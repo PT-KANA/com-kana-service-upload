@@ -1,0 +1,10 @@
+FROM microsoft/aspnetcore-build:2.0.2
+WORKDIR /app
+
+COPY Com.Kana.Service.Upload.Lib/*.csproj ./Com.Kana.Service.Upload.Lib/
+COPY Com.Kana.Service.Upload.WebApi/*.csproj ./Com.Kana.Service.Upload.WebApi/
+RUN dotnet restore ./Com.Kana.Service.Upload.WebApi/
+
+COPY Com.Kana.Service.Upload.Lib/. ./Com.Kana.Service.Upload.Lib/
+COPY Com.Kana.Service.Upload.WebApi/. ./Com.Kana.Service.Upload.WebApi/
+RUN dotnet publish ./Com.Kana.Service.Upload.WebApi/ --output /out/ --configuration Release
