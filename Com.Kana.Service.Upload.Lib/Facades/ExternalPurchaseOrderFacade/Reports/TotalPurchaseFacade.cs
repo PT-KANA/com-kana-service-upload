@@ -16,11 +16,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.ExternalPurchaseOrderFacade.Report
 {
 	public class TotalPurchaseFacade
 	{
-		private readonly PurchasingDbContext dbContext;
+		private readonly UploadDbContext dbContext;
 		public readonly IServiceProvider serviceProvider;
 		private readonly DbSet<ExternalPurchaseOrder> dbSet;
 
-		public TotalPurchaseFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+		public TotalPurchaseFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
 		{
 			this.serviceProvider = serviceProvider;
 			this.dbContext = dbContext;

@@ -55,7 +55,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.GarmentPurchaseRequestViewModel
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            PurchasingDbContext dbContext = validationContext == null ? null : (PurchasingDbContext)validationContext.GetService(typeof(PurchasingDbContext));
+            UploadDbContext dbContext = validationContext == null ? null : (UploadDbContext)validationContext.GetService(typeof(UploadDbContext));
 
             if (Buyer == null) {
                 yield return new ValidationResult("Buyer tidak boleh kosong", new List<string> { "Buyer" });

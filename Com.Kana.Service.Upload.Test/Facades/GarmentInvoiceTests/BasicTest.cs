@@ -51,15 +51,15 @@ namespace Com.Kana.Service.Upload.Test.Facades.GarmentInvoiceTests
 
 		}
 	
-		private PurchasingDbContext _dbContext(string testName)
+		private UploadDbContext _dbContext(string testName)
 		{
-			DbContextOptionsBuilder<PurchasingDbContext> optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+			DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
 			optionsBuilder
 				.UseInMemoryDatabase(testName)
 				.EnableSensitiveDataLogging()
 				.ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
-			PurchasingDbContext dbContext = new PurchasingDbContext(optionsBuilder.Options);
+			UploadDbContext dbContext = new UploadDbContext(optionsBuilder.Options);
 
 			return dbContext;
 		}
@@ -307,7 +307,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.GarmentInvoiceTests
 		public void Should_Success_Validate_Data()
 		{
             Mock<IServiceProvider> serviceProvider = new Mock<IServiceProvider>();
-            serviceProvider.Setup(x => x.GetService(typeof(PurchasingDbContext)))
+            serviceProvider.Setup(x => x.GetService(typeof(UploadDbContext)))
                 .Returns(_dbContext(GetCurrentMethod()));
 
             GarmentInvoiceViewModel nullViewModel = new GarmentInvoiceViewModel();

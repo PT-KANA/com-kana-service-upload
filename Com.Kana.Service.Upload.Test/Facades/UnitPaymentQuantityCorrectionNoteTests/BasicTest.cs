@@ -51,19 +51,19 @@ namespace Com.Kana.Service.Upload.Test.Facades.UnitPaymentQuantityCorrectionNote
             return string.Concat(sf.GetMethod().Name, "_", ENTITY);
         }
 
-        private PurchasingDbContext _dbContext(string testName)
+        private UploadDbContext _dbContext(string testName)
         {
-            DbContextOptionsBuilder<PurchasingDbContext> optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+            DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
             optionsBuilder
                 .UseInMemoryDatabase(testName)
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
-            PurchasingDbContext dbContext = new PurchasingDbContext(optionsBuilder.Options);
+            UploadDbContext dbContext = new UploadDbContext(optionsBuilder.Options);
 
             return dbContext;
         }
 
-        private Mock<IServiceProvider> GetServiceProvider(string testname, PurchasingDbContext dbContext)
+        private Mock<IServiceProvider> GetServiceProvider(string testname, UploadDbContext dbContext)
         {
             var serviceProvider = new Mock<IServiceProvider>();
             serviceProvider
@@ -105,7 +105,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.UnitPaymentQuantityCorrectionNote
             return serviceProvider;
         }
 
-        private UnitPaymentCorrectionNoteDataUtil _dataUtil(UnitPaymentQuantityCorrectionNoteFacade facade, PurchasingDbContext dbContext, IServiceProvider serviceProvider)
+        private UnitPaymentCorrectionNoteDataUtil _dataUtil(UnitPaymentQuantityCorrectionNoteFacade facade, UploadDbContext dbContext, IServiceProvider serviceProvider)
         {
             
 

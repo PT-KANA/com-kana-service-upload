@@ -24,13 +24,13 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Report
 {
     public class ImportPurchasingBookReportFacade : IImportPurchasingBookReportFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<UnitReceiptNote> dbSet;
         private readonly ICurrencyProvider _currencyProvider;
         private readonly IdentityService _identityService;
 
-        public ImportPurchasingBookReportFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public ImportPurchasingBookReportFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             //MongoDbContext mongoDbContext = new MongoDbContext();
             //collection = mongoDbContext.UnitReceiptNote;

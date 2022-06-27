@@ -43,14 +43,14 @@ namespace Com.Kana.Service.Upload.Test.Facades.GarmentUnitDeliveryOrderReturTest
 
             return string.Concat(sf.GetMethod().Name, "_", ENTITY);
         }
-        private PurchasingDbContext _dbContext(string testName)
+        private UploadDbContext _dbContext(string testName)
         {
-            DbContextOptionsBuilder<PurchasingDbContext> optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+            DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
             optionsBuilder
                 .UseInMemoryDatabase(testName)
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
-            PurchasingDbContext dbContext = new PurchasingDbContext(optionsBuilder.Options);
+            UploadDbContext dbContext = new UploadDbContext(optionsBuilder.Options);
 
             return dbContext;
         }
@@ -242,7 +242,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.GarmentUnitDeliveryOrderReturTest
             var item = data.Items.First();
 
             var serviceProvider = GetServiceProvider();
-            serviceProvider.Setup(x => x.GetService(typeof(PurchasingDbContext)))
+            serviceProvider.Setup(x => x.GetService(typeof(UploadDbContext)))
                 .Returns(_dbContext(GetCurrentMethod()));
 
             GarmentUnitDeliveryOrderViewModel viewModelWithItemsQuantityOver = new GarmentUnitDeliveryOrderViewModel

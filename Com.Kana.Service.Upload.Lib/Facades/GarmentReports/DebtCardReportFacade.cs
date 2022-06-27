@@ -13,10 +13,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentReports
 {
     public class DebtCardReportFacade : IDebtCardReportFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         ILocalDbCashFlowDbContext dbContextLocal;
         public readonly IServiceProvider serviceProvider;
-        public DebtCardReportFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext, ILocalDbCashFlowDbContext dbContextLocal)
+        public DebtCardReportFacade(IServiceProvider serviceProvider, UploadDbContext dbContext, ILocalDbCashFlowDbContext dbContextLocal)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

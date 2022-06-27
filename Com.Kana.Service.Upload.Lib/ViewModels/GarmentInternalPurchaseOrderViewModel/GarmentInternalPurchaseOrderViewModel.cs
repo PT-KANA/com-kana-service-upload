@@ -55,7 +55,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.GarmentInternalPurchaseOrderVie
                     }
                     else if (Id != 0)
                     {
-                        PurchasingDbContext dbContext = validationContext == null ? null : (PurchasingDbContext)validationContext.GetService(typeof(PurchasingDbContext));
+                        UploadDbContext dbContext = validationContext == null ? null : (UploadDbContext)validationContext.GetService(typeof(UploadDbContext));
                         var oldItem = dbContext.GarmentInternalPurchaseOrderItems.SingleOrDefault(i => i.Id == item.Id);
                         if (oldItem != null)
                         {

@@ -20,10 +20,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades.MonitoringCentralBillReceptionFaca
     {
         //private string USER_AGENT = "Facade";
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<GarmentDeliveryOrder> dbSet;
 
-        public MonitoringCentralBillReceptionFacade(PurchasingDbContext dbContext)
+        public MonitoringCentralBillReceptionFacade(UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<GarmentDeliveryOrder>();

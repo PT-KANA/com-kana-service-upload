@@ -30,14 +30,14 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentDeliveryOrderFacades
     {
         private string USER_AGENT = "Facade";
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<GarmentDeliveryOrder> dbSet;
         //private readonly DbSet<GarmentDeliveryOrderItem> dbSetItem;
 
         private readonly IMapper mapper;
 
-        public GarmentDeliveryOrderFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public GarmentDeliveryOrderFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             dbSet = dbContext.Set<GarmentDeliveryOrder>();

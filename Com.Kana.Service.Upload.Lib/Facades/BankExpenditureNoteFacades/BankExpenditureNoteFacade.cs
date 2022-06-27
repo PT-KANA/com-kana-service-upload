@@ -32,7 +32,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.BankExpenditureNoteFacades
     public class BankExpenditureNoteFacade : IBankExpenditureNoteFacade, IReadByIdable<BankExpenditureNoteModel>
     {
         private const string V = "Operasional";
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<BankExpenditureNoteModel> dbSet;
         private readonly DbSet<BankExpenditureNoteDetailModel> detailDbSet;
         private readonly DbSet<BankExpenditureNoteItemModel> itemDbSet;
@@ -45,7 +45,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.BankExpenditureNoteFacades
         private readonly string USER_AGENT = "Facade";
         private readonly string CREDITOR_ACCOUNT_URI = "creditor-account/bank-expenditure-note/list";
 
-        public BankExpenditureNoteFacade(PurchasingDbContext dbContext, IBankDocumentNumberGenerator bankDocumentNumberGenerator, IServiceProvider serviceProvider)
+        public BankExpenditureNoteFacade(UploadDbContext dbContext, IBankDocumentNumberGenerator bankDocumentNumberGenerator, IServiceProvider serviceProvider)
         {
             this.dbContext = dbContext;
             this.bankDocumentNumberGenerator = new BankDocumentNumberGenerator(dbContext);

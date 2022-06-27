@@ -18,13 +18,13 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentReports
 {
     public class GarmentPurchaseDayBookReportFacade : IGarmentPurchaseDayBookReport
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<GarmentDeliveryOrder> dbSet;
        // private readonly IdentityService identityService;
 
 
-        public GarmentPurchaseDayBookReportFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public GarmentPurchaseDayBookReportFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

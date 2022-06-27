@@ -15,11 +15,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentReports
 {
     public class BeacukaiNoFeature : IBeacukaiNoFeature
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<GarmentDeliveryOrder> dbSet;
 
-        public BeacukaiNoFeature(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public BeacukaiNoFeature(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

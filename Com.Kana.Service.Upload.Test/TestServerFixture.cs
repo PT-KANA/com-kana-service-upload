@@ -77,7 +77,7 @@ namespace Com.Kana.Service.Upload.Test
                        .AddTransient<UnitPaymentOrderUnpaidReportDataUtil>()
                        .AddScoped<IHttpClientService, HttpClientTestService>()
                        .AddScoped<ICurrencyProvider, CurrencyProvider>()
-                       .AddDbContext<PurchasingDbContext>(options => options.UseSqlServer(configuration[Constant.DEFAULT_CONNECTION]), ServiceLifetime.Transient);
+                       .AddDbContext<UploadDbContext>(options => options.UseSqlServer(configuration[Constant.DEFAULT_CONNECTION]), ServiceLifetime.Transient);
                 })
                 .UseStartup<Startup>();
 

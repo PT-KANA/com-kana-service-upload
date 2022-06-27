@@ -17,10 +17,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Expedition
 {
     public class UnitPaymentOrderPaidStatusReportFacade : IUnitPaymentOrderPaidStatusReportFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<UnitPaymentOrder> dbSet;
         // private readonly DbSet<PurchasingDocumentExpedition> dbSet;
-        public UnitPaymentOrderPaidStatusReportFacade(PurchasingDbContext dbContext)
+        public UnitPaymentOrderPaidStatusReportFacade(UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.dbSet = this.dbContext.Set<UnitPaymentOrder>();

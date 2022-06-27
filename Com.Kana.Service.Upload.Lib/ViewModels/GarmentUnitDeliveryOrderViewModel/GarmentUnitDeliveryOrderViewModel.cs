@@ -125,7 +125,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.GarmentUnitDeliveryOrderViewMod
                             }
                             else
                             {
-                                PurchasingDbContext dbContext = (PurchasingDbContext)validationContext.GetService(typeof(PurchasingDbContext));
+                                UploadDbContext dbContext = (UploadDbContext)validationContext.GetService(typeof(UploadDbContext));
                                 var DOItem = dbContext.GarmentDOItems.AsNoTracking().FirstOrDefault(x => x.Id == item.DOItemsId);
                                 if (DOItem != null)
                                 {

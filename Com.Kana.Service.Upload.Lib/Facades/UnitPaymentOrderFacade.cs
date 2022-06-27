@@ -32,14 +32,14 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 {
     public class UnitPaymentOrderFacade : IUnitPaymentOrderFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<UnitPaymentOrder> dbSet;
         private readonly IServiceProvider _serviceProvider;
         private readonly IDistributedCache _cacheManager;
         private readonly ICurrencyProvider _currencyProvider;
         private string USER_AGENT = "Facade";
 
-        public UnitPaymentOrderFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public UnitPaymentOrderFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<UnitPaymentOrder>();

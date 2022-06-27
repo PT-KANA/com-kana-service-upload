@@ -17,11 +17,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentReports
 {
     public class MutationBeacukaiFacade : IMutationBeacukaiFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<GarmentDeliveryOrder> dbSet;
 
-        public MutationBeacukaiFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public MutationBeacukaiFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

@@ -22,13 +22,13 @@ namespace Com.Kana.Service.Upload.Lib.Facades
     public class DeliveryOrderFacade : IDeliveryOrderFacade
     {
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<DeliveryOrder> dbSet;
         public readonly IServiceProvider serviceProvider;
 
         private string USER_AGENT = "Facade";
 
-        public DeliveryOrderFacade(PurchasingDbContext dbContext, IServiceProvider serviceProvider)
+        public DeliveryOrderFacade(UploadDbContext dbContext, IServiceProvider serviceProvider)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<DeliveryOrder>();

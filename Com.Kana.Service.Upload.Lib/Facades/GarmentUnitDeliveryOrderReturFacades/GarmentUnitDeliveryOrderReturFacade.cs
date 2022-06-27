@@ -6,14 +6,12 @@ using Com.Kana.Service.Upload.Lib.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using Com.Kana.Service.Upload.Lib.Helpers;
 using Newtonsoft.Json;
 using Com.Moonlay.NetCore.Lib;
 using Com.Moonlay.Models;
-using Com.Kana.Service.Upload.Lib.Migrations;
 using Com.Kana.Service.Upload.Lib.Models.GarmentUnitReceiptNoteModel;
 using Com.Kana.Service.Upload.Lib.Models.GarmentDeliveryOrderModel;
 
@@ -26,11 +24,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentUnitDeliveryOrderReturFacad
         public readonly IServiceProvider serviceProvider;
         private readonly IdentityService identityService;
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<GarmentUnitDeliveryOrder> dbSet;
         private readonly IMapper mapper;
 
-        public GarmentUnitDeliveryOrderReturFacade(PurchasingDbContext dbContext, IServiceProvider serviceProvider)
+        public GarmentUnitDeliveryOrderReturFacade(UploadDbContext dbContext, IServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
             identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));

@@ -19,12 +19,12 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentReports
 {
     public class GarmentInternNotePaymentStatusFacade : IGarmenInternNotePaymentStatusFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         ILocalDbCashFlowDbContext dbContextLocal;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<GarmentInternNote> dbSet;
 
-        public GarmentInternNotePaymentStatusFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext, ILocalDbCashFlowDbContext dbContextLocal)
+        public GarmentInternNotePaymentStatusFacade(IServiceProvider serviceProvider, UploadDbContext dbContext, ILocalDbCashFlowDbContext dbContextLocal)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

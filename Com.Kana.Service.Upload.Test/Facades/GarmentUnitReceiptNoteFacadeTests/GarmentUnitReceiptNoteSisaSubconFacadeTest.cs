@@ -8,9 +8,9 @@ using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitDeliveryOrderFacades;
 using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitExpenditureNoteFacade;
 using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitReceiptNoteFacades;
 using Com.Kana.Service.Upload.Lib.Interfaces;
-using Com.Kana.Service.Upload.Lib.Migrations;
 using Com.Kana.Service.Upload.Lib.Models.GarmentDeliveryOrderModel;
 using Com.Kana.Service.Upload.Lib.Models.GarmentUnitExpenditureNoteModel;
+using Com.Kana.Service.Upload.Lib.Models.GarmentUnitReceiptNoteModel;
 using Com.Kana.Service.Upload.Lib.Services;
 using Com.Kana.Service.Upload.Lib.ViewModels.GarmentUnitExpenditureNoteViewModel;
 using Com.Kana.Service.Upload.Lib.ViewModels.GarmentUnitReceiptNoteViewModels;
@@ -196,14 +196,14 @@ namespace Com.Kana.Service.Upload.Test.Facades.GarmentUnitReceiptNoteFacadeTests
             return string.Concat(sf.GetMethod().Name, "_", ENTITY);
         }
 
-        private PurchasingDbContext _dbContext(string testName)
+        private UploadDbContext _dbContext(string testName)
         {
-            DbContextOptionsBuilder<PurchasingDbContext> optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+            DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
             optionsBuilder
                 .UseInMemoryDatabase(testName)
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
-            PurchasingDbContext dbContext = new PurchasingDbContext(optionsBuilder.Options);
+            UploadDbContext dbContext = new UploadDbContext(optionsBuilder.Options);
 
             return dbContext;
         }

@@ -25,14 +25,14 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Report
 {
     public class LocalPurchasingBookReportFacade : ILocalPurchasingBookReportFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<UnitReceiptNote> dbSet;
         private readonly ICurrencyProvider _currencyProvider;
         private readonly IdentityService _identityService;
         private readonly string IDRCurrencyCode = "IDR";
 
-        public LocalPurchasingBookReportFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public LocalPurchasingBookReportFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

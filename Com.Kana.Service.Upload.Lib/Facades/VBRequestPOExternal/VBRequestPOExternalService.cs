@@ -23,7 +23,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.VBRequestPOExternal
 {
     public class VBRequestPOExternalService : IVBRequestPOExternalService
     {
-        private readonly PurchasingDbContext _dbContext;
+        private readonly UploadDbContext _dbContext;
         private readonly IdentityService _identityService;
         private readonly IDistributedCache _cacheManager;
         private readonly ICurrencyProvider _currencyProvider;
@@ -34,7 +34,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.VBRequestPOExternal
             "BP","BB","EM","S","R","E","PL","MM","SP","U"
         };
 
-        public VBRequestPOExternalService(PurchasingDbContext dbContext, IServiceProvider serviceProvider)
+        public VBRequestPOExternalService(UploadDbContext dbContext, IServiceProvider serviceProvider)
         {
             _dbContext = dbContext;
             _identityService = serviceProvider.GetService<IdentityService>();

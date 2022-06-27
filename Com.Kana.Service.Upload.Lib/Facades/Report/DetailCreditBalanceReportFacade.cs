@@ -32,7 +32,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Report
 {
     public class DetailCreditBalanceReportFacade : IDetailCreditBalanceReportFacade
     {
-        private readonly PurchasingDbContext _dbContext;
+        private readonly UploadDbContext _dbContext;
         private readonly List<UnitDto> _units;
         private readonly List<AccountingUnitDto> _accountingUnits;
         private readonly List<CategoryDto> _categories;
@@ -42,7 +42,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Report
 
         public DetailCreditBalanceReportFacade(IServiceProvider serviceProvider)
         {
-            _dbContext = serviceProvider.GetService<PurchasingDbContext>();
+            _dbContext = serviceProvider.GetService<UploadDbContext>();
             var cache = serviceProvider.GetService<IDistributedCache>();
             var jsonUnits = cache.GetString(MemoryCacheConstant.Units);
             var jsonCategories = cache.GetString(MemoryCacheConstant.Categories);

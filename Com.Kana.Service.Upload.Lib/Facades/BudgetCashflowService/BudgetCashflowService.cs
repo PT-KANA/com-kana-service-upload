@@ -18,7 +18,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.BudgetCashflowService
     public class BudgetCashflowService : IBudgetCashflowService
     {
         private const string UserAgent = "purchasing-service";
-        private readonly PurchasingDbContext _dbContext;
+        private readonly UploadDbContext _dbContext;
         private readonly IdentityService _identityService;
         private readonly List<BudgetingCategoryDto> _budgetingCategories;
         private readonly List<CategoryDto> _categories;
@@ -26,7 +26,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.BudgetCashflowService
 
         public BudgetCashflowService(IServiceProvider serviceProvider)
         {
-            _dbContext = serviceProvider.GetService<PurchasingDbContext>();
+            _dbContext = serviceProvider.GetService<UploadDbContext>();
             _identityService = serviceProvider.GetService<IdentityService>();
 
             var cache = serviceProvider.GetService<IDistributedCache>();

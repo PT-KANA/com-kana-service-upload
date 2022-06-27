@@ -14,9 +14,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Expedition
 {
     public class PPHBankExpenditureNoteReportFacade : IPPHBankExpenditureNoteReportFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<PPHBankExpenditureNote> dbSet;
-        public PPHBankExpenditureNoteReportFacade(PurchasingDbContext dbContext)
+        public PPHBankExpenditureNoteReportFacade(UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.dbSet = this.dbContext.Set<PPHBankExpenditureNote>();

@@ -12,11 +12,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentDispositionPaymentReport
 {
     public class GarmentDispositionPaymentReportService : IGarmentDispositionPaymentReportService
     {
-        private readonly PurchasingDbContext _dbContext;
+        private readonly UploadDbContext _dbContext;
 
         public GarmentDispositionPaymentReportService(IServiceProvider serviceProvider)
         {
-            _dbContext = serviceProvider.GetService<PurchasingDbContext>();
+            _dbContext = serviceProvider.GetService<UploadDbContext>();
         }
 
         public List<GarmentDispositionPaymentReportDto> GetReportByDate(DateTimeOffset startDate, DateTimeOffset endDate)

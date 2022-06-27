@@ -20,12 +20,12 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentPOMasterDistributionFacades
 
         private string USER_AGENT = "Facade";
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly IServiceProvider serviceProvider;
         private readonly DbSet<GarmentPOMasterDistribution> dbSet;
         private readonly IdentityService identityService;
 
-        public GarmentPOMasterDistributionFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public GarmentPOMasterDistributionFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));

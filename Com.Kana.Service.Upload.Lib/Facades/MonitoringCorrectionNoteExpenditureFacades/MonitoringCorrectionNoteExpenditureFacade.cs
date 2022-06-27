@@ -20,10 +20,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades.MonitoringCorrectionNoteExpenditur
     {
         //private string USER_AGENT = "Facade";
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<GarmentDeliveryOrder> dbSet;
 
-        public MonitoringCorrectionNoteExpenditureFacade(PurchasingDbContext dbContext)
+        public MonitoringCorrectionNoteExpenditureFacade(UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<GarmentDeliveryOrder>();

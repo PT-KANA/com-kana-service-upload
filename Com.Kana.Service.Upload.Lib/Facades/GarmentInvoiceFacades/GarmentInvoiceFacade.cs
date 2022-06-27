@@ -19,14 +19,14 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentInvoiceFacades
 {
     public class GarmentInvoiceFacade : IGarmentInvoice
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<GarmentInvoice> dbSet;
         private readonly DbSet<GarmentDeliveryOrder> dbSetDeliveryOrder;
         public readonly IServiceProvider serviceProvider;
         private readonly IGarmentDebtBalanceService _garmentDebtBalanceService;
         private string USER_AGENT = "Facade";
 
-        public GarmentInvoiceFacade(PurchasingDbContext dbContext, IServiceProvider serviceProvider)
+        public GarmentInvoiceFacade(UploadDbContext dbContext, IServiceProvider serviceProvider)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<GarmentInvoice>();

@@ -54,20 +54,20 @@ namespace Com.Kana.Service.Upload.Test.Facades.VBRequestPOExternal
 
         }
 
-        protected PurchasingDbContext GetDbContext(string testName)
+        protected UploadDbContext GetDbContext(string testName)
         {
             string databaseName = testName;
             var serviceProvider = new ServiceCollection()
                 .AddEntityFrameworkInMemoryDatabase()
                 .BuildServiceProvider();
 
-            var optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
             optionsBuilder
                 .UseInMemoryDatabase(databaseName)
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .UseInternalServiceProvider(serviceProvider);
 
-            PurchasingDbContext DbContex = new PurchasingDbContext(optionsBuilder.Options);
+            UploadDbContext DbContex = new UploadDbContext(optionsBuilder.Options);
             return DbContex;
         }
 
@@ -103,7 +103,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.VBRequestPOExternal
             return new GarmentInternNoteDataUtil(facades);
         }
 
-        public UnitPaymentOrderDataUtil dataUtil(PurchasingDbContext dbContext)
+        public UnitPaymentOrderDataUtil dataUtil(UploadDbContext dbContext)
         {
             return new UnitPaymentOrderDataUtil(dbContext);
         }
@@ -118,7 +118,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.VBRequestPOExternal
         public async Task ReadPOExternal_with_Garment_Return_Success()
         {
             //Setup
-            PurchasingDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
+            UploadDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
             var serviceProviderMock = GetServiceProvider();
 
             GarmentExternalPurchaseOrderFacade facade = new GarmentExternalPurchaseOrderFacade(serviceProviderMock.Object, dbContext);
@@ -143,7 +143,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.VBRequestPOExternal
         public async Task ShouldSuccess_ReadPOExternal_with_NoGarment()
         {
             //Setup
-            PurchasingDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
+            UploadDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
             var serviceProviderMock = GetServiceProvider();
 
             var purchaseRequestItemDataUtil = new PurchaseRequestItemDataUtil();
@@ -173,7 +173,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.VBRequestPOExternal
         public async Task ShouldSuccess_ReadSPB_Garment()
         {
             //Setup
-            PurchasingDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
+            UploadDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
             var serviceProviderMock = GetServiceProvider();
 
             GarmentExternalPurchaseOrderFacade facade = new GarmentExternalPurchaseOrderFacade(serviceProviderMock.Object, dbContext);
@@ -198,7 +198,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.VBRequestPOExternal
         public async Task ShouldSuccess_ReadSPB_Garment_WithEpoIds()
         {
             //Setup
-            PurchasingDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
+            UploadDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
             var serviceProviderMock = GetServiceProvider();
 
             GarmentExternalPurchaseOrderFacade facade = new GarmentExternalPurchaseOrderFacade(serviceProviderMock.Object, dbContext);
@@ -223,7 +223,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.VBRequestPOExternal
         public async Task ShouldSuccess_ReadSPB_Garment_WithGarmentTypePurchasing()
         {
             //Setup
-            PurchasingDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
+            UploadDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
             var serviceProviderMock = GetServiceProvider();
 
             GarmentExternalPurchaseOrderFacade facade = new GarmentExternalPurchaseOrderFacade(serviceProviderMock.Object, dbContext);
@@ -248,7 +248,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.VBRequestPOExternal
         public async Task ShouldSuccess_ReadSPB_NonGarment()
         {
             //Setup
-            PurchasingDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
+            UploadDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
             var serviceProviderMock = GetServiceProvider();
 
             GarmentExternalPurchaseOrderFacade facade = new GarmentExternalPurchaseOrderFacade(serviceProviderMock.Object, dbContext);
@@ -293,7 +293,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.VBRequestPOExternal
         public void ShouldSuccess_UpdateSPB_with_NonGarmentDivision()
         {
             //Setup
-            PurchasingDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
+            UploadDbContext dbContext = GetDbContext(GetCurrentAsyncMethod());
             GarmentInternNote garmentInternNote = new GarmentInternNote();
             garmentInternNote.Id = 1;
             garmentInternNote.IsCreatedVB = false;

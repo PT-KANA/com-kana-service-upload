@@ -54,14 +54,14 @@ namespace Com.Kana.Service.Upload.Test.Facades
             return string.Concat(sf.GetMethod().Name, "_", ENTITY);
         }
 
-        private PurchasingDbContext _dbContext(string testName)
+        private UploadDbContext _dbContext(string testName)
         {
-            DbContextOptionsBuilder<PurchasingDbContext> optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+            DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
             optionsBuilder
                 .UseInMemoryDatabase(testName)
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
-            PurchasingDbContext dbContext = new PurchasingDbContext(optionsBuilder.Options);
+            UploadDbContext dbContext = new UploadDbContext(optionsBuilder.Options);
 
             return dbContext;
         }
@@ -121,7 +121,7 @@ namespace Com.Kana.Service.Upload.Test.Facades
             return serviceProvider;
         }
 
-        private UnitPaymentOrderDataUtil _dataUtil(UnitPaymentOrderFacade facade, PurchasingDbContext dbContext, string testname)
+        private UnitPaymentOrderDataUtil _dataUtil(UnitPaymentOrderFacade facade, UploadDbContext dbContext, string testname)
         {
 
             PurchaseRequestFacade purchaseRequestFacade = new PurchaseRequestFacade(GetServiceProvider(testname).Object, dbContext);

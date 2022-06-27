@@ -82,7 +82,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.GarmentUnitExpenditureNoteViewM
                         }
 
 
-                        PurchasingDbContext dbContext = (PurchasingDbContext)validationContext.GetService(typeof(PurchasingDbContext));
+                        UploadDbContext dbContext = (UploadDbContext)validationContext.GetService(typeof(UploadDbContext));
                         var UENItem = dbContext.GarmentUnitExpenditureNoteItems.AsNoTracking().FirstOrDefault(x => x.Id == item.Id);
                         if (UENItem != null)
                         {

@@ -204,11 +204,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.InternalPO
             }
         };
         #endregion
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<InternalPurchaseOrder> dbSet;
 
-        public InternalPurchaseOrderFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public InternalPurchaseOrderFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

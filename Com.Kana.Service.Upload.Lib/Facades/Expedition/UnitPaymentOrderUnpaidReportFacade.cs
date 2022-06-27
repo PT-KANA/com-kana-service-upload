@@ -18,13 +18,13 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Expedition
 {
     public class UnitPaymentOrderUnpaidReportFacade : IUnitPaymentOrderUnpaidReportFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<PurchasingDocumentExpedition> dbSet;
 
         IMongoCollection<BsonDocument> collectionUPO;
         IMongoCollection<BsonDocument> collectionURN;
 
-        public UnitPaymentOrderUnpaidReportFacade(PurchasingDbContext dbContext)
+        public UnitPaymentOrderUnpaidReportFacade(UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.dbSet = this.dbContext.Set<PurchasingDocumentExpedition>();

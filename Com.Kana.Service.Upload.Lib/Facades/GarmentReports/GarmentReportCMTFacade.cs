@@ -20,12 +20,12 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentReports
 {
     public class GarmentReportCMTFacade : IGarmentReportCMTFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         ILocalDbCashFlowDbContext dbContextLocal;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<GarmentUnitExpenditureNote> dbSet;
 
-        public GarmentReportCMTFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext, ILocalDbCashFlowDbContext dbContextLocal)
+        public GarmentReportCMTFacade(IServiceProvider serviceProvider, UploadDbContext dbContext, ILocalDbCashFlowDbContext dbContextLocal)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

@@ -16,9 +16,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentReports
     {
         private readonly IServiceProvider serviceProvider;
         private readonly IdentityService identityService;
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
 
-        public MonitoringROMasterFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public MonitoringROMasterFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));

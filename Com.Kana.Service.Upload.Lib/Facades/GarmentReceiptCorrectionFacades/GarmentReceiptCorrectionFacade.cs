@@ -25,14 +25,14 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentReceiptCorrectionFacades
         public readonly IServiceProvider serviceProvider;
         private readonly IdentityService identityService;
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<GarmentReceiptCorrection> dbSet;
         private readonly DbSet<GarmentInventoryDocument> dbSetGarmentInventoryDocument;
         private readonly DbSet<GarmentInventoryMovement> dbSetGarmentInventoryMovement;
         private readonly DbSet<GarmentInventorySummary> dbSetGarmentInventorySummary;
         private readonly IMapper mapper;
 
-        public GarmentReceiptCorrectionFacade(PurchasingDbContext dbContext, IServiceProvider serviceProvider)
+        public GarmentReceiptCorrectionFacade(UploadDbContext dbContext, IServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
             identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));

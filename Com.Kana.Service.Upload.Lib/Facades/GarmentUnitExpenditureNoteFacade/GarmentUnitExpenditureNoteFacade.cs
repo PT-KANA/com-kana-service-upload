@@ -42,7 +42,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentUnitExpenditureNoteFacade
         private readonly IServiceProvider serviceProvider;
         private readonly IdentityService identityService;
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<GarmentUnitExpenditureNote> dbSet;
         private readonly DbSet<GarmentUnitExpenditureNoteItem> dbSetItem;
         private readonly DbSet<GarmentUnitDeliveryOrder> dbSetGarmentUnitDeliveryOrder;
@@ -62,7 +62,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentUnitExpenditureNoteFacade
 
         private readonly IMapper mapper;
 
-        public GarmentUnitExpenditureNoteFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public GarmentUnitExpenditureNoteFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));

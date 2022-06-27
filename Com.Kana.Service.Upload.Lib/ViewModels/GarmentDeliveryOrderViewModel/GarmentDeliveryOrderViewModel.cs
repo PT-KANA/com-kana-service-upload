@@ -54,7 +54,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.GarmentDeliveryOrderViewModel
             }
             else
             {
-                PurchasingDbContext purchasingDbContext = (PurchasingDbContext)validationContext.GetService(typeof(PurchasingDbContext));
+                UploadDbContext purchasingDbContext = (UploadDbContext)validationContext.GetService(typeof(UploadDbContext));
                 if (purchasingDbContext.GarmentDeliveryOrders.Where(DO => DO.DONo.Equals(doNo) && DO.Id != Id && DO.DODate.ToOffset((new TimeSpan(7, 0, 0))) == doDate && DO.SupplierId == supplier.Id && DO.ArrivalDate.ToOffset((new TimeSpan(7, 0, 0))) == arrivalDate).Count() > 0)
                 {
                     yield return new ValidationResult("DoNo is already exist", new List<string> { "doNo" });

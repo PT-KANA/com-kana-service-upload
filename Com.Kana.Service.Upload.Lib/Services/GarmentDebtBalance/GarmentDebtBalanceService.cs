@@ -14,12 +14,12 @@ namespace Com.Kana.Service.Upload.Lib.Services.GarmentDebtBalance
     public class GarmentDebtBalanceService : IGarmentDebtBalanceService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly PurchasingDbContext _dbContext;
+        private readonly UploadDbContext _dbContext;
 
         public GarmentDebtBalanceService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _dbContext = serviceProvider.GetService<PurchasingDbContext>();
+            _dbContext = serviceProvider.GetService<UploadDbContext>();
         }
 
         public async Task<int> CreateFromCustoms(CustomsFormDto form)

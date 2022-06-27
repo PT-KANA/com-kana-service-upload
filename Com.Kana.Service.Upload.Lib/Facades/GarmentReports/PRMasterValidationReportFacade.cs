@@ -18,10 +18,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades.PRMasterValidationReportFacade
 {
     public class PRMasterValidationReportFacade : IPRMasterValidationReportFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<GarmentPurchaseRequest> dbSet;
 
-        public PRMasterValidationReportFacade(PurchasingDbContext dbContext)
+        public PRMasterValidationReportFacade(UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<GarmentPurchaseRequest>();

@@ -14,11 +14,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentPurchasingBookReport
 {
     public class GarmentPurchasingBookReportService : IGarmentPurchasingBookReportService
     {
-        private readonly PurchasingDbContext _dbContext;
+        private readonly UploadDbContext _dbContext;
 
         public GarmentPurchasingBookReportService(IServiceProvider serviceProvider)
         {
-            _dbContext = serviceProvider.GetService<PurchasingDbContext>();
+            _dbContext = serviceProvider.GetService<UploadDbContext>();
         }
 
         public List<AutoCompleteDto> GetBillNos(string keyword)

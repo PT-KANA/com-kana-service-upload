@@ -13,10 +13,10 @@ namespace Com.Kana.Service.Upload.Lib.Helpers
     public class BankDocumentNumberGenerator : IBankDocumentNumberGenerator
     {
         private readonly DbSet<BankDocumentNumber> dbSet;
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly string USER_AGENT = "document-number-generator";
 
-        public BankDocumentNumberGenerator(PurchasingDbContext dbContext)
+        public BankDocumentNumberGenerator(UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             dbSet = dbContext.Set<BankDocumentNumber>();

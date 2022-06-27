@@ -29,7 +29,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentUnitReceiptNoteFacades
         private readonly DbSet<GarmentUnitReceiptNoteItem> dbSetGarmentUnitReceiptNoteItem;
         private readonly DbSet<GarmentExternalPurchaseOrderItem> dbSetGarmentExternalPurchaseOrderItem;
 
-        public GarmentDOItemFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public GarmentDOItemFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));

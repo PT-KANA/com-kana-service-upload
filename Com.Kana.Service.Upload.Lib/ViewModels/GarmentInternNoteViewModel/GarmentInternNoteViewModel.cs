@@ -88,7 +88,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.GarmentInternNoteViewModel
                         }
 
                         //Check if Invoice No for Specific Supplier is Existed
-                        PurchasingDbContext purchasingDbContext = (PurchasingDbContext)validationContext.GetService(typeof(PurchasingDbContext));
+                        UploadDbContext purchasingDbContext = (UploadDbContext)validationContext.GetService(typeof(UploadDbContext));
                         var detailData = purchasingDbContext.GarmentInternNoteItems.Where(w => w.InvoiceId == item.garmentInvoice.Id && w.InvoiceDate == item.garmentInvoice.invoiceDate && w.IsDeleted == false).Select(s => new { s.Id, s.GarmentINId, s.InvoiceId, s.InvoiceNo});
                         if (detailData.ToList().Count > 0)
                         {

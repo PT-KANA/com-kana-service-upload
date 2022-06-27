@@ -14,7 +14,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.DebtAndDispositionSummary
 {
     public class DebtAndDispositionSummaryService : IDebtAndDispositionSummaryService
     {
-        private readonly PurchasingDbContext _dbContext;
+        private readonly UploadDbContext _dbContext;
         private readonly IdentityService _identityService;
         private readonly List<UnitDto> _units;
         //private readonly List<AccountingUnitDto> _units;
@@ -27,7 +27,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.DebtAndDispositionSummary
 
         public DebtAndDispositionSummaryService(IServiceProvider serviceProvider)
         {
-            _dbContext = serviceProvider.GetService<PurchasingDbContext>();
+            _dbContext = serviceProvider.GetService<UploadDbContext>();
             _identityService = serviceProvider.GetService<IdentityService>();
             var cache = serviceProvider.GetService<IDistributedCache>();
             var jsonUnits = cache.GetString(MemoryCacheConstant.Units);

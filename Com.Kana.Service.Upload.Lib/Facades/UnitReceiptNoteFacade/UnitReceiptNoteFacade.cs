@@ -36,7 +36,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.UnitReceiptNoteFacade
     public class UnitReceiptNoteFacade : IUnitReceiptNoteFacade
     {
         private string USER_AGENT = "Facade";
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly IDistributedCache _cacheManager;
         private readonly ICurrencyProvider _currencyProvider;
@@ -46,7 +46,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.UnitReceiptNoteFacade
             "BP","BB","EM","S","R","E","PL","MM","SP","U"
         };
 
-        public UnitReceiptNoteFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public UnitReceiptNoteFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             _cacheManager = serviceProvider.GetService<IDistributedCache>();

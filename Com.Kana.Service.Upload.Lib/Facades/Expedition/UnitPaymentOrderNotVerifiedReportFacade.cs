@@ -17,9 +17,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Expedition
 {
     public class UnitPaymentOrderNotVerifiedReportFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<PurchasingDocumentExpedition> dbSet;
-        public UnitPaymentOrderNotVerifiedReportFacade(PurchasingDbContext dbContext)
+        public UnitPaymentOrderNotVerifiedReportFacade(UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.dbSet = this.dbContext.Set<PurchasingDocumentExpedition>();

@@ -19,11 +19,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentCorrectionNoteFacades
     public class GarmentCorrectionNoteQuantityFacade : IGarmentCorrectionNoteQuantityFacade
     {
         private string USER_AGENT = "Facade";
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<GarmentCorrectionNote> dbSet;
 
-        public GarmentCorrectionNoteQuantityFacade(IServiceProvider serviceProvider ,PurchasingDbContext dbContext)
+        public GarmentCorrectionNoteQuantityFacade(IServiceProvider serviceProvider ,UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.serviceProvider = serviceProvider;

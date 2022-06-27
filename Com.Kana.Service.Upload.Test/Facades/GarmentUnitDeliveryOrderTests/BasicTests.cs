@@ -9,7 +9,6 @@ using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitDeliveryOrderFacades;
 using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitExpenditureNoteFacade;
 using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitReceiptNoteFacades;
 using Com.Kana.Service.Upload.Lib.Interfaces;
-using Com.Kana.Service.Upload.Lib.Migrations;
 using Com.Kana.Service.Upload.Lib.Models.GarmentUnitDeliveryOrderModel;
 using Com.Kana.Service.Upload.Lib.Services;
 using Com.Kana.Service.Upload.Lib.ViewModels.GarmentUnitDeliveryOrderViewModel;
@@ -54,14 +53,14 @@ namespace Com.Kana.Service.Upload.Test.Facades.GarmentUnitDeliveryOrderTests
 
             return string.Concat(sf.GetMethod().Name, "_", ENTITY);
         }
-        private PurchasingDbContext _dbContext(string testName)
+        private UploadDbContext _dbContext(string testName)
         {
-            DbContextOptionsBuilder<PurchasingDbContext> optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+            DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
             optionsBuilder
                 .UseInMemoryDatabase(testName)
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
-            PurchasingDbContext dbContext = new PurchasingDbContext(optionsBuilder.Options);
+            UploadDbContext dbContext = new UploadDbContext(optionsBuilder.Options);
 
             return dbContext;
         }

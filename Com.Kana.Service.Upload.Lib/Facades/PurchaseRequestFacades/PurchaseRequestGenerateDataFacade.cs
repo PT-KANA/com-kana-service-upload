@@ -22,11 +22,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.PurchaseRequestFacades
 {
     public class PurchaseRequestGenerateDataFacade
     {
-        private readonly PurchasingDbContext DbContext;
+        private readonly UploadDbContext DbContext;
         private readonly DbSet<PurchaseRequest> DbSet;
         private IdentityService IdentityService;
       
-        public PurchaseRequestGenerateDataFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public PurchaseRequestGenerateDataFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.DbContext = dbContext;
             this.DbSet = this.DbContext.Set<PurchaseRequest>();

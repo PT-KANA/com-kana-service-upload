@@ -42,7 +42,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.GarmentInvoiceViewModels
 				yield return new ValidationResult("No is required", new List<string> { "invoiceNo" });
 			}else
 			{
-				PurchasingDbContext purchasingDbContext = (PurchasingDbContext)validationContext.GetService(typeof(PurchasingDbContext));
+				UploadDbContext purchasingDbContext = (UploadDbContext)validationContext.GetService(typeof(UploadDbContext));
 				if (purchasingDbContext.GarmentInvoices.Where(DO => DO.InvoiceNo.Equals(invoiceNo) && DO.Id != Id && DO.InvoiceDate.ToOffset((new TimeSpan(7, 0, 0))) == invoiceDate && DO.SupplierId == supplier.Id).Count() > 0)
 				{
 					yield return new ValidationResult("No is already exist", new List<string> { "no" });
@@ -142,7 +142,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.GarmentInvoiceViewModels
                         }
 
                         //Check if Delivery Order No for Specific Supplier is Existed
-                        PurchasingDbContext purchasingDbContext = (PurchasingDbContext)validationContext.GetService(typeof(PurchasingDbContext));
+                        UploadDbContext purchasingDbContext = (UploadDbContext)validationContext.GetService(typeof(UploadDbContext));
 						var detailData = purchasingDbContext.GarmentInvoiceItems.Where(w => w.DeliveryOrderNo == item.deliveryOrder.doNo && w.DODate == item.deliveryOrder.doDate && w.ArrivalDate == item.deliveryOrder.arrivalDate && w.IsDeleted == false).Select(s => new { s.Id, s.InvoiceId, s.DeliveryOrderNo});
 						if (detailData.ToList().Count > 0)
                         {

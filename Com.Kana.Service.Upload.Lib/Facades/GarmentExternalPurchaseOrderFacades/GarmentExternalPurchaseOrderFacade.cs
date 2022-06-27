@@ -25,11 +25,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentExternalPurchaseOrderFacade
     {
         private string USER_AGENT = "Facade";
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<GarmentExternalPurchaseOrder> dbSet;
         public readonly IServiceProvider serviceProvider;
 
-        public GarmentExternalPurchaseOrderFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public GarmentExternalPurchaseOrderFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<GarmentExternalPurchaseOrder>();

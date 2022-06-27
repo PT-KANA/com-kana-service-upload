@@ -17,10 +17,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades.MonitoringUnitReceiptFacades
 {
 	public class MonitoringUnitReceiptAllFacade : IMonitoringUnitReceiptAllFacade
 	{
-		private readonly PurchasingDbContext dbContext;
+		private readonly UploadDbContext dbContext;
 		public readonly IServiceProvider serviceProvider;
 		private readonly DbSet<GarmentUnitReceiptNote> dbSet;
-		public MonitoringUnitReceiptAllFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+		public MonitoringUnitReceiptAllFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
 		{
 			this.dbSet = dbContext.Set<GarmentUnitReceiptNote>();
 			this.serviceProvider = serviceProvider;

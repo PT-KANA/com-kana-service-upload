@@ -12,8 +12,8 @@ namespace Com.Kana.Service.Upload.Test.DataUtils.UnitPaymentOrderDataUtils
     {
         private UnitReceiptNoteDataUtil unitReceiptNoteDataUtil;
         private readonly UnitPaymentOrderFacade facade;
-        private PurchasingDbContext _dbContext;
-        public UnitPaymentOrderDataUtil(PurchasingDbContext dbContext)
+        private UploadDbContext _dbContext;
+        public UnitPaymentOrderDataUtil(UploadDbContext dbContext)
         {
             _dbContext = dbContext;
         }

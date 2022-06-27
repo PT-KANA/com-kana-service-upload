@@ -20,11 +20,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.ExternalPurchaseOrderFacade
 {
     public class ExternalPurchaseOrderGenerateDataFacade
     {
-        private readonly PurchasingDbContext DbContext;
+        private readonly UploadDbContext DbContext;
         private readonly DbSet<ExternalPurchaseOrder> DbSet;
         private IdentityService IdentityService;
       
-        public ExternalPurchaseOrderGenerateDataFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public ExternalPurchaseOrderGenerateDataFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.DbContext = dbContext;
             this.DbSet = this.DbContext.Set<ExternalPurchaseOrder>();

@@ -25,9 +25,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Expedition
 {
     public class UnitPaymentOrderExpeditionReportService : IUnitPaymentOrderExpeditionReportService
     {
-        private readonly PurchasingDbContext _dbContext;
+        private readonly UploadDbContext _dbContext;
 
-        public UnitPaymentOrderExpeditionReportService(PurchasingDbContext dbContext)
+        public UnitPaymentOrderExpeditionReportService(UploadDbContext dbContext)
         {
             _dbContext = dbContext;
             DateTime dt = DateTime.Parse("0001-01-01T00:00:00.0000000+00:00");

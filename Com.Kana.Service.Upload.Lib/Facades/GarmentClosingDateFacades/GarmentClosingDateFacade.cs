@@ -15,12 +15,12 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentClosingDateFacades
 {
     public class GarmentClosingDateFacade : IGarmentClosingDateFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<GarmentClosingDate> dbSet;
         public readonly IServiceProvider serviceProvider;
         private string USER_AGENT = "Facade";
 
-        public GarmentClosingDateFacade(PurchasingDbContext dbContext, IServiceProvider serviceProvider)
+        public GarmentClosingDateFacade(UploadDbContext dbContext, IServiceProvider serviceProvider)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<GarmentClosingDate>();

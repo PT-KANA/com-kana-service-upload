@@ -94,7 +94,7 @@ namespace Com.Kana.Service.Upload.Test
 			APIEndpoint.ConnectionString = configuration.GetConnectionString(Constant.DEFAULT_CONNECTION) ?? configuration[Constant.DEFAULT_CONNECTION];
 
 			this.ServiceProvider = new ServiceCollection()
-                .AddDbContext<PurchasingDbContext>((serviceProvider, options) =>
+                .AddDbContext<UploadDbContext>((serviceProvider, options) =>
                 {
                     options.UseSqlServer(connectionString);
                 }, ServiceLifetime.Transient)
@@ -170,7 +170,7 @@ namespace Com.Kana.Service.Upload.Test
             RegisterClassMap();
             MongoDbContext.connectionString = configuration.GetConnectionString(Constant.MONGODB_CONNECTION) ?? configuration[Constant.MONGODB_CONNECTION];
 
-            PurchasingDbContext dbContext = ServiceProvider.GetService<PurchasingDbContext>();
+            UploadDbContext dbContext = ServiceProvider.GetService<UploadDbContext>();
             if (dbContext.Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory")
             {
                 dbContext.Database.Migrate();

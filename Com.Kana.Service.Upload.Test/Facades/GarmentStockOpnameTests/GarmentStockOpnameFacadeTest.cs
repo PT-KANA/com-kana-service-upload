@@ -64,19 +64,19 @@ namespace Com.Kana.Service.Upload.Test.Facades.GarmentStockOpnameTests
             return serviceProviderMock;
         }
 
-        private PurchasingDbContext _dbContext(string testName)
+        private UploadDbContext _dbContext(string testName)
         {
-            DbContextOptionsBuilder<PurchasingDbContext> optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+            DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
             optionsBuilder
                 .UseInMemoryDatabase(testName)
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
-            PurchasingDbContext dbContext = new PurchasingDbContext(optionsBuilder.Options);
+            UploadDbContext dbContext = new UploadDbContext(optionsBuilder.Options);
 
             return dbContext;
         }
 
-        private GarmentStockOpnameDataUtil dataUtil(GarmentStockOpnameFacade facade, IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        private GarmentStockOpnameDataUtil dataUtil(GarmentStockOpnameFacade facade, IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             var garmentPurchaseRequestFacade = new GarmentPurchaseRequestFacade(serviceProvider, dbContext);
             var garmentPurchaseRequestDataUtil = new GarmentPurchaseRequestDataUtil(garmentPurchaseRequestFacade);

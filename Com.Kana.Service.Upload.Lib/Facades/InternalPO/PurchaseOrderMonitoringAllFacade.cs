@@ -22,11 +22,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.InternalPO
 {
     public class PurchaseOrderMonitoringAllFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<InternalPurchaseOrder> dbSet;
 
-        public PurchaseOrderMonitoringAllFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public PurchaseOrderMonitoringAllFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

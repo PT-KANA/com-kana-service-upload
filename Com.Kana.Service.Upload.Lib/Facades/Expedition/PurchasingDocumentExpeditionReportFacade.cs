@@ -9,9 +9,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Expedition
 {
     public class PurchasingDocumentExpeditionReportFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<PurchasingDocumentExpedition> dbSet;
-        public PurchasingDocumentExpeditionReportFacade(PurchasingDbContext dbContext)
+        public PurchasingDocumentExpeditionReportFacade(UploadDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.dbSet = this.dbContext.Set<PurchasingDocumentExpedition>();

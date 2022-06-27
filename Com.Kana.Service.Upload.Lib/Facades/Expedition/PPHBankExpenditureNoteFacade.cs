@@ -28,7 +28,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Expedition
     public class PPHBankExpenditureNoteFacade : IPPHBankExpenditureNoteFacade, IReadByIdable<PPHBankExpenditureNote>
     {
         private const string UserAgent = "Facade";
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<PPHBankExpenditureNote> dbSet;
         private readonly DbSet<PurchasingDocumentExpedition> dbSetPurchasingDocumentExpedition;
         private readonly IBankDocumentNumberGenerator bankDocumentNumberGenerator;
@@ -37,7 +37,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Expedition
         private readonly IDistributedCache _cacheManager;
         private readonly IdentityService identityService;
 
-        public PPHBankExpenditureNoteFacade(PurchasingDbContext dbContext, IBankDocumentNumberGenerator bankDocumentNumberGenerator, IServiceProvider serviceProvider)
+        public PPHBankExpenditureNoteFacade(UploadDbContext dbContext, IBankDocumentNumberGenerator bankDocumentNumberGenerator, IServiceProvider serviceProvider)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<PPHBankExpenditureNote>();

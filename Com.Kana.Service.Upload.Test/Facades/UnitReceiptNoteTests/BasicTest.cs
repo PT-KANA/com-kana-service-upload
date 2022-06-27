@@ -51,14 +51,14 @@ namespace Com.Kana.Service.Upload.Test.Facades.UnitReceiptNoteTests
             return string.Concat(sf.GetMethod().Name, "_", ENTITY);
         }
 
-        private PurchasingDbContext _dbContext(string testName)
+        private UploadDbContext _dbContext(string testName)
         {
-            DbContextOptionsBuilder<PurchasingDbContext> optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+            DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
             optionsBuilder
                 .UseInMemoryDatabase(testName)
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
-            PurchasingDbContext dbContext = new PurchasingDbContext(optionsBuilder.Options);
+            UploadDbContext dbContext = new UploadDbContext(optionsBuilder.Options);
 
             return dbContext;
         }
@@ -267,7 +267,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.UnitReceiptNoteTests
 
         private Mock<IServiceProvider> _ServiceProvider(string testname) => GetServiceProvider(testname);
 
-        private UnitReceiptNoteDataUtil _dataUtil(UnitReceiptNoteFacade facade, PurchasingDbContext _DbContext, string testname)
+        private UnitReceiptNoteDataUtil _dataUtil(UnitReceiptNoteFacade facade, UploadDbContext _DbContext, string testname)
         {
             PurchaseRequestFacade purchaseRequestFacade = new PurchaseRequestFacade(_ServiceProvider(testname).Object, _DbContext);
             PurchaseRequestItemDataUtil purchaseRequestItemDataUtil = new PurchaseRequestItemDataUtil();

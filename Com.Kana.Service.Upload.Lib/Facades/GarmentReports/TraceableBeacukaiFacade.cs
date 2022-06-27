@@ -26,10 +26,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentReports
 {
     public class TraceableBeacukaiFacade : ITraceableBeacukaiFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
 
-        public TraceableBeacukaiFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public TraceableBeacukaiFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

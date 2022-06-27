@@ -48,15 +48,15 @@ namespace Com.Kana.Service.Upload.Test.Facades.DeliveryOrderTests
             return string.Concat(sf.GetMethod().Name, "_", ENTITY);
         }
 
-        private PurchasingDbContext _dbContext(string testName)
+        private UploadDbContext _dbContext(string testName)
         {
-            DbContextOptionsBuilder<PurchasingDbContext> optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+            DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
             optionsBuilder
                 .UseInMemoryDatabase(testName)
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .EnableSensitiveDataLogging();
 
-            PurchasingDbContext dbContext = new PurchasingDbContext(optionsBuilder.Options);
+            UploadDbContext dbContext = new UploadDbContext(optionsBuilder.Options);
 
             return dbContext;
         }
@@ -105,7 +105,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.DeliveryOrderTests
             return serviceProvider;
         }
 
-        private DeliveryOrderDataUtil _dataUtil(DeliveryOrderFacade facade, PurchasingDbContext _DbContext, string testname)
+        private DeliveryOrderDataUtil _dataUtil(DeliveryOrderFacade facade, UploadDbContext _DbContext, string testname)
         {
             PurchaseRequestFacade purchaseRequestFacade = new PurchaseRequestFacade(GetServiceProvider(testname).Object, _DbContext);
             PurchaseRequestItemDataUtil purchaseRequestItemDataUtil = new PurchaseRequestItemDataUtil();
@@ -130,7 +130,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.DeliveryOrderTests
             return new DeliveryOrderDataUtil(deliveryOrderItemDataUtil, deliveryOrderDetailDataUtil, externalPurchaseOrderDataUtil, facade);
         }
 
-        private InternalPurchaseOrderDataUtil _dataUtilIPO(InternalPurchaseOrderFacade facade, PurchasingDbContext _DbContext, string testname)
+        private InternalPurchaseOrderDataUtil _dataUtilIPO(InternalPurchaseOrderFacade facade, UploadDbContext _DbContext, string testname)
         {
             PurchaseRequestFacade purchaseRequestFacade = new PurchaseRequestFacade(GetServiceProvider(testname).Object, _DbContext);
             PurchaseRequestItemDataUtil purchaseRequestItemDataUtil = new PurchaseRequestItemDataUtil();
@@ -431,7 +431,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.DeliveryOrderTests
         {
             var serviceProvider = GetServiceProvider(GetCurrentMethod());
             serviceProvider
-                .Setup(x => x.GetService(typeof(PurchasingDbContext)))
+                .Setup(x => x.GetService(typeof(UploadDbContext)))
                 .Returns(_dbContext(GetCurrentMethod()));
 
             var vm = new DeliveryOrderViewModel()

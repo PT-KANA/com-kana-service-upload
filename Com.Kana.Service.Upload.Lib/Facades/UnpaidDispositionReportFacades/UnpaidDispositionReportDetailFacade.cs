@@ -18,7 +18,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.UnpaidDispositionReportFacades
 {
     public class UnpaidDispositionReportDetailFacade : IUnpaidDispositionReportDetailFacade
     {
-        private readonly PurchasingDbContext _dbContext;
+        private readonly UploadDbContext _dbContext;
         private readonly ICurrencyProvider _currencyProvider;
         private readonly IdentityService _identityService;
         private const string IDRCurrencyCode = "IDR";
@@ -29,7 +29,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.UnpaidDispositionReportFacades
             var cache = serviceProvider.GetService<IDistributedCache>();
             var jsonCategories = cache.GetString(MemoryCacheConstant.Categories);
 
-            _dbContext = serviceProvider.GetService<PurchasingDbContext>();
+            _dbContext = serviceProvider.GetService<UploadDbContext>();
             _currencyProvider = serviceProvider.GetService<ICurrencyProvider>();
             _identityService = serviceProvider.GetService<IdentityService>();
 

@@ -187,11 +187,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         private string USER_AGENT = "Facade";
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<PurchaseRequest> dbSet;
 
-        public PurchaseRequestFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public PurchaseRequestFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

@@ -32,7 +32,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.UnitPaymentCorrectionNoteFacade
     {
         private string USER_AGENT = "Facade";
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<UnitPaymentCorrectionNote> dbSet;
         private readonly IDistributedCache _cacheManager;
@@ -42,7 +42,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.UnitPaymentCorrectionNoteFacade
             "BP","BB","EM","S","R","E","PL","MM","SP","U"
         };
 
-        public UnitPaymentPriceCorrectionNoteFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public UnitPaymentPriceCorrectionNoteFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

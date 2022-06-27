@@ -34,7 +34,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.InternalPurchaseOrderViewModel
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            PurchasingDbContext dbContext = (PurchasingDbContext)validationContext.GetService(typeof(PurchasingDbContext));
+            UploadDbContext dbContext = (UploadDbContext)validationContext.GetService(typeof(UploadDbContext));
             //InternalPurchaseOrder a =
             if (this.prNo == null)
             {

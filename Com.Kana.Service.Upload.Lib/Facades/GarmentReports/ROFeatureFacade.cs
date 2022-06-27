@@ -11,11 +11,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentReports
 {
     public class ROFeatureFacade : IROFeatureFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<GarmentDeliveryOrder> dbSet;
 
-        public ROFeatureFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public ROFeatureFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

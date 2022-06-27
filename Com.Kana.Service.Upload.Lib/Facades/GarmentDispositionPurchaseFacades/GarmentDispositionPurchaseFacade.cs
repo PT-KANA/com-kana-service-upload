@@ -21,14 +21,14 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentDispositionPurchaseFacades
     {
         private string USER_AGENT = "Facade";
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<GarmentDispositionPurchase> dbSet;
         public readonly IServiceProvider serviceProvider;
         private readonly IdentityService identityService;
         private readonly IMapper mapper;
 
 
-        public GarmentDispositionPurchaseFacade(PurchasingDbContext dbContext, IServiceProvider serviceProvider, IdentityService identityService, IMapper mapper)
+        public GarmentDispositionPurchaseFacade(UploadDbContext dbContext, IServiceProvider serviceProvider, IdentityService identityService, IMapper mapper)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.GarmentDispositionPurchases;

@@ -20,11 +20,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.UnitReceiptNoteFacade
 {
     public class UnitReceiptNoteGenerateDataFacade
     {
-        private readonly PurchasingDbContext DbContext;
+        private readonly UploadDbContext DbContext;
         private readonly DbSet<UnitReceiptNoteFacade> DbSet;
         private IdentityService IdentityService;
       
-        public UnitReceiptNoteGenerateDataFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public UnitReceiptNoteGenerateDataFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.DbContext = dbContext;
             this.DbSet = this.DbContext.Set<UnitReceiptNoteFacade>();

@@ -18,11 +18,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades.PurchasingDispositionFacades
 {
     public class PurchasingDispositionFacade : IPurchasingDispositionFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<PurchasingDisposition> dbSet;
 
-        public PurchasingDispositionFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public PurchasingDispositionFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

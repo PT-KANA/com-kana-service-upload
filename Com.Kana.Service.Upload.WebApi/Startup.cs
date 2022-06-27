@@ -269,7 +269,7 @@ namespace Com.Kana.Service.Upload.WebApi
 
             /* Register */
             //services.AddDbContext<PurchasingDbContext>(options => options.UseSqlServer(connectionString));
-            services.AddDbContext<PurchasingDbContext>(options => options.UseSqlServer(connectionString, sqlServerOptions => sqlServerOptions.CommandTimeout(1000 * 60 * 20)));
+            services.AddDbContext<UploadDbContext>(options => options.UseSqlServer(connectionString, sqlServerOptions => sqlServerOptions.CommandTimeout(1000 * 60 * 20)));
             services.AddTransient<ILocalDbCashFlowDbContext>(s => new LocalDbCashFlowDbContext(connectionStringLocalCashFlow));
             RegisterEndpoints();
             RegisterFacades(services);

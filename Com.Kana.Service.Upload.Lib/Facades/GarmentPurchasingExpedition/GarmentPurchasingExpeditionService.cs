@@ -15,12 +15,12 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentPurchasingExpedition
     public class GarmentPurchasingExpeditionService : IGarmentPurchasingExpeditionService
     {
         private const string UserAgent = "purchasing-service";
-        private readonly PurchasingDbContext _dbContext;
+        private readonly UploadDbContext _dbContext;
         private readonly IdentityService _identityService;
 
         public GarmentPurchasingExpeditionService(IServiceProvider serviceProvider)
         {
-            _dbContext = serviceProvider.GetService<PurchasingDbContext>();
+            _dbContext = serviceProvider.GetService<UploadDbContext>();
             _identityService = serviceProvider.GetService<IdentityService>();
         }
 

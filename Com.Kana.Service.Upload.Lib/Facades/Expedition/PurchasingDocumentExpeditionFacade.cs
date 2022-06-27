@@ -34,7 +34,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Expedition
 
     public class PurchasingDocumentExpeditionFacade : IPurchasingDocumentExpeditionFacade
     {
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         public readonly IServiceProvider serviceProvider;
         private readonly DbSet<PurchasingDocumentExpedition> dbSet;
         private readonly DbSet<UnitPaymentOrder> unitPaymentOrderDbSet;
@@ -42,7 +42,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.Expedition
         //var unitPaymentOrderDbSet = dbContext.Set<UnitPaymentOrder>();
 
 
-        public PurchasingDocumentExpeditionFacade(IServiceProvider serviceProvider, PurchasingDbContext dbContext)
+        public PurchasingDocumentExpeditionFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;

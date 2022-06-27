@@ -91,20 +91,20 @@ namespace Com.Kana.Service.Upload.Test.Facades.GarmentReportTests
             return mockServiceProvider;
         }
 
-        private PurchasingDbContext GetDbContext(string testName)
+        private UploadDbContext GetDbContext(string testName)
         {
-            DbContextOptionsBuilder<PurchasingDbContext> optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+            DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
             optionsBuilder
                 .UseInMemoryDatabase(testName)
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .EnableSensitiveDataLogging();
 
-            PurchasingDbContext dbContext = new PurchasingDbContext(optionsBuilder.Options);
+            UploadDbContext dbContext = new UploadDbContext(optionsBuilder.Options);
 
             return dbContext;
         }
 
-        private async Task<DataUtilResult> GetDataUtil(GarmentPOMasterDistributionFacade facade, PurchasingDbContext dbContext)
+        private async Task<DataUtilResult> GetDataUtil(GarmentPOMasterDistributionFacade facade, UploadDbContext dbContext)
         {
             var mockServiceProvider = GetMockServiceProvider();
             var garmentPurchaseRequestFacade = new GarmentPurchaseRequestFacade(mockServiceProvider.Object, dbContext);

@@ -19,7 +19,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.InternalPO
 {
     public class PurchaseMonitoringService : IPurchaseMonitoringService
     {
-        private readonly PurchasingDbContext _dbContext;
+        private readonly UploadDbContext _dbContext;
         private readonly DbSet<PurchaseRequest> _purchaseRequestDbSet;
         private readonly DbSet<PurchaseRequestItem> _purchaseRequestItemDbSet;
         private readonly DbSet<InternalPurchaseOrder> _internalPurchaseOrderDbSet;
@@ -38,7 +38,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades.InternalPO
         private readonly DbSet<UnitPaymentOrderDetail> _unitPaymentOrderDetailDbSet;
         private readonly DbSet<UnitPaymentCorrectionNoteItem> _correctionItemDbSet;
 
-        public PurchaseMonitoringService(PurchasingDbContext dbContext)
+        public PurchaseMonitoringService(UploadDbContext dbContext)
         {
             _dbContext = dbContext;
             //_dbContext.Database.SetCommandTimeout(1000 * 60 * 2);

@@ -38,9 +38,9 @@ using Com.Kana.Service.Upload.Lib.Models.GarmentUenUrnChangeDateHistory;
 
 namespace Com.Kana.Service.Upload.Lib
 {
-    public class PurchasingDbContext : StandardDbContext
+    public class UploadDbContext : StandardDbContext
     {
-        public PurchasingDbContext(DbContextOptions<PurchasingDbContext> options) : base(options)
+        public UploadDbContext(DbContextOptions<UploadDbContext> options) : base(options)
         {
             if (Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory")
                 Database.SetCommandTimeout(1000 * 60 * 20);

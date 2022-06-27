@@ -8,7 +8,7 @@ using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitDeliveryOrderFacades;
 using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitExpenditureNoteFacade;
 using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitReceiptNoteFacades;
 using Com.Kana.Service.Upload.Lib.Interfaces;
-using Com.Kana.Service.Upload.Lib.Migrations;
+
 using Com.Kana.Service.Upload.Lib.Models.GarmentUnitDeliveryOrderModel;
 using Com.Kana.Service.Upload.Lib.Models.GarmentUnitExpenditureNoteModel;
 using Com.Kana.Service.Upload.Lib.Services;
@@ -48,6 +48,7 @@ using Com.Kana.Service.Upload.Test.DataUtils.GarmentBeacukaiDataUtils;
 using Com.Kana.Service.Upload.Lib.Services.GarmentDebtBalance;
 using Com.Kana.Service.Upload.Lib.Models.GarmentExternalPurchaseOrderModel;
 using Newtonsoft.Json;
+using Com.Kana.Service.Upload.Lib.Models.GarmentUnitReceiptNoteModel;
 
 namespace Com.Kana.Service.Upload.Test.Facades.GarmentUnitExpenditureNoteTests
 {
@@ -257,14 +258,14 @@ namespace Com.Kana.Service.Upload.Test.Facades.GarmentUnitExpenditureNoteTests
             return string.Concat(sf.GetMethod().Name, "_", ENTITY);
         }
 
-        private PurchasingDbContext _dbContext(string testName)
+        private UploadDbContext _dbContext(string testName)
         {
-            DbContextOptionsBuilder<PurchasingDbContext> optionsBuilder = new DbContextOptionsBuilder<PurchasingDbContext>();
+            DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
             optionsBuilder
                 .UseInMemoryDatabase(testName)
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
-            PurchasingDbContext dbContext = new PurchasingDbContext(optionsBuilder.Options);
+            UploadDbContext dbContext = new UploadDbContext(optionsBuilder.Options);
 
             return dbContext;
         }
@@ -810,7 +811,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.GarmentUnitExpenditureNoteTests
             serviceProvider.
                 Setup(x => x.GetService(typeof(IGarmentUnitDeliveryOrderFacade)))
                 .Returns(garmentUnitDeliveryOrderFacadeMock.Object);
-            serviceProvider.Setup(x => x.GetService(typeof(PurchasingDbContext)))
+            serviceProvider.Setup(x => x.GetService(typeof(UploadDbContext)))
                 .Returns(_dbContext(GetCurrentMethod()));
             var data = await dataUtil(facade, GetCurrentMethod()).GetTestData();
             var item = data.Items.First();

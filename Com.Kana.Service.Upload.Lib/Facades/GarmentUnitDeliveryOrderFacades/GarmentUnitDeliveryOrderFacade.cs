@@ -25,12 +25,12 @@ namespace Com.Kana.Service.Upload.Lib.Facades.GarmentUnitDeliveryOrderFacades
         public readonly IServiceProvider serviceProvider;
         private readonly IdentityService identityService;
 
-        private readonly PurchasingDbContext dbContext;
+        private readonly UploadDbContext dbContext;
         private readonly DbSet<GarmentUnitDeliveryOrder> dbSet;
         private readonly DbSet<GarmentDOItems> dbSetGarmentDOItems;
         private readonly IMapper mapper;
 
-        public GarmentUnitDeliveryOrderFacade(PurchasingDbContext dbContext, IServiceProvider serviceProvider)
+        public GarmentUnitDeliveryOrderFacade(UploadDbContext dbContext, IServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
             identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
