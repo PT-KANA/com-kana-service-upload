@@ -24,4 +24,13 @@
     <PackageReference Include="MongoDB.Driver" Version="2.9.2" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.10" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="AutoMapperProfiles\" />
+    <Folder Include="Configs\" />
+    <Folder Include="Facades\" />
+    <Folder Include="Models\" />
+    <Folder Include="PDFTemplates\" />
+    <Folder Include="ViewModels\" />
+  </ItemGroup>
 </Project>

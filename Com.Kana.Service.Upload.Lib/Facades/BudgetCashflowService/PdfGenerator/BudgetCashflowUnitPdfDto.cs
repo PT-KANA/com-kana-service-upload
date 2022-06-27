@@ -1,6 +1,0 @@
-﻿namespace Com.Kana.Service.Upload.Lib.Facades.BudgetCashflowService.PdfGenerator
-{
-    internal class BudgetCashflowUnitPdfDto
-    {
-    }
-}
