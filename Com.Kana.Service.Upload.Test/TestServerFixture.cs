@@ -1,9 +1,9 @@
 ﻿using Com.Kana.Service.Upload.Lib;
 using Com.Kana.Service.Upload.Lib.Interfaces;
 using Com.Kana.Service.Upload.Lib.Services;
-using Com.Kana.Service.Upload.Test.DataUtils.ExpeditionDataUtil;
-using Com.Kana.Service.Upload.Test.DataUtils.PurchaseRequestDataUtils;
-using Com.Kana.Service.Upload.Test.DataUtils.InternalPurchaseOrderDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.ExpeditionDataUtil;
+//using Com.Kana.Service.Upload.Test.DataUtils.PurchaseRequestDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.InternalPurchaseOrderDataUtils;
 using Com.Kana.Service.Upload.Test.Helpers;
 using Com.Kana.Service.Upload.WebApi;
 using Com.Kana.Service.Upload.WebApi.Helpers;
@@ -20,11 +20,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using Xunit;
-using Com.Kana.Service.Upload.Test.DataUtils.ExternalPurchaseOrderDataUtils;
-using Com.Kana.Service.Upload.Test.DataUtils.DeliveryOrderDataUtils;
-using Com.Kana.Service.Upload.Test.DataUtils.UnitReceiptNoteDataUtils;
-using Com.Kana.Service.Upload.Test.DataUtils.UnitPaymentCorrectionNoteDataUtils;
-using Com.Kana.Service.Upload.Test.DataUtils.UnitPaymentOrderDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.ExternalPurchaseOrderDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.DeliveryOrderDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.UnitReceiptNoteDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.UnitPaymentCorrectionNoteDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.UnitPaymentOrderDataUtils;
 using Com.Kana.Service.Upload.Lib.Utilities.Currencies;
 
 namespace Com.Kana.Service.Upload.Test
@@ -56,25 +56,25 @@ namespace Com.Kana.Service.Upload.Test
                 .ConfigureServices(services =>
                 {
                     services
-                       .AddTransient<SendToVerificationDataUtil>()
-                       .AddTransient<PurchasingDocumentAcceptanceDataUtil>()
-                       .AddTransient<PurchaseRequestDataUtil>()
-                       .AddTransient<PurchaseRequestItemDataUtil>()
-                       .AddTransient<InternalPurchaseOrderDataUtil>()
-                       .AddTransient<InternalPurchaseOrderItemDataUtil>()
-                       .AddTransient<ExternalPurchaseOrderDataUtil>()
-                       .AddTransient<ExternalPurchaseOrderItemDataUtil>()
-                       .AddTransient<ExternalPurchaseOrderDetailDataUtil>()
-                       .AddTransient<DeliveryOrderDataUtil>()
-                       .AddTransient<DeliveryOrderItemDataUtil>()
-                       .AddTransient<DeliveryOrderDetailDataUtil>()
-                       .AddTransient<UnitReceiptNoteDataUtil>()
-                       .AddTransient<UnitReceiptNoteItemDataUtil>()
-                       .AddTransient<UnitPaymentOrderDataUtil>()
-                       .AddTransient<UnitPaymentCorrectionNoteDataUtil>()
-                       .AddTransient<UnitPaymentPriceCorrectionNoteDataUtils>()
-                       .AddTransient<UnitPaymentCorrectionNoteDataUtil>()
-                       .AddTransient<UnitPaymentOrderUnpaidReportDataUtil>()
+                       //.AddTransient<SendToVerificationDataUtil>()
+                       //.AddTransient<PurchasingDocumentAcceptanceDataUtil>()
+                       //.AddTransient<PurchaseRequestDataUtil>()
+                       //.AddTransient<PurchaseRequestItemDataUtil>()
+                       //.AddTransient<InternalPurchaseOrderDataUtil>()
+                       //.AddTransient<InternalPurchaseOrderItemDataUtil>()
+                       //.AddTransient<ExternalPurchaseOrderDataUtil>()
+                       //.AddTransient<ExternalPurchaseOrderItemDataUtil>()
+                       //.AddTransient<ExternalPurchaseOrderDetailDataUtil>()
+                       //.AddTransient<DeliveryOrderDataUtil>()
+                       //.AddTransient<DeliveryOrderItemDataUtil>()
+                       //.AddTransient<DeliveryOrderDetailDataUtil>()
+                       //.AddTransient<UnitReceiptNoteDataUtil>()
+                       //.AddTransient<UnitReceiptNoteItemDataUtil>()
+                       //.AddTransient<UnitPaymentOrderDataUtil>()
+                       //.AddTransient<UnitPaymentCorrectionNoteDataUtil>()
+                       //.AddTransient<UnitPaymentPriceCorrectionNoteDataUtils>()
+                       //.AddTransient<UnitPaymentCorrectionNoteDataUtil>()
+                       //.AddTransient<UnitPaymentOrderUnpaidReportDataUtil>()
                        .AddScoped<IHttpClientService, HttpClientTestService>()
                        .AddScoped<ICurrencyProvider, CurrencyProvider>()
                        .AddDbContext<UploadDbContext>(options => options.UseSqlServer(configuration[Constant.DEFAULT_CONNECTION]), ServiceLifetime.Transient);
