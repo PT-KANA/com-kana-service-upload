@@ -1,19 +1,19 @@
 ﻿using Com.Kana.Service.Upload.Lib;
-using Com.Kana.Service.Upload.Lib.Facades;
-using Com.Kana.Service.Upload.Lib.Facades.InternalPO;
-using Com.Kana.Service.Upload.Lib.Facades.Expedition;
-using Com.Kana.Service.Upload.Lib.Facades.Report;
+//using Com.Kana.Service.Upload.Lib.Facades;
+//using Com.Kana.Service.Upload.Lib.Facades.InternalPO;
+//using Com.Kana.Service.Upload.Lib.Facades.Expedition;
+//using Com.Kana.Service.Upload.Lib.Facades.Report;
 using Com.Kana.Service.Upload.Lib.Helpers;
 using Com.Kana.Service.Upload.Lib.Interfaces;
 using Com.Kana.Service.Upload.Lib.Serializers;
 using Com.Kana.Service.Upload.Lib.Services;
-using Com.Kana.Service.Upload.Lib.ViewModels.IntegrationViewModel;
-using Com.Kana.Service.Upload.Lib.ViewModels.PurchaseOrder;
-using Com.Kana.Service.Upload.Lib.ViewModels.UnitReceiptNote;
-using Com.Kana.Service.Upload.Test.DataUtils.ExpeditionDataUtil;
-using Com.Kana.Service.Upload.Test.DataUtils.PurchaseRequestDataUtils;
-using Com.Kana.Service.Upload.Test.DataUtils.InternalPurchaseOrderDataUtils;
-using Com.Kana.Service.Upload.Test.DataUtils.UnitReceiptNote;
+//using Com.Kana.Service.Upload.Lib.ViewModels.IntegrationViewModel;
+//using Com.Kana.Service.Upload.Lib.ViewModels.PurchaseOrder;
+//using Com.Kana.Service.Upload.Lib.ViewModels.UnitReceiptNote;
+//using Com.Kana.Service.Upload.Test.DataUtils.ExpeditionDataUtil;
+//using Com.Kana.Service.Upload.Test.DataUtils.PurchaseRequestDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.InternalPurchaseOrderDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.UnitReceiptNote;
 using Com.Kana.Service.Upload.Test.Helpers;
 using Com.Kana.Service.Upload.WebApi.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -23,27 +23,27 @@ using MongoDB.Bson.Serialization;
 using System;
 using System.Collections.Generic;
 using Xunit;
-using Com.Kana.Service.Upload.Lib.Facades.ExternalPurchaseOrderFacade;
-using Com.Kana.Service.Upload.Test.DataUtils.ExternalPurchaseOrderDataUtils;
-using Com.Kana.Service.Upload.Test.DataUtils.DeliveryOrderDataUtils;
-using Com.Kana.Service.Upload.Lib.Facades.BankExpenditureNoteFacades;
-using Com.Kana.Service.Upload.Test.DataUtils.BankExpenditureNoteDataUtils;
-using Com.Kana.Service.Upload.Lib.Facades.UnitReceiptNoteFacade;
-using Com.Kana.Service.Upload.Test.DataUtils.UnitReceiptNoteDataUtils;
-using Com.Kana.Service.Upload.Lib.ViewModels.Expedition;
-using Com.Kana.Service.Upload.Lib.Facades.ExternalPurchaseOrderFacade.Reports;
-using Com.Kana.Service.Upload.Lib.Facades.UnitPaymentCorrectionNoteFacade;
-using Com.Kana.Service.Upload.Test.DataUtils.UnitPaymentCorrectionNoteDataUtils;
-using Com.Kana.Service.Upload.Test.DataUtils.UnitPaymentOrderDataUtils;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentInvoiceFacades;
-using Com.Kana.Service.Upload.Test.DataUtils.GarmentInvoiceDataUtils;
-using Com.Kana.Service.Upload.Test.DataUtils.GarmentInternNoteDataUtils;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentInternNoteFacades;
-using Com.Kana.Service.Upload.Lib.Facades.PurchaseRequestFacades;
-using Com.Kana.Service.Upload.Lib.Facades.MonitoringCentralBillReceptionFacades;
-using Com.Kana.Service.Upload.Lib.Facades.MonitoringCentralBillExpenditureFacades;
-using Com.Kana.Service.Upload.Lib.Facades.MonitoringCorrectionNoteReceptionFacades;
-using Com.Kana.Service.Upload.Lib.Facades.MonitoringCorrectionNoteExpenditureFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.ExternalPurchaseOrderFacade;
+//using Com.Kana.Service.Upload.Test.DataUtils.ExternalPurchaseOrderDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.DeliveryOrderDataUtils;
+//using Com.Kana.Service.Upload.Lib.Facades.BankExpenditureNoteFacades;
+//using Com.Kana.Service.Upload.Test.DataUtils.BankExpenditureNoteDataUtils;
+//using Com.Kana.Service.Upload.Lib.Facades.UnitReceiptNoteFacade;
+//using Com.Kana.Service.Upload.Test.DataUtils.UnitReceiptNoteDataUtils;
+//using Com.Kana.Service.Upload.Lib.ViewModels.Expedition;
+//using Com.Kana.Service.Upload.Lib.Facades.ExternalPurchaseOrderFacade.Reports;
+//using Com.Kana.Service.Upload.Lib.Facades.UnitPaymentCorrectionNoteFacade;
+//using Com.Kana.Service.Upload.Test.DataUtils.UnitPaymentCorrectionNoteDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.UnitPaymentOrderDataUtils;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentInvoiceFacades;
+//using Com.Kana.Service.Upload.Test.DataUtils.GarmentInvoiceDataUtils;
+//using Com.Kana.Service.Upload.Test.DataUtils.GarmentInternNoteDataUtils;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentInternNoteFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.PurchaseRequestFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.MonitoringCentralBillReceptionFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.MonitoringCentralBillExpenditureFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.MonitoringCorrectionNoteReceptionFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.MonitoringCorrectionNoteExpenditureFacades;
 using Com.Kana.Service.Upload.Lib.Utilities.Currencies;
 
 namespace Com.Kana.Service.Upload.Test
@@ -64,16 +64,16 @@ namespace Com.Kana.Service.Upload.Test
 
         private void RegisterClassMap()
         {
-            ClassMap<UnitReceiptNoteViewModel>.Register();
-            ClassMap<UnitReceiptNoteItemViewModel>.Register();
-            ClassMap<UnitViewModel>.Register();
-            ClassMap<DivisionViewModel>.Register();
-            ClassMap<CategoryViewModel>.Register();
-            ClassMap<ProductViewModel>.Register();
-            ClassMap<UomViewModel>.Register();
-            ClassMap<PurchaseOrderViewModel>.Register();
-            ClassMap<SupplierViewModel>.Register();
-            ClassMap<UnitPaymentOrderUnpaidViewModel>.Register();
+            //ClassMap<UnitReceiptNoteViewModel>.Register();
+            //ClassMap<UnitReceiptNoteItemViewModel>.Register();
+            //ClassMap<UnitViewModel>.Register();
+            //ClassMap<DivisionViewModel>.Register();
+            //ClassMap<CategoryViewModel>.Register();
+            //ClassMap<ProductViewModel>.Register();
+            //ClassMap<UomViewModel>.Register();
+            //ClassMap<PurchaseOrderViewModel>.Register();
+            //ClassMap<SupplierViewModel>.Register();
+            //ClassMap<UnitPaymentOrderUnpaidViewModel>.Register();
         }
 
         public ServiceProviderFixture()
@@ -98,69 +98,69 @@ namespace Com.Kana.Service.Upload.Test
                 {
                     options.UseSqlServer(connectionString);
                 }, ServiceLifetime.Transient)
-                .AddTransient<PurchasingDocumentExpeditionFacade>()
-                .AddTransient<PurchasingDocumentExpeditionReportFacade>()
-                .AddTransient<ImportPurchasingBookReportFacade>()
-                .AddTransient<LocalPurchasingBookReportFacade>()
-                .AddTransient<SendToVerificationDataUtil>()
+    //            .AddTransient<PurchasingDocumentExpeditionFacade>()
+    //            .AddTransient<PurchasingDocumentExpeditionReportFacade>()
+    //            .AddTransient<ImportPurchasingBookReportFacade>()
+    //            .AddTransient<LocalPurchasingBookReportFacade>()
+    //            .AddTransient<SendToVerificationDataUtil>()
 
-                .AddTransient<UnitPaymentOrderUnpaidReportFacade>()
-                .AddTransient<UnitPaymentOrderNotVerifiedReportFacade>()
-                .AddTransient<PurchasingDocumentAcceptanceDataUtil>()
-                .AddTransient<UnitReceiptNoteBsonDataUtil>()
-                .AddTransient<UnitPaymentOrderUnpaidReportDataUtil>()
-                .AddTransient<UnitReceiptNoteImportFalseBsonDataUtil>()
+    //            .AddTransient<UnitPaymentOrderUnpaidReportFacade>()
+    //            .AddTransient<UnitPaymentOrderNotVerifiedReportFacade>()
+    //            .AddTransient<PurchasingDocumentAcceptanceDataUtil>()
+    //            .AddTransient<UnitReceiptNoteBsonDataUtil>()
+    //            .AddTransient<UnitPaymentOrderUnpaidReportDataUtil>()
+    //            .AddTransient<UnitReceiptNoteImportFalseBsonDataUtil>()
 
-                .AddTransient<PurchaseRequestFacade>()
-                .AddTransient<PurchaseRequestDataUtil>()
-                .AddTransient<PurchaseRequestItemDataUtil>()
-                .AddTransient<PurchaseOrderMonitoringAllFacade>()
-                .AddTransient<MonitoringPriceFacade>()
-                .AddTransient<PurchaseRequestGenerateDataFacade>()
-                .AddTransient<ExternalPurchaseOrderGenerateDataFacade>()
-                .AddTransient<UnitReceiptNoteGenerateDataFacade>()
+    //            .AddTransient<PurchaseRequestFacade>()
+    //            .AddTransient<PurchaseRequestDataUtil>()
+    //            .AddTransient<PurchaseRequestItemDataUtil>()
+    //            .AddTransient<PurchaseOrderMonitoringAllFacade>()
+    //            .AddTransient<MonitoringPriceFacade>()
+    //            .AddTransient<PurchaseRequestGenerateDataFacade>()
+    //            .AddTransient<ExternalPurchaseOrderGenerateDataFacade>()
+    //            .AddTransient<UnitReceiptNoteGenerateDataFacade>()
 
-                .AddTransient<InternalPurchaseOrderFacade>()
-                .AddTransient<InternalPurchaseOrderDataUtil>()
-                .AddTransient<InternalPurchaseOrderItemDataUtil>()
+    //            .AddTransient<InternalPurchaseOrderFacade>()
+    //            .AddTransient<InternalPurchaseOrderDataUtil>()
+    //            .AddTransient<InternalPurchaseOrderItemDataUtil>()
 
-                .AddTransient<ExternalPurchaseOrderFacade>()
-                .AddTransient<ExternalPurchaseOrderDataUtil>()
-                .AddTransient<ExternalPurchaseOrderItemDataUtil>()
-                .AddTransient<ExternalPurchaseOrderDetailDataUtil>()
+    //            .AddTransient<ExternalPurchaseOrderFacade>()
+    //            .AddTransient<ExternalPurchaseOrderDataUtil>()
+    //            .AddTransient<ExternalPurchaseOrderItemDataUtil>()
+    //            .AddTransient<ExternalPurchaseOrderDetailDataUtil>()
 
-                .AddTransient<DeliveryOrderFacade>()
-                .AddTransient<IDeliveryOrderFacade, DeliveryOrderFacade>()
-                .AddTransient<DeliveryOrderDataUtil>()
-                .AddTransient<DeliveryOrderItemDataUtil>()
-                .AddTransient<DeliveryOrderDetailDataUtil>()
+    //            .AddTransient<DeliveryOrderFacade>()
+    //            .AddTransient<IDeliveryOrderFacade, DeliveryOrderFacade>()
+    //            .AddTransient<DeliveryOrderDataUtil>()
+    //            .AddTransient<DeliveryOrderItemDataUtil>()
+    //            .AddTransient<DeliveryOrderDetailDataUtil>()
 
-                .AddTransient<BankExpenditureNoteFacade>()
-                .AddTransient<BankExpenditureNoteDataUtil>()
+    //            .AddTransient<BankExpenditureNoteFacade>()
+    //            .AddTransient<BankExpenditureNoteDataUtil>()
 
-                //.AddTransient<UnitReceiptNoteFacade>()
-                .AddTransient<UnitReceiptNoteFacade>()
-                .AddTransient<UnitReceiptNoteDataUtil>()
-                .AddTransient<UnitReceiptNoteItemDataUtil>()
-				.AddTransient<TotalPurchaseFacade>()
-				.AddTransient<ImportPurchasingBookReportFacade>()
-				.AddTransient<IGarmentInvoice,GarmentInvoiceFacade>()
-				.AddTransient<GarmentInvoiceDataUtil>()
-				.AddTransient<GarmentInvoiceItemDataUtil>()
-				.AddTransient<GarmentInvoiceDetailDataUtil>()
+    //            //.AddTransient<UnitReceiptNoteFacade>()
+    //            .AddTransient<UnitReceiptNoteFacade>()
+    //            .AddTransient<UnitReceiptNoteDataUtil>()
+    //            .AddTransient<UnitReceiptNoteItemDataUtil>()
+				//.AddTransient<TotalPurchaseFacade>()
+				//.AddTransient<ImportPurchasingBookReportFacade>()
+				//.AddTransient<IGarmentInvoice,GarmentInvoiceFacade>()
+				//.AddTransient<GarmentInvoiceDataUtil>()
+				//.AddTransient<GarmentInvoiceItemDataUtil>()
+				//.AddTransient<GarmentInvoiceDetailDataUtil>()
 
-                .AddTransient<GarmentInternNoteFacades>()
-                .AddTransient<GarmentInternNoteDataUtil>()
+    //            .AddTransient<GarmentInternNoteFacades>()
+    //            .AddTransient<GarmentInternNoteDataUtil>()
 
-                .AddTransient<IUnitPaymentOrderFacade, UnitPaymentOrderFacade>()
-                .AddTransient<UnitPaymentOrderDataUtil>()
-                .AddTransient<IUnitPaymentPriceCorrectionNoteFacade, UnitPaymentPriceCorrectionNoteFacade>()
-                .AddTransient<IMonitoringCentralBillReceptionFacade, MonitoringCentralBillReceptionFacade>()
-                .AddTransient<IMonitoringCentralBillExpenditureFacade, MonitoringCentralBillExpenditureFacade>()
-                .AddTransient<IMonitoringCorrectionNoteReceptionFacade, MonitoringCorrectionNoteReceptionFacade>()
-                .AddTransient<IMonitoringCorrectionNoteExpenditureFacade, MonitoringCorrectionNoteExpenditureFacade>()
-                .AddTransient<UnitPaymentPriceCorrectionNoteDataUtils>()
-                .AddTransient<UnitPaymentCorrectionNoteDataUtil>()
+    //            .AddTransient<IUnitPaymentOrderFacade, UnitPaymentOrderFacade>()
+    //            .AddTransient<UnitPaymentOrderDataUtil>()
+    //            .AddTransient<IUnitPaymentPriceCorrectionNoteFacade, UnitPaymentPriceCorrectionNoteFacade>()
+    //            .AddTransient<IMonitoringCentralBillReceptionFacade, MonitoringCentralBillReceptionFacade>()
+    //            .AddTransient<IMonitoringCentralBillExpenditureFacade, MonitoringCentralBillExpenditureFacade>()
+    //            .AddTransient<IMonitoringCorrectionNoteReceptionFacade, MonitoringCorrectionNoteReceptionFacade>()
+    //            .AddTransient<IMonitoringCorrectionNoteExpenditureFacade, MonitoringCorrectionNoteExpenditureFacade>()
+    //            .AddTransient<UnitPaymentPriceCorrectionNoteDataUtils>()
+    //            .AddTransient<UnitPaymentCorrectionNoteDataUtil>()
 				.AddSingleton<IHttpClientService, HttpClientTestService>()
 				.AddSingleton<ICurrencyProvider, CurrencyProvider>()
                 .AddSingleton<IdentityService>()

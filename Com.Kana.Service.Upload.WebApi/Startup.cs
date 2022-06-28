@@ -1,35 +1,35 @@
 using AutoMapper;
 using Com.Kana.Service.Upload.Lib;
-using Com.Kana.Service.Upload.Lib.Facades;
-using Com.Kana.Service.Upload.Lib.Facades.BankExpenditureNoteFacades;
-using Com.Kana.Service.Upload.Lib.Facades.Expedition;
-using Com.Kana.Service.Upload.Lib.Facades.ExternalPurchaseOrderFacade;
-using Com.Kana.Service.Upload.Lib.Facades.ExternalPurchaseOrderFacade.Reports;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentBeacukaiFacade;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentCorrectionNoteFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentDeliveryOrderFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentExternalPurchaseOrderFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentInternalPurchaseOrderFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentInternNoteFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentInvoiceFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentPurchaseRequestFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitDeliveryOrderFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitReceiptNoteFacades;
-using Com.Kana.Service.Upload.Lib.Facades.InternalPO;
-using Com.Kana.Service.Upload.Lib.Facades.MonitoringUnitReceiptFacades;
-using Com.Kana.Service.Upload.Lib.Facades.PurchasingDispositionFacades;
-using Com.Kana.Service.Upload.Lib.Facades.Report;
-using Com.Kana.Service.Upload.Lib.Facades.UnitPaymentCorrectionNoteFacade;
-using Com.Kana.Service.Upload.Lib.Facades.UnitReceiptNoteFacade;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitExpenditureNoteFacade;
+//using Com.Kana.Service.Upload.Lib.Facades;
+//using Com.Kana.Service.Upload.Lib.Facades.BankExpenditureNoteFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.Expedition;
+//using Com.Kana.Service.Upload.Lib.Facades.ExternalPurchaseOrderFacade;
+//using Com.Kana.Service.Upload.Lib.Facades.ExternalPurchaseOrderFacade.Reports;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentBeacukaiFacade;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentCorrectionNoteFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentDeliveryOrderFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentExternalPurchaseOrderFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentInternalPurchaseOrderFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentInternNoteFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentInvoiceFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentPurchaseRequestFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitDeliveryOrderFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitReceiptNoteFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.InternalPO;
+//using Com.Kana.Service.Upload.Lib.Facades.MonitoringUnitReceiptFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.PurchasingDispositionFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.Report;
+//using Com.Kana.Service.Upload.Lib.Facades.UnitPaymentCorrectionNoteFacade;
+//using Com.Kana.Service.Upload.Lib.Facades.UnitReceiptNoteFacade;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitExpenditureNoteFacade;
 using Com.Kana.Service.Upload.Lib.Helpers;
 using Com.Kana.Service.Upload.Lib.Interfaces;
 using Com.Kana.Service.Upload.Lib.Serializers;
 using Com.Kana.Service.Upload.Lib.Services;
-using Com.Kana.Service.Upload.Lib.ViewModels.IntegrationViewModel;
-using Com.Kana.Service.Upload.Lib.ViewModels.PurchaseOrder;
-using Com.Kana.Service.Upload.Lib.ViewModels.UnitPaymentCorrectionNoteViewModel;
-using Com.Kana.Service.Upload.Lib.ViewModels.UnitReceiptNote;
+//using Com.Kana.Service.Upload.Lib.ViewModels.IntegrationViewModel;
+//using Com.Kana.Service.Upload.Lib.ViewModels.PurchaseOrder;
+//using Com.Kana.Service.Upload.Lib.ViewModels.UnitPaymentCorrectionNoteViewModel;
+//using Com.Kana.Service.Upload.Lib.ViewModels.UnitReceiptNote;
 using Com.Kana.Service.Upload.WebApi.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -42,43 +42,43 @@ using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson.Serialization;
 using Newtonsoft.Json.Serialization;
 using System.Text;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentExternalPurchaseOrderFacade.Reports;
-using Com.Kana.Service.Upload.Lib.Facades.PurchaseRequestFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitDeliveryOrderReturFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentReceiptCorrectionFacades;
-using Com.Kana.Service.Upload.Lib.Facades.MonitoringCentralBillReceptionFacades;
-using Com.Kana.Service.Upload.Lib.Facades.MonitoringCentralBillExpenditureFacades;
-using Com.Kana.Service.Upload.Lib.Facades.MonitoringCorrectionNoteReceptionFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentExternalPurchaseOrderFacade.Reports;
+//using Com.Kana.Service.Upload.Lib.Facades.PurchaseRequestFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentUnitDeliveryOrderReturFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentReceiptCorrectionFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.MonitoringCentralBillReceptionFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.MonitoringCentralBillExpenditureFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.MonitoringCorrectionNoteReceptionFacades;
 using FluentScheduler;
 using Com.Kana.Service.Upload.WebApi.SchedulerJobs;
 using Com.Kana.Service.Upload.Lib.Utilities.CacheManager;
-using Com.Kana.Service.Upload.Lib.Facades.MonitoringCorrectionNoteExpenditureFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentPOMasterDistributionFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentReports;
+//using Com.Kana.Service.Upload.Lib.Facades.MonitoringCorrectionNoteExpenditureFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentPOMasterDistributionFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentReports;
 using Com.Kana.Service.Upload.Lib.Utilities.Currencies;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentDailyPurchasingReportFacade;
-using Com.Kana.Service.Upload.Lib.AutoMapperProfiles;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentDailyPurchasingReportFacade;
+//using Com.Kana.Service.Upload.Lib.AutoMapperProfiles;
 using Com.Kana.Service.Upload.Lib.Utilities;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Collections.Generic;
 using System.Linq;
-using Com.Kana.Service.Upload.Lib.Facades.PRMasterValidationReportFacade;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentExternalPurchaseOrderFacades.Reports;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentSupplierBalanceDebtFacades;
-using Com.Kana.Service.Upload.Lib.Facades.VBRequestPOExternal;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentStockOpnameFacades;
-using Com.Kana.Service.Upload.Lib.Facades.DebtAndDispositionSummary;
-using Com.Kana.Service.Upload.Lib.Facades.UnpaidDispositionReportFacades;
-using Com.Kana.Service.Upload.Lib.Facades.BudgetCashflowService;
-using Com.Kana.Service.Upload.Lib.Facades.BudgetCashflowService.ExcelGenerator;
-using Com.Kana.Service.Upload.Lib.Facades.BudgetCashflowService.PdfGenerator;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentPurchasingExpedition;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentPurchasingBookReport;
-using Com.Kana.Service.Upload.Lib.Services.GarmentDebtBalance;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentDispositionPurchaseFacades;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentDispositionPaymentReport;
+//using Com.Kana.Service.Upload.Lib.Facades.PRMasterValidationReportFacade;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentExternalPurchaseOrderFacades.Reports;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentSupplierBalanceDebtFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.VBRequestPOExternal;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentStockOpnameFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.DebtAndDispositionSummary;
+//using Com.Kana.Service.Upload.Lib.Facades.UnpaidDispositionReportFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.BudgetCashflowService;
+//using Com.Kana.Service.Upload.Lib.Facades.BudgetCashflowService.ExcelGenerator;
+//using Com.Kana.Service.Upload.Lib.Facades.BudgetCashflowService.PdfGenerator;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentPurchasingExpedition;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentPurchasingBookReport;
+//using Com.Kana.Service.Upload.Lib.Services.GarmentDebtBalance;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentDispositionPurchaseFacades;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentDispositionPaymentReport;
+//using Com.Kana.Service.Upload.Lib.Facades.GarmentClosingDateFacades;
 using Microsoft.ApplicationInsights.AspNetCore;
-using Com.Kana.Service.Upload.Lib.Facades.GarmentClosingDateFacades;
 
 namespace Com.Kana.Service.Upload.WebApi
 {
@@ -120,109 +120,7 @@ namespace Com.Kana.Service.Upload.WebApi
             services
                 .AddTransient<ICoreData, CoreData>()
                 .AddTransient<ICoreHttpClientService, CoreHttpClientService>()
-                .AddTransient<IMemoryCacheManager, MemoryCacheManager>()
-                .AddTransient<PurchasingDocumentExpeditionFacade>()
-                .AddTransient<IBankExpenditureNoteFacade, BankExpenditureNoteFacade>()
-                .AddTransient<IBankDocumentNumberGenerator, BankDocumentNumberGenerator>()
-                .AddTransient<PurchasingDocumentExpeditionReportFacade>()
-                .AddTransient<IPurchasingDocumentExpeditionFacade, PurchasingDocumentExpeditionFacade>()
-                .AddTransient<IPPHBankExpenditureNoteFacade, PPHBankExpenditureNoteFacade>()
-                .AddTransient<IPPHBankExpenditureNoteReportFacade, PPHBankExpenditureNoteReportFacade>()
-                .AddTransient<IUnitPaymentOrderPaidStatusReportFacade, UnitPaymentOrderPaidStatusReportFacade>()
-                .AddTransient<IUnitPaymentOrderUnpaidReportFacade, UnitPaymentOrderUnpaidReportFacade>()
-                .AddTransient<UnitPaymentOrderNotVerifiedReportFacade>()
-                .AddTransient<PurchaseRequestFacade>()
-                .AddTransient<DeliveryOrderFacade>()
-                .AddTransient<IDeliveryOrderFacade, DeliveryOrderFacade>()
-                .AddTransient<InternalPurchaseOrderFacade>()
-                .AddTransient<ExternalPurchaseOrderFacade>()
-                .AddTransient<MonitoringPriceFacade>()
-                .AddTransient<IUnitReceiptNoteFacade, UnitReceiptNoteFacade>()
-                .AddTransient<TotalPurchaseFacade>()
-                .AddTransient<PurchaseRequestGenerateDataFacade>()
-                .AddTransient<ExternalPurchaseOrderGenerateDataFacade>()
-                .AddTransient<UnitReceiptNoteGenerateDataFacade>()
-                .AddTransient<IUnitPaymentOrderFacade, UnitPaymentOrderFacade>()
-                .AddTransient<IUnitPaymentQuantityCorrectionNoteFacade, UnitPaymentQuantityCorrectionNoteFacade>()
-                .AddTransient<IUnitPaymentPriceCorrectionNoteFacade, UnitPaymentPriceCorrectionNoteFacade>()
-                .AddTransient<PurchaseOrderMonitoringAllFacade>()
-                .AddTransient<IGarmentPurchaseRequestFacade, GarmentPurchaseRequestFacade>()
-                .AddTransient<IGarmentPurchaseRequestItemFacade, GarmentPurchaseRequestItemFacade>()
-                .AddTransient<IGarmentInternalPurchaseOrderFacade, GarmentInternalPurchaseOrderFacade>()
-                .AddTransient<IGarmentTotalPurchaseOrderFacade, TotalGarmentPurchaseFacade>()
-                .AddTransient<IGarmentInvoice, GarmentInvoiceFacade>()
-                .AddTransient<IGarmentInternNoteFacade, GarmentInternNoteFacades>()
-                .AddTransient<IGarmentExternalPurchaseOrderFacade, GarmentExternalPurchaseOrderFacade>()
-                .AddTransient<IGarmentDeliveryOrderFacade, GarmentDeliveryOrderFacade>()
-                .AddTransient<IGarmentDebtBalanceReportFacade, GarmentDebtBalanceReportFacade>()
-                .AddTransient<IPurchasingDispositionFacade, PurchasingDispositionFacade>()
-                .AddTransient<IGarmentCorrectionNotePriceFacade, GarmentCorrectionNotePriceFacade>()
-                .AddTransient<IGarmentCorrectionNoteQuantityFacade, GarmentCorrectionNoteQuantityFacade>()
-                .AddTransient<IGarmentBeacukaiFacade, GarmentBeacukaiFacade>()
-                .AddTransient<IPurchasingDispositionFacade, PurchasingDispositionFacade>()
-                .AddTransient<IGarmentCorrectionNotePriceFacade, GarmentCorrectionNotePriceFacade>()
-                .AddTransient<IGarmentUnitReceiptNoteFacade, GarmentUnitReceiptNoteFacade>()
-                .AddTransient<IGarmentDOItemFacade, GarmentDOItemFacade>()
-                .AddTransient<IMonitoringUnitReceiptAllFacade, MonitoringUnitReceiptAllFacade>()
-                .AddTransient<IGarmentUnitDeliveryOrderFacade, GarmentUnitDeliveryOrderFacade>()
-                .AddTransient<IGarmentUnitExpenditureNoteFacade, GarmentUnitExpenditureNoteFacade>()
-                .AddTransient<IGarmentReturnCorrectionNoteFacade, GarmentReturnCorrectionNoteFacade>()
-                .AddTransient<IGarmentUnitDeliveryOrderReturFacade, GarmentUnitDeliveryOrderReturFacade>()
-                .AddTransient<IMonitoringCentralBillReceptionFacade, MonitoringCentralBillReceptionFacade>()
-                .AddTransient<IMonitoringCentralBillExpenditureFacade, MonitoringCentralBillExpenditureFacade>()
-                .AddTransient<IMonitoringCorrectionNoteReceptionFacade, MonitoringCorrectionNoteReceptionFacade>()
-                .AddTransient<IMonitoringCorrectionNoteExpenditureFacade, MonitoringCorrectionNoteExpenditureFacade>()
-                .AddTransient<IGarmentDailyPurchasingReportFacade, GarmentDailyPurchasingReportFacade>()
-                .AddTransient<IGarmentReceiptCorrectionFacade, GarmentReceiptCorrectionFacade>()
-                .AddTransient<IGarmentPOMasterDistributionFacade, GarmentPOMasterDistributionFacade>()
-                .AddTransient<IMonitoringROJobOrderFacade, MonitoringROJobOrderFacade>()
-                .AddTransient<IMonitoringROMasterFacade, MonitoringROMasterFacade>()
-                .AddTransient<IBudgetMasterSampleDisplayFacade, BudgetMasterSampleDisplayFacade>()
-                .AddTransient<IUnitPaymentOrderExpeditionReportService, UnitPaymentOrderExpeditionReportService>()
-                .AddTransient<ILocalPurchasingBookReportFacade, LocalPurchasingBookReportFacade>()
-                .AddTransient<IImportPurchasingBookReportFacade, ImportPurchasingBookReportFacade>()
-                .AddTransient<IDetailCreditBalanceReportFacade, DetailCreditBalanceReportFacade>()
-                .AddTransient<ICurrencyProvider, CurrencyProvider>()
-                .AddTransient<IPurchaseMonitoringService, PurchaseMonitoringService>()
-                .AddTransient<IGarmentPurchasingBookReportFacade, GarmentPurchasingBookReportFacade>()
-                .AddTransient<IPRMasterValidationReportFacade, PRMasterValidationReportFacade>()
-                .AddTransient<IAccountingStockReportFacade, AccountingStockReportFacade>()
-                .AddTransient<IGarmentReceiptCorrectionReportFacade, GarmentReceiptCorrectionReportFacade>()
-                .AddTransient<IGarmentTopTenPurchaseSupplier, TopTenGarmentPurchaseFacade>()
-                .AddTransient<IGarmentFlowDetailMaterialReport, GarmentFlowDetailMaterialReportFacade>()
-                .AddTransient<IGarmentPurchaseDayBookReport, GarmentPurchaseDayBookReportFacade>()
-                .AddTransient<IGarmentCorrectionNoteFacade, GarmentCorrectionNoteFacade>()
-                .AddTransient<IGarmentPurchaseDayBookReport, GarmentPurchaseDayBookReportFacade>()
-                .AddTransient<IGarmentStockReportFacade, GarmentStockReportFacade>()
-                .AddTransient<IGarmenInternNotePaymentStatusFacade, GarmentInternNotePaymentStatusFacade>()
-                .AddTransient<IGarmentReportCMTFacade, GarmentReportCMTFacade>()
-                .AddTransient<IGarmentRealizationCMTReportFacade, GarmentRealizationCMTReportFacade>()
-                .AddTransient<IDebtBookReportFacade, DebtBookReportFacade>()
-                .AddTransient<IBalanceDebtFacade, GarmentSupplierBalanceDebtFacade>()
-                .AddTransient<IDebtCardReportFacade, DebtCardReportFacade>()
-                .AddTransient<IVBRequestPOExternalService, VBRequestPOExternalService>()
-                .AddTransient<IDebtAndDispositionSummaryService, DebtAndDispositionSummaryService>()
-                .AddTransient<IGarmentStockOpnameFacade, GarmentStockOpnameFacade>()
-                .AddTransient<IBudgetCashflowService, BudgetCashflowService>()
-                .AddTransient<IBudgetCashflowUnitPdf, BudgetCashflowUnitPdf>()
-                .AddTransient<IBudgetCashflowDivisionPdf, BudgetCashflowDivisionPdf>()
-                .AddTransient<IBudgetCashflowUnitExcelGenerator, BudgetCashflowUnitExcelGenerator>()
-                .AddTransient<IBudgetCashflowDivisionExcelGenerator, BudgetCashflowDivisionExcelGenerator>()
-                .AddTransient<IGarmentPurchasingExpeditionService, GarmentPurchasingExpeditionService>()
-                .AddTransient<IUnpaidDispositionReportDetailFacade, UnpaidDispositionReportDetailFacade>()
-                .AddTransient<IGarmentPurchasingBookReportService, GarmentPurchasingBookReportService>()
-                .AddTransient<IGarmentDebtBalanceService, GarmentDebtBalanceService>()
-                .AddTransient<IGarmentDispositionPurchaseFacade, GarmentDispositionPurchaseFacade>()
-                .AddTransient<IGarmentDispositionPaymentReportService, GarmentDispositionPaymentReportService>()
-                .AddTransient<IROFeatureFacade, ROFeatureFacade>()
-                .AddTransient<ITraceableBeacukaiFacade, TraceableBeacukaiFacade>()
-                .AddTransient<IGarmentBC23ReportFacade, GarmentBC23ReportFacade>()
-                .AddTransient<IMutationBeacukaiFacade, MutationBeacukaiFacade>()
-                .AddTransient<IGarmentClosingDateFacade, GarmentClosingDateFacade>()
-                .AddTransient<IMonitoringFlowProductFacade, MonitoringFlowProductFacade>()
-                .AddTransient<IBeacukaiNoFeature, BeacukaiNoFeature>()
-                .AddTransient<IRealizationBOMFacade, RealizationBOMFacade>();
-
+                .AddTransient<IMemoryCacheManager, MemoryCacheManager>();
         }
 
         private void RegisterServices(IServiceCollection services, bool isTest)
@@ -246,16 +144,16 @@ namespace Com.Kana.Service.Upload.WebApi
 
         private void RegisterClassMap()
         {
-            ClassMap<UnitReceiptNoteViewModel>.Register();
-            ClassMap<UnitReceiptNoteItemViewModel>.Register();
-            ClassMap<UnitViewModel>.Register();
-            ClassMap<DivisionViewModel>.Register();
-            ClassMap<CategoryViewModel>.Register();
-            ClassMap<ProductViewModel>.Register();
-            ClassMap<UomViewModel>.Register();
-            ClassMap<PurchaseOrderViewModel>.Register();
-            ClassMap<SupplierViewModel>.Register();
-            ClassMap<UnitPaymentCorrectionNoteViewModel>.Register();
+            //    ClassMap<UnitReceiptNoteViewModel>.Register();
+            //    ClassMap<UnitReceiptNoteItemViewModel>.Register();
+            //    ClassMap<UnitViewModel>.Register();
+            //    ClassMap<DivisionViewModel>.Register();
+            //    ClassMap<CategoryViewModel>.Register();
+            //    ClassMap<ProductViewModel>.Register();
+            //    ClassMap<UomViewModel>.Register();
+            //    ClassMap<PurchaseOrderViewModel>.Register();
+            //    ClassMap<SupplierViewModel>.Register();
+            //    ClassMap<UnitPaymentCorrectionNoteViewModel>.Register();
         }
 
         #endregion Register

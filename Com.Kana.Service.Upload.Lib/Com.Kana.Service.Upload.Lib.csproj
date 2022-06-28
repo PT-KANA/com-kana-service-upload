@@ -5,11 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20210721040342_add_GLWExpenditure_Type_GarmentURN.cs" />
-    <Compile Remove="Migrations\20210721095753_add_GLWExpenditure_Type_GarmentURN.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Com.Moonlay.Data.EntityFrameworkCore" Version="1.0.2" />
@@ -29,7 +24,6 @@
     <Folder Include="AutoMapperProfiles\" />
     <Folder Include="Configs\" />
     <Folder Include="Facades\" />
-    <Folder Include="Models\" />
     <Folder Include="PDFTemplates\" />
     <Folder Include="ViewModels\" />
   </ItemGroup>

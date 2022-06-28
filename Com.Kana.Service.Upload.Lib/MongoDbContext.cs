@@ -1,5 +1,4 @@
-﻿using Com.Kana.Service.Upload.Lib.ViewModels.UnitReceiptNote;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Com.Kana.Service.Upload.Lib
@@ -26,8 +25,8 @@ namespace Com.Kana.Service.Upload.Lib
             database = mongoClient.GetDatabase(mongoUrl.DatabaseName);
         }
 
-        public IMongoCollection<BsonDocument> UnitReceiptNote => database.GetCollection<BsonDocument>("unit-receipt-notes");
-        public IMongoCollection<UnitReceiptNoteViewModel> UnitReceiptNoteViewModel => database.GetCollection<UnitReceiptNoteViewModel>("unit-receipt-notes");
-        public IMongoCollection<BsonDocument> UnitPaymentOrder => database.GetCollection<BsonDocument>("unit-payment-orders");
+        //public IMongoCollection<BsonDocument> UnitReceiptNote => database.GetCollection<BsonDocument>("unit-receipt-notes");
+        //public IMongoCollection<UnitReceiptNoteViewModel> UnitReceiptNoteViewModel => database.GetCollection<UnitReceiptNoteViewModel>("unit-receipt-notes");
+        //public IMongoCollection<BsonDocument> UnitPaymentOrder => database.GetCollection<BsonDocument>("unit-payment-orders");
     }
 }
