@@ -79,6 +79,8 @@ using System.Linq;
 //using Com.Kana.Service.Upload.Lib.Facades.GarmentDispositionPaymentReport;
 //using Com.Kana.Service.Upload.Lib.Facades.GarmentClosingDateFacades;
 using Microsoft.ApplicationInsights.AspNetCore;
+using Com.Kana.Service.Upload.Lib.Interfaces.ItemInterface;
+using Com.Kana.Service.Upload.Lib.Facades;
 
 namespace Com.Kana.Service.Upload.WebApi
 {
@@ -120,7 +122,8 @@ namespace Com.Kana.Service.Upload.WebApi
             services
                 .AddTransient<ICoreData, CoreData>()
                 .AddTransient<ICoreHttpClientService, CoreHttpClientService>()
-                .AddTransient<IMemoryCacheManager, MemoryCacheManager>();
+                .AddTransient<IMemoryCacheManager, MemoryCacheManager>()
+                .AddTransient<IItemFacade, ItemFacade>();
         }
 
         private void RegisterServices(IServiceCollection services, bool isTest)
