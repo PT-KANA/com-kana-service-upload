@@ -12,7 +12,6 @@ namespace Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuItemModel
         public DateTimeOffset ExpiredDate { get; set; }
         public double Quantity { get; set; }
         public string SerialNumberNo { get; set; }
-
         public virtual long AccuItemDetailOpenBalanceId { get; set; }
         [ForeignKey("AccuItemDetailOpenBalanceId")]
         public virtual AccuItemDetailOpenBalance DetailOpenBalance { get; set; }
