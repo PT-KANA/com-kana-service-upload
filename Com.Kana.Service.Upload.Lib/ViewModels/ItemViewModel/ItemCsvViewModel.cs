@@ -24,14 +24,14 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.ItemViewModel
         //public string option3Value { get; set; }
 
         public string variantSKU { get; set; }
-        public dynamic variantGrams { get; set; } //berat
+        public string variantGrams { get; set; } //berat
         public string variantInventoryTracker { get; set; } //inventory
-        public dynamic variantInventoryQty { get; set; }
+        public string variantInventoryQty { get; set; }
 
         //public string variantInventoryPolicy { get; set; }
         //public string variantFulfillmentService { get; set; }
 
-        public double variantPrice { get; set; } //price
+        public string variantPrice { get; set; } //price
 
         //public string VariantCompareAtPrice { get; set; }
         //public string VariantRequiresShipping { get; set; }
@@ -61,7 +61,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.ItemViewModel
 
         public string variantWeightUnit { get; set; } //uom
         public string variantTaxCode { get; set; } //kode pajak
-        public dynamic costPeritem { get; set; } //COGS
+        public string costPeritem { get; set; } //COGS
 
         //public string status { get; set; }
     }

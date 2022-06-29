@@ -15,5 +15,6 @@ namespace Com.Kana.Service.Upload.Lib.Interfaces.ItemInterface
         Tuple<bool, List<object>> UploadValidate(ref List<ItemCsvViewModel> data, List<KeyValuePair<string, StringValues>> list);
         Task UploadData(List<AccuItem> data, string username);
         List<string> CsvHeader { get; }
+        Task<List<AccuItem>> MapToModel(List<AccuItemViewModel> data1);
     }
 }
