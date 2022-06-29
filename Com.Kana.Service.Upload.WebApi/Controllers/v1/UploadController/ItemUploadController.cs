@@ -74,7 +74,8 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 
                         if (Validated.Item1)
                         {
-                            List<AccuItem> data = mapper.Map<List<AccuItem>>(Data1);
+                            //List<AccuItem> data = mapper.Map<List<AccuItem>>(Data1);
+                            List<AccuItem> data = await facade.MapToModel(Data1);
                             await facade.UploadData(data, identityService.Username);
 
                             Dictionary<string, object> Result =
@@ -87,12 +88,15 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                             using (MemoryStream memoryStream = new MemoryStream())
                             {
                                 using (StreamWriter streamWriter = new StreamWriter(memoryStream))
-                                using (CsvWriter csvWriter = new CsvWriter(streamWriter))
                                 {
-                                    csvWriter.WriteRecords(Validated.Item2);
-                                }
+                                    using (CsvWriter csvWriter = new CsvWriter(streamWriter))
+                                    {
+                                        csvWriter.WriteRecords(Validated.Item2);
+                                    }
 
-                                return File(memoryStream.ToArray(), ContentType, FileName);
+                                    return File(memoryStream.ToArray(), ContentType, FileName);
+
+                                }
                             }
                         }
                     }

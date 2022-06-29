@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using CsvHelper.TypeConversion;
 using System.Dynamic;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +29,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         {
             this.serviceProvider = serviceProvider;
             this.dbContext = dbContext;
+            this.dbSet = dbContext.Set<AccuItem>();
         }
 
         public List<string> CsvHeader { get; } = new List<string>()
@@ -73,25 +74,25 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     name = string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title : i.title,
                     no = i.variantBarcode,
                     unit1Name = "PCS",
-                    unitPrice = i.variantPrice,
+                    unitPrice = string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice),
                     detailGroup = new List<AccuItemDetailGroupViewModel>()
                     {
                         new AccuItemDetailGroupViewModel()
                         {
-                            quantity = i.variantInventoryQty,
+                            quantity = string.IsNullOrWhiteSpace(i.variantInventoryQty) ? 0 : Convert.ToDouble(i.variantInventoryQty),
                         }
                     },
                     detailOpenBalance = new List<AccuItemDetailOpenBalanceViewModel>()
                     {
                         new AccuItemDetailOpenBalanceViewModel()
                         {
-                            quantity = i.variantInventoryQty,
+                            quantity = string.IsNullOrWhiteSpace(i.variantInventoryQty) ? 0 : Convert.ToDouble(i.variantInventoryQty),
                             warehouseName = i.variantInventoryTracker,
                             detailSerialNumber = new List<AccuItemDetailSerialNumberViewModel>()
                             {
                                 new AccuItemDetailSerialNumberViewModel
                                 {
-                                    quantity = i.variantInventoryQty
+                                    quantity = string.IsNullOrWhiteSpace(i.variantInventoryQty) ? 0 : Convert.ToDouble(i.variantInventoryQty),
                                 }
                             }
                         }
@@ -104,6 +105,63 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             return item;
         }
 
+        public async Task<List<AccuItem>> MapToModel(List<AccuItemViewModel> data1)
+        {
+            List<AccuItem> item = new List<AccuItem>();
+            List<AccuItemDetailGroup> itemDetailGroup = new List<AccuItemDetailGroup>();
+            List<AccuItemDetailOpenBalance> itemDetailOpenBalance = new List<AccuItemDetailOpenBalance>();
+            List<AccuItemDetailSerialNumber> itemDetailSerialNumber = new List<AccuItemDetailSerialNumber>();
+
+            foreach (var i in data1)
+            {
+                foreach(var ii in i.detailGroup)
+                {
+                    AccuItemDetailGroup temp2 = new AccuItemDetailGroup
+                    {
+                        Quantity = ii.quantity
+                    };
+
+                    itemDetailGroup.Add(temp2);
+                }
+
+                foreach(var iii in i.detailOpenBalance)
+                {
+                    foreach(var iv in iii.detailSerialNumber)
+                    {
+                        AccuItemDetailSerialNumber temp4 = new AccuItemDetailSerialNumber
+                        {
+                            Quantity = iv.quantity
+                        };
+
+                        itemDetailSerialNumber.Add(temp4);
+                    }
+
+                    AccuItemDetailOpenBalance temp3 = new AccuItemDetailOpenBalance
+                    {
+                        Quantity = iii.quantity,
+                        WarehouseName = iii.warehouseName,
+                        DetailSerialNumber = itemDetailSerialNumber
+                    };
+
+                    itemDetailOpenBalance.Add(temp3);
+                }
+
+                AccuItem temp1 = new AccuItem
+                {
+                    ItemType = i.itemType,
+                    Name = i.name,
+                    No = i.no,
+                    Unit1Name = i.unit1Name,
+                    UnitPrice = i.unitPrice,
+                    DetailGroup = itemDetailGroup,
+                    DetailOpenBalance = itemDetailOpenBalance,
+                };
+
+                item.Add(temp1);
+            }
+
+            return item;
+        }
         public Tuple<bool, List<object>> UploadValidate(ref List<ItemCsvViewModel> data, List<KeyValuePair<string, StringValues>> list)
         {
             List<object> ErrorList = new List<object>();
@@ -142,9 +200,25 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             foreach(var i in data)
             {
                 EntityExtension.FlagForCreate(i, username, USER_AGENT);
+
+                foreach(var ii in i.DetailGroup)
+                {
+                    EntityExtension.FlagForCreate(ii, username, USER_AGENT);
+                }
+                foreach (var iii in i.DetailOpenBalance)
+                {
+                    EntityExtension.FlagForCreate(iii, username, USER_AGENT);
+
+                    foreach (var iv in iii.DetailSerialNumber)
+                    {
+                        EntityExtension.FlagForCreate(iv, username, USER_AGENT);
+                    }
+                }
+
                 dbSet.Add(i);
             }
             var result = await dbContext.SaveChangesAsync();
         }
+
     }
 }
