@@ -11,9 +11,10 @@ using System;
 namespace Com.Kana.Service.Upload.Lib.Migrations
 {
     [DbContext(typeof(UploadDbContext))]
-    partial class UploadDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220701021159_addISRefundColumninSalesInvoiceDetailItem")]
+    partial class addISRefundColumninSalesInvoiceDetailItem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -402,8 +403,6 @@ namespace Com.Kana.Service.Upload.Lib.Migrations
                     b.Property<double>("InputDownPayment");
 
                     b.Property<bool>("InvoiceDp");
-
-                    b.Property<bool>("IsAccurate");
 
                     b.Property<bool>("IsDeleted");
 

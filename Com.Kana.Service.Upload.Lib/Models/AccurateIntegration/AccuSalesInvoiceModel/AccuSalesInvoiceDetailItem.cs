@@ -27,7 +27,8 @@ namespace Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoic
         public bool UseTax1 { get; set; }
         public bool UseTax2 { get; set; }
         public bool UseTax3 { get; set; }
-        public string WarehouseName { get; set; }
+		public bool IsRefund { get; set; }
+		public string WarehouseName { get; set; }
         public virtual IEnumerable<AccuSalesInvoiceDetailSerialNumber> DetailSerialNumber { get; set; }
         public virtual long AccuSalesInvoceId { get; set; }
         [ForeignKey("AccuSalesInvoceId")]
