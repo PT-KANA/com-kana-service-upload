@@ -16,11 +16,17 @@ namespace Com.Kana.Service.Upload.Lib.Helpers
         public static string Auth { get; set; }
         public static string GarmentProduction { get; set; }
         public static string PackingInventory { get; set; }
+        public static string Upload { get; set; }
+        public static string Accurate { get; set; }
     }
 
     public static class AuthCredential
     {
         public static string Username { get; set; }
         public static string Password { get; set; }
+        public static string ClientId { get; set; }
+        public static string ClientSecret { get; set; }
+        public static string Scope { get; set; }
+        public static string AccessToken { get; set; }
     }
 }
