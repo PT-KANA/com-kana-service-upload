@@ -125,6 +125,29 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 				return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
 			}
 		}
+		[HttpPost("post")]
+		public async Task<IActionResult> Post([FromBody] List<AccuSalesViewModel> ViewModel)
+		{
+			try
+			{
+				identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+				identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
+
+				await facade.Create(ViewModel, identityService.Username, identityService.Token);
+
+				Dictionary<string, object> Result =
+					new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
+					.Ok();
+				return Created(String.Concat(Request.Path, "/", 0), Result);
+			}
+			catch (Exception e)
+			{
+				Dictionary<string, object> Result =
+					new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+					.Fail();
+				return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+			}
+		}
 
 		[HttpGet]
 		public IActionResult Get(int page = 1, int size = 25, string order = "{}", string keyword = null, string filter = "{}")

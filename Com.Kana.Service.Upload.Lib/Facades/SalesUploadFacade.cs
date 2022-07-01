@@ -252,5 +252,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 			return Tuple.Create(Data, TotalData, OrderDictionary);
 		}
+
+		public Task Create(List<AccuSalesViewModel> data, string username, string token)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
