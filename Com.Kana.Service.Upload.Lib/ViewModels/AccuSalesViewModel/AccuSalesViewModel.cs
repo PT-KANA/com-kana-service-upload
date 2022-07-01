@@ -36,6 +36,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesViewModel
 		public string tax1Name { get; set; }
 		public string taxType { get; set; }
 		public bool taxable { get; set; }
+		public bool isAccurate { get; set; }
 		public string toAddress { get; set; }
 		public long typeAutoNumber { get; set; }
 		public List<AccuSalesInvoiceDetailDownPaymentViewModel> detailDownPayment { get; set; }

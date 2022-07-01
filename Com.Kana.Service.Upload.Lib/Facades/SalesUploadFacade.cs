@@ -65,7 +65,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 						taxDate = Convert.ToDateTime(i.createdAt),
 						taxable = Convert.ToBoolean(i.lineitemtaxable),
 						currencyCode = i.currency,
-
+						isAccurate=false,
 						detailItem = new List<AccuSalesInvoiceDetailItemViewModel>()
 						{
 						 new AccuSalesInvoiceDetailItemViewModel()
@@ -118,17 +118,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 					};
 					invoiceDetailItems.Add(dd);
-					//var detail=new List<AccuSalesInvoiceDetailItem>()
-					//	{
-					//		 new AccuSalesInvoiceDetailItem()
-					//		{
-					//			UnitPrice= ii.unitPrice,
-					//			Quantity= ii.quantity,
-					//			ItemNo=ii.itemNo
-
-					//		 }
-					//	};
-
+					 
 				};
 				AccuSalesInvoice accuSales = new AccuSalesInvoice
 				{
@@ -140,6 +130,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					CustomerNo = i.customerNo,
 					BranchName = i.branchName,
 					CurrencyCode = i.currencyCode,
+					IsAccurate=i.isAccurate,
 					DetailItem=invoiceDetailItems
 				};
 
