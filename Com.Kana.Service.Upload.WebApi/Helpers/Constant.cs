@@ -22,7 +22,13 @@ namespace Com.Kana.Service.Upload.WebApi.Helpers
         public const string USERNAME = "AdminUsername";
         public const string PASSWORD = "Password";
         public const string GARMENT_PRODUCTION_ENDPOINT = "GarmentProductionEndpoint";
+        public const string UPLOAD_ENDPOINT = "UploadEndpoint";
+        public const string ACCURATE_ENDPOINT = "AccurateEndpoint";
 
+        public const string ACCURATE_CLIENT_ID = "AccuClientId";
+        public const string ACCURATE_CLIENT_SECRET = "AccuClientSecret";
+        public const string ACCURATE_CLIENT_CODE = "AccuClientCode";
+        public const string ACCURATE_SCOPE = "AccuScope";
 
         public const string CATEGORIES = "Categories";
         public const string DIVISIONS = "Divisions";
