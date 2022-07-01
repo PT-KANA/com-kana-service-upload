@@ -14,5 +14,6 @@ namespace Com.Kana.Service.Upload.Lib.Interfaces
         Task<HttpResponseMessage> DeleteAsync(string url);
         Task<HttpResponseMessage> PatchAsync(string url, HttpContent content);
         Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, HttpContent content);
+        //Task SendAsync(HttpRequestMessage request);
     }
 }

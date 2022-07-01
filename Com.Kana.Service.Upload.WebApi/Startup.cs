@@ -112,9 +112,15 @@ namespace Com.Kana.Service.Upload.WebApi
             APIEndpoint.Auth = Configuration.GetValue<string>(Constant.AUTH_ENDPOINT) ?? Configuration[Constant.AUTH_ENDPOINT];
             APIEndpoint.GarmentProduction = Configuration.GetValue<string>(Constant.GARMENT_PRODUCTION_ENDPOINT) ?? Configuration[Constant.GARMENT_PRODUCTION_ENDPOINT];
             APIEndpoint.PackingInventory = Configuration.GetValue<string>(Constant.PACKINGINVENTORY_ENDPOINT) ?? Configuration[Constant.PACKINGINVENTORY_ENDPOINT];
+            APIEndpoint.Upload = Configuration.GetValue<string>(Constant.UPLOAD_ENDPOINT) ?? Configuration[Constant.UPLOAD_ENDPOINT];
+            APIEndpoint.Accurate = Configuration.GetValue<string>(Constant.ACCURATE_ENDPOINT) ?? Configuration[Constant.ACCURATE_ENDPOINT];
 
             AuthCredential.Username = Configuration.GetValue<string>(Constant.USERNAME) ?? Configuration[Constant.USERNAME];
             AuthCredential.Password = Configuration.GetValue<string>(Constant.PASSWORD) ?? Configuration[Constant.PASSWORD];
+
+            AuthCredential.ClientId = Configuration.GetValue<string>(Constant.ACCURATE_CLIENT_ID) ?? Configuration[Constant.ACCURATE_CLIENT_ID];
+            AuthCredential.ClientSecret = Configuration.GetValue<string>(Constant.ACCURATE_CLIENT_SECRET) ?? Configuration[Constant.ACCURATE_CLIENT_SECRET];
+            AuthCredential.Scope = Configuration.GetValue<string>(Constant.ACCURATE_SCOPE) ?? Configuration[Constant.ACCURATE_SCOPE];
         }
 
         private void RegisterFacades(IServiceCollection services)
@@ -123,7 +129,8 @@ namespace Com.Kana.Service.Upload.WebApi
                 .AddTransient<ICoreData, CoreData>()
                 .AddTransient<ICoreHttpClientService, CoreHttpClientService>()
                 .AddTransient<IMemoryCacheManager, MemoryCacheManager>()
-                .AddTransient<IItemFacade, ItemFacade>();
+                .AddTransient<IItemFacade, ItemFacade>()
+                .AddTransient<IIntegrationFacade, IntegrationFacade>();
         }
 
         private void RegisterServices(IServiceCollection services, bool isTest)
@@ -165,13 +172,14 @@ namespace Com.Kana.Service.Upload.WebApi
         {
             string connectionString = Configuration.GetConnectionString(Constant.DEFAULT_CONNECTION) ?? Configuration[Constant.DEFAULT_CONNECTION];
             string env = Configuration.GetValue<string>(Constant.ASPNETCORE_ENVIRONMENT);
-            string connectionStringLocalCashFlow = Configuration.GetConnectionString("LocalDbCashFlowConnection") ?? Configuration["LocalDbCashFlowConnection"];
+            //string connectionStringLocalCashFlow = Configuration.GetConnectionString("LocalDbCashFlowConnection") ?? Configuration["LocalDbCashFlowConnection"];
             APIEndpoint.ConnectionString = Configuration.GetConnectionString("DefaultConnection") ?? Configuration["DefaultConnection"];
 
             /* Register */
             //services.AddDbContext<PurchasingDbContext>(options => options.UseSqlServer(connectionString));
             services.AddDbContext<UploadDbContext>(options => options.UseSqlServer(connectionString, sqlServerOptions => sqlServerOptions.CommandTimeout(1000 * 60 * 20)));
-            services.AddTransient<ILocalDbCashFlowDbContext>(s => new LocalDbCashFlowDbContext(connectionStringLocalCashFlow));
+            //services.AddTransient<ILocalDbCashFlowDbContext>(s => new LocalDbCashFlowDbContext(connectionStringLocalCashFlow));
+
             RegisterEndpoints();
             RegisterFacades(services);
             RegisterServices(services, env.Equals("Test"));
