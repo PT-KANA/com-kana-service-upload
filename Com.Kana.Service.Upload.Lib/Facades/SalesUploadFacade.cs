@@ -1,6 +1,8 @@
 ﻿using Com.Kana.Service.Upload.Lib.Helpers;
+using Com.Kana.Service.Upload.Lib.Interfaces;
 using Com.Kana.Service.Upload.Lib.Interfaces.SalesUploadInterface;
 using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoiceModel;
+using Com.Kana.Service.Upload.Lib.ViewModels;
 using Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesViewModel;
 using Com.Kana.Service.Upload.Lib.ViewModels.SalesViewModel;
 using Com.Moonlay.Models;
@@ -12,6 +14,8 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,7 +24,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 	public class SalesUploadFacade : ISalesUpload
 	{
 		private string USER_AGENT = "Facade";
-
+		protected readonly IHttpClientService _http;
 		private readonly UploadDbContext dbContext;
 		private readonly DbSet<AccuSalesInvoice> dbSet;
 		public readonly IServiceProvider serviceProvider;
@@ -32,6 +36,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			this.serviceProvider = serviceProvider;
 			this.dbContext = dbContext;
 			this.dbSet = dbContext.Set<AccuSalesInvoice>();
+			 
 		}
 
 		public List<string> CsvHeader { get; } = new List<string>()
@@ -252,10 +257,61 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 			return Tuple.Create(Data, TotalData, OrderDictionary);
 		}
-
-		public Task Create(List<AccuSalesViewModel> data, string username, string token)
+		public async Task CreateRead(List<AccuSalesViewModel> data, string username, string token)
 		{
-			throw new NotImplementedException();
+			var httpClient = new HttpClient();
+
+			//var url = "https://public.accurate.id/accurate/api/sales-invoice/list.do";
+			var url = username+ "/api/sales-invoice/list.do";
+
+
+			using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+			{
+				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+				request.Headers.Add("X-Session-ID", token);
+				 
+
+				var response = await httpClient.SendAsync(request);
+				//response.EnsureSuccessStatusCode();
+
+				if (response.IsSuccessStatusCode)
+				{
+					var message = response.Content.ReadAsStringAsync().Result;
+				}
+				else
+				{
+					var message = response.Content.ReadAsStringAsync().Result;
+					//	return message;
+				}
+			}
+
+		}
+
+			public async Task Create(List<AccuSalesViewModel> data, string username, string token)
+		{
+			var httpClient = new HttpClient();
+
+			var url = "https://account.accurate.id/api/open-db.do?id=578154";
+			using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+			{
+				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+
+				var response = await httpClient.SendAsync(request);
+				//response.EnsureSuccessStatusCode();
+
+				if (response.IsSuccessStatusCode)
+				{
+					var message = response.Content.ReadAsStringAsync().Result;
+					AccurateSessionViewModel AccuToken = JsonConvert.DeserializeObject<AccurateSessionViewModel>(message);
+					await CreateRead(data, AccuToken.host, AccuToken.session);
+
+				}
+				else
+				{
+					var message = response.Content.ReadAsStringAsync().Result;
+					//	return message;
+				}
+			}
 		}
 	}
 }
