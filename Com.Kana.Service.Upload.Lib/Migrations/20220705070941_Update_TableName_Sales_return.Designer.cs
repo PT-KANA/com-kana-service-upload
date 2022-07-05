@@ -11,9 +11,10 @@ using System;
 namespace Com.Kana.Service.Upload.Lib.Migrations
 {
     [DbContext(typeof(UploadDbContext))]
-    partial class UploadDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220705070941_Update_TableName_Sales_return")]
+    partial class Update_TableName_Sales_return
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

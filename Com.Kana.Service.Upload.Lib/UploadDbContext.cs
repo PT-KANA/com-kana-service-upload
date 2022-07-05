@@ -1,5 +1,6 @@
 ﻿using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuItemModel;
 using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoiceModel;
+using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesReturnModel;
 using Com.Moonlay.Data.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -27,6 +28,13 @@ namespace Com.Kana.Service.Upload.Lib
         public DbSet<AccuSalesInvoiceDetailExpense> AccuSalesInvoiceDetailExpenses { get; set; }
         public DbSet<AccuSalesInvoiceDetailItem> AccuSalesInvoiceDetailItems { get; set; }
         public DbSet<AccuSalesInvoiceDetailSerialNumber> AccuSalesInvoiceDetailSerialNumbers { get; set; }
+        #endregion
+
+        #region sales-return
+        public DbSet<AccuSalesReturn> AccuSalesReturns { get; set; }
+        public DbSet<AccuSalesReturnDetailExpense> AccuSalesReturnDetailExpenses { get; set; }
+        public DbSet<AccuSalesReturnDetailItem> AccuSalesReturnDetailItems { get; set; }
+        public DbSet<AccuSalesReturnDetailSerialNumber> AccuSalesReturnDetailSerialNumbers { get; set; }
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
