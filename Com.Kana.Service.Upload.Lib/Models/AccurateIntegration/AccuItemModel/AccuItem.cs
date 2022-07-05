@@ -57,6 +57,7 @@ namespace Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuItemModel
         public bool UseWholesalePrice { get; set; }
         public double VendorPrice { get; set; }
         public string VendorUnitName { get; set; }
+        public bool IsAccurate { get; set; }
         public virtual IEnumerable<AccuItemDetailGroup> DetailGroup { get; set; }
         public virtual IEnumerable<AccuItemDetailOpenBalance> DetailOpenBalance { get; set; }
     }
