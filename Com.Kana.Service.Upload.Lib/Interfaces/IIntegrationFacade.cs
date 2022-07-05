@@ -9,6 +9,7 @@ namespace Com.Kana.Service.Upload.Lib.Interfaces
     public interface IIntegrationFacade
     {
         Task<AccurateTokenViewModel> RetrieveToken(string code);
-        Task<bool> GetCode();
+        Task<AccurateTokenViewModel> RefreshToken();
+        Task<object> GetDbList();
     }
 }
