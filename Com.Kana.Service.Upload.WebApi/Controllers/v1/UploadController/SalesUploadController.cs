@@ -168,16 +168,16 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 
 				var Data = facade.ReadForUpload(page, size, order, keyword, filter);
 
-				var newData = mapper.Map<List<AccuSalesInvoice>>(Data.Item1);
+				var newData = mapper.Map<List<AccuSalesViewModel>>(Data.Item1);
 
 				List<object> listData = new List<object>();
 				listData.AddRange(
 					newData.AsQueryable().Select(s => new
 					{
-						 s.OrderDownPaymentNumber,
-						 s.TransDate,
-						 s.CustomerNo,
-						 s.BranchName
+						s.orderDownPaymentNumber,
+						s.transDate, 
+						s.customerNo,
+						s.branchName
 					}).ToList()
 				);
 

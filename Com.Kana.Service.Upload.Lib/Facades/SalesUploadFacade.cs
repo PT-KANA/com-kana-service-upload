@@ -1,4 +1,5 @@
 ﻿using Com.Kana.Service.Upload.Lib.Helpers;
+using Com.Kana.Service.Upload.Lib.Interfaces;
 using Com.Kana.Service.Upload.Lib.Interfaces.SalesUploadInterface;
 using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoiceModel;
 using Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesViewModel;
@@ -12,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,7 +23,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 	public class SalesUploadFacade : ISalesUpload
 	{
 		private string USER_AGENT = "Facade";
-
+		protected readonly IHttpClientService _http;
 		private readonly UploadDbContext dbContext;
 		private readonly DbSet<AccuSalesInvoice> dbSet;
 		public readonly IServiceProvider serviceProvider;
@@ -32,6 +35,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			this.serviceProvider = serviceProvider;
 			this.dbContext = dbContext;
 			this.dbSet = dbContext.Set<AccuSalesInvoice>();
+			 
 		}
 
 		public List<string> CsvHeader { get; } = new List<string>()
@@ -253,9 +257,57 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			return Tuple.Create(Data, TotalData, OrderDictionary);
 		}
 
-		public Task Create(List<AccuSalesViewModel> data, string username, string token)
+		public async Task Create(List<AccuSalesViewModel> data, string username, string token)
 		{
-			throw new NotImplementedException();
+			var httpClient = new HttpClient();
+
+			
+
+			var url = "https://account.accurate.id/api/db-list.do"; 
+
+ 
+
+			using (var request = new HttpRequestMessage(HttpMethod.Post, url  ))
+			{
+				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+				 
+				var response = await httpClient.SendAsync(request);
+				//response.EnsureSuccessStatusCode();
+
+				if (response.IsSuccessStatusCode)
+				{
+					var message = response.Content.ReadAsStringAsync().Result;
+					var url1 = "https://account.accurate.id/api/open-db.do/Id?578154";
+
+
+
+					using (var request1 = new HttpRequestMessage(HttpMethod.Post, url))
+					{
+						request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+
+						var response1 = await httpClient.SendAsync(request);
+						//response.EnsureSuccessStatusCode();
+
+						if (response.IsSuccessStatusCode)
+						{
+							var message1 = response.Content.ReadAsStringAsync().Result;
+							//var decode = JsonConvert.DeserializeObject<Dictionary<string, object>>(message);
+
+							//	return message;
+						}
+						else
+						{
+							var message1 = response.Content.ReadAsStringAsync().Result;
+							//	return message;
+						}
+					}
+				}
+				else
+				{
+					var message = response.Content.ReadAsStringAsync().Result;
+				//	return message;
+				}
+			}
 		}
 	}
 }
