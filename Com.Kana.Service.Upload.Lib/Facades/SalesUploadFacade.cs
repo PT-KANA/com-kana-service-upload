@@ -2,6 +2,7 @@
 using Com.Kana.Service.Upload.Lib.Interfaces;
 using Com.Kana.Service.Upload.Lib.Interfaces.SalesUploadInterface;
 using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoiceModel;
+using Com.Kana.Service.Upload.Lib.ViewModels;
 using Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesViewModel;
 using Com.Kana.Service.Upload.Lib.ViewModels.SalesViewModel;
 using Com.Moonlay.Models;
@@ -256,56 +257,59 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 			return Tuple.Create(Data, TotalData, OrderDictionary);
 		}
-
-		public async Task Create(List<AccuSalesViewModel> data, string username, string token)
+		public async Task CreateRead(List<AccuSalesViewModel> data, string username, string token)
 		{
 			var httpClient = new HttpClient();
 
-			
+			//var url = "https://public.accurate.id/accurate/api/sales-invoice/list.do";
+			var url = username+ "/api/sales-invoice/list.do";
 
-			var url = "https://account.accurate.id/api/db-list.do"; 
 
- 
-
-			using (var request = new HttpRequestMessage(HttpMethod.Post, url  ))
+			using (var request = new HttpRequestMessage(HttpMethod.Get, url))
 			{
 				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+				request.Headers.Add("X-Session-ID", token);
 				 
+
 				var response = await httpClient.SendAsync(request);
 				//response.EnsureSuccessStatusCode();
 
 				if (response.IsSuccessStatusCode)
 				{
 					var message = response.Content.ReadAsStringAsync().Result;
-					var url1 = "https://account.accurate.id/api/open-db.do/Id?578154";
-
-
-
-					using (var request1 = new HttpRequestMessage(HttpMethod.Post, url))
-					{
-						request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
-
-						var response1 = await httpClient.SendAsync(request);
-						//response.EnsureSuccessStatusCode();
-
-						if (response.IsSuccessStatusCode)
-						{
-							var message1 = response.Content.ReadAsStringAsync().Result;
-							//var decode = JsonConvert.DeserializeObject<Dictionary<string, object>>(message);
-
-							//	return message;
-						}
-						else
-						{
-							var message1 = response.Content.ReadAsStringAsync().Result;
-							//	return message;
-						}
-					}
 				}
 				else
 				{
 					var message = response.Content.ReadAsStringAsync().Result;
-				//	return message;
+					//	return message;
+				}
+			}
+
+		}
+
+			public async Task Create(List<AccuSalesViewModel> data, string username, string token)
+		{
+			var httpClient = new HttpClient();
+
+			var url = "https://account.accurate.id/api/open-db.do?id=578154";
+			using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+			{
+				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+
+				var response = await httpClient.SendAsync(request);
+				//response.EnsureSuccessStatusCode();
+
+				if (response.IsSuccessStatusCode)
+				{
+					var message = response.Content.ReadAsStringAsync().Result;
+					AccurateSessionViewModel AccuToken = JsonConvert.DeserializeObject<AccurateSessionViewModel>(message);
+					await CreateRead(data, AccuToken.host, AccuToken.session);
+
+				}
+				else
+				{
+					var message = response.Content.ReadAsStringAsync().Result;
+					//	return message;
 				}
 			}
 		}
