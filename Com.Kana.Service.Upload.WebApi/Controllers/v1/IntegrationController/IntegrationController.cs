@@ -25,13 +25,43 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
             this.facade = facade;
         }
 
-        [HttpGet("call")]
-        public IActionResult CallAccurate()
+        //[HttpGet("call")]
+        //public IActionResult CallAccurate()
+        //{
+        //    try
+        //    {
+        //        var data = facade.GetCode();
+        //        if (!data.Result)
+        //        {
+        //            throw new Exception("Terjadi Kesalahan");
+        //        }
+        //        else
+        //        {
+        //            return Ok(new
+        //            {
+        //                apiVersion = ApiVersion,
+        //                statusCode = General.OK_STATUS_CODE,
+        //                message = General.OK_MESSAGE,
+        //            });
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Dictionary<string, object> Result =
+        //           new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+        //           .Fail();
+
+        //        return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+        //    }
+        //}
+
+        [HttpGet("authcallback")]
+        public IActionResult GetToken(string code)
         {
             try
             {
-                var data = facade.GetCode();
-                if (!data.Result)
+                var data = facade.RetrieveToken(code);
+                if(data.Result == null)
                 {
                     throw new Exception("Terjadi Kesalahan");
                 }
@@ -42,6 +72,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
                         apiVersion = ApiVersion,
                         statusCode = General.OK_STATUS_CODE,
                         message = General.OK_MESSAGE,
+                        data = data.Result.access_token
                     });
                 }
             }
@@ -55,13 +86,13 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
             }
         }
 
-        [HttpGet("authcallback")]
-        public IActionResult GetToken(string code)
+        [HttpGet("refresh")]
+        public IActionResult RefreshToken()
         {
             try
             {
-                var data = facade.RetrieveToken(code);
-                if(data == null)
+                var data = facade.RefreshToken();
+                if (data.Result == null)
                 {
                     throw new Exception("Terjadi Kesalahan");
                 }
@@ -73,6 +104,37 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
                         statusCode = General.OK_STATUS_CODE,
                         message = General.OK_MESSAGE,
                         data = data.Result.access_token
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                   new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                   .Fail();
+
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
+        [HttpGet("db")]
+        public IActionResult GetDb()
+        {
+            try
+            {
+                var data = facade.GetDbList();
+                if (data.Result == null)
+                {
+                    throw new Exception("Terjadi Kesalahan");
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        apiVersion = ApiVersion,
+                        statusCode = General.OK_STATUS_CODE,
+                        message = General.OK_MESSAGE,
+                        data = data.Result
                     });
                 }
             }

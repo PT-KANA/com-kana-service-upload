@@ -28,5 +28,6 @@ namespace Com.Kana.Service.Upload.Lib.Helpers
         public static string ClientSecret { get; set; }
         public static string Scope { get; set; }
         public static string AccessToken { get; set; }
+        public static string RefreshToken { get; set; }
     }
 }

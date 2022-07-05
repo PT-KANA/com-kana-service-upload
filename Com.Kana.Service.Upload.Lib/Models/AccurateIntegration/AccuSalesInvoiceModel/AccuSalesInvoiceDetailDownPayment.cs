@@ -11,8 +11,8 @@ namespace Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoic
         public string Status { get; set; }
         public string InvoiceNumber { get; set; }
         public double PaymentAmount { get; set; }
-        public virtual long AccuSalesInvoceId { get; set; }
-        [ForeignKey("AccuSalesInvoceId")]
+        public virtual long AccuSalesInvoiceId { get; set; }
+        [ForeignKey("AccuSalesInvoiceId")]
         public virtual AccuSalesInvoice AccuSalesInvoice { get; set; }
     }
 }

@@ -12,6 +12,10 @@ using CsvHelper.TypeConversion;
 using System.Dynamic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
+using Com.Kana.Service.Upload.Lib.Helpers;
+using Newtonsoft.Json;
+using Com.Moonlay.NetCore.Lib;
 
 namespace Com.Kana.Service.Upload.Lib.Facades
 {
@@ -162,19 +166,30 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             return item;
         }
+
         public Tuple<bool, List<object>> UploadValidate(ref List<ItemCsvViewModel> data, List<KeyValuePair<string, StringValues>> list)
         {
             List<object> ErrorList = new List<object>();
             string ErrorMessage;
             bool Valid = true;
 
-            foreach(ItemCsvViewModel item in data)
+            IQueryable<AccuItem> Query = this.dbSet;
+
+            foreach (ItemCsvViewModel item in data)
             {
                 ErrorMessage = "";
 
-                if (string.IsNullOrWhiteSpace(item.title))
+                var x = data.Find(y => y.handle == item.handle && !string.IsNullOrWhiteSpace(y.handle));
+                var isExist = Query.Where(s => s.Name == x.title);
+
+                if (x == null || string.IsNullOrWhiteSpace(x.title))
                 {
                     ErrorMessage = string.Concat(ErrorMessage, "Nama Barang Tidak Boleh Kosong, ");
+                }
+
+                if (isExist != null)
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Barang Sudah Ada, ");
                 }
 
                 if (!string.IsNullOrEmpty(ErrorMessage))
@@ -182,6 +197,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     ErrorMessage = ErrorMessage.Remove(ErrorMessage.Length - 2);
                     var Error = new ExpandoObject() as IDictionary<string, object>;
                     Error.Add("title", item.title);
+                    Error.Add("handle", item.handle);
 
                     ErrorList.Add(Error);
                 }
@@ -220,5 +236,28 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             var result = await dbContext.SaveChangesAsync();
         }
 
+        public Tuple<List<AccuItem>, int, Dictionary<string, string>> ReadForUpload(int page, int size, string order, string keyword, string filter)
+        {
+            IQueryable<AccuItem> Query = this.dbSet.Include(x => x.DetailGroup).Include(x => x.DetailOpenBalance);
+
+            List<string> searchAttributes = new List<string>()
+            {
+                "No", "Name"
+            };
+
+            Query = QueryHelper<AccuItem>.ConfigureSearch(Query, searchAttributes, keyword);
+
+            Dictionary<string, string> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(filter);
+            Query = QueryHelper<AccuItem>.ConfigureFilter(Query, FilterDictionary);
+
+            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(order);
+            Query = QueryHelper<AccuItem>.ConfigureOrder(Query, OrderDictionary);
+
+            Pageable<AccuItem> pageable = new Pageable<AccuItem>(Query, page - 1, size);
+            List<AccuItem> Data = pageable.Data.ToList<AccuItem>();
+            int TotalData = pageable.TotalCount;
+
+            return Tuple.Create(Data, TotalData, OrderDictionary);
+        }
     }
 }
