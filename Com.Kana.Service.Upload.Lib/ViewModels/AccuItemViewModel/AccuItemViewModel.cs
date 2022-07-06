@@ -60,5 +60,7 @@ namespace Com.DanLiris.Service.Purchasing.Lib.ViewModels.AccuItemViewModel
         public bool useWholesalePrice { get; set; }
         public double vendorPrice { get; set; }
         public string vendorUnitName { get; set; }
+
+        public bool isAccurate { get; set; }
     }
 }

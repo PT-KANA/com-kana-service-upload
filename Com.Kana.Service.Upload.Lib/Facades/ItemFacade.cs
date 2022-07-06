@@ -16,6 +16,10 @@ using System.Linq;
 using Com.Kana.Service.Upload.Lib.Helpers;
 using Newtonsoft.Json;
 using Com.Moonlay.NetCore.Lib;
+using Com.Kana.Service.Upload.Lib.Interfaces;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Com.Kana.Service.Upload.Lib.ViewModels;
 
 namespace Com.Kana.Service.Upload.Lib.Facades
 {
@@ -26,12 +30,15 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         private readonly UploadDbContext dbContext;
         private readonly DbSet<AccuItem> dbSet;
         public readonly IServiceProvider serviceProvider;
+        public readonly IIntegrationFacade facade;
+
         public object Request { get; private set; }
         public object ApiVersion { get; private set; }
 
-        public ItemFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
+        public ItemFacade(IServiceProvider serviceProvider, IIntegrationFacade integration, UploadDbContext dbContext)
         {
             this.serviceProvider = serviceProvider;
+            this.facade = integration;
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<AccuItem>();
         }
@@ -258,6 +265,70 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             int TotalData = pageable.TotalCount;
 
             return Tuple.Create(Data, TotalData, OrderDictionary);
+        }
+
+        private async Task<AccurateSessionViewModel> OpenDb() 
+        {
+            var httpClient = new HttpClient();
+
+            var url = "https://account.accurate.id/api/open-db.do?id=578154";
+
+            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+
+                var response = await httpClient.SendAsync(request);
+
+                response.EnsureSuccessStatusCode();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var message = response.Content.ReadAsStringAsync().Result;
+                    AccurateSessionViewModel AccuSession = JsonConvert.DeserializeObject<AccurateSessionViewModel>(message);
+                    return AccuSession;
+
+                }
+                else
+                {
+                    var message = response.Content.ReadAsStringAsync().Result;
+                    return null;
+                }
+            }
+        }
+
+        public async Task Create(List<AccuItemViewModel> viewModel)
+        {
+            var Session = OpenDb();
+
+            var httpClient = new HttpClient();
+            var url = Session.Result.host + "/accurate/api/item/list.do";
+
+            var data = new[]
+            {
+                new KeyValuePair<string, string>("fields", "id,name,no"),
+                new KeyValuePair<string, string>("filter.itemType", "INVENTORY"),
+            };
+
+            var content = new FormUrlEncodedContent(data);
+
+            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+                request.Headers.Add("X-Session-ID", Session.Result.session);
+                request.Content = content;
+
+                var response = await httpClient.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var message = response.Content.ReadAsStringAsync().Result;
+                }
+                else
+                {
+                    var message = response.Content.ReadAsStringAsync().Result;
+                    //	return message;
+                }
+            }
         }
     }
 }
