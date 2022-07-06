@@ -131,9 +131,8 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 			try
 			{
 				identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
-				identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
-
-				await facade.Create(ViewModel, identityService.Username, identityService.Token);
+				 
+				await facade.Create(ViewModel,identityService.Username );
 
 				Dictionary<string, object> Result =
 					new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
