@@ -128,6 +128,30 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
             }
         }
 
+        [HttpPost("post")]
+        public async Task<IActionResult> Post([FromBody] List<AccuItemViewModel> ViewModel)
+        {
+            try
+            {
+                identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+                identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
+
+                await facade.Create(ViewModel);
+
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
+                    .Ok();
+                return Created(String.Concat(Request.Path, "/", 0), Result);
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
         [HttpGet]
         public IActionResult Get(int page = 1, int size = 25, string order = "{}", string keyword = null, string filter = "{}")
         {
@@ -147,14 +171,15 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 
                 var Data = facade.ReadForUpload(page, size, order, keyword, filter);
 
-                var newData = mapper.Map<List<AccuItem>>(Data.Item1);
+                var newData = mapper.Map<List<AccuItemViewModel>>(Data.Item1);
 
                 List<object> listData = new List<object>();
                 listData.AddRange(
                     newData.AsQueryable().Select(s => new
                     {
-                        s.No,
-                        s.Name,
+                        s.no,
+                        s.name,
+                        s.isAccurate
                     }).ToList()
                 );
 

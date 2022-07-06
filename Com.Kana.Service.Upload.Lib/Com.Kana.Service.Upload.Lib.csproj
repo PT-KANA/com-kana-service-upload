@@ -26,7 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="AutoMapperProfiles\" />
     <Folder Include="Configs\" />
     <Folder Include="PDFTemplates\" />
   </ItemGroup>
