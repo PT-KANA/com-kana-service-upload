@@ -14,7 +14,7 @@ namespace Com.Kana.Service.Upload.Lib.Interfaces.SalesUploadInterface
 		Task<List<AccuSalesViewModel>> MapToViewModel(List<SalesCsvViewModel> data);
 		Tuple<bool, List<object>> UploadValidate(ref List<SalesCsvViewModel> data, List<KeyValuePair<string, StringValues>> list);
 		Task UploadData(List<AccuSalesInvoice> data, string username);
-		Task Create(List<AccuSalesViewModel> data, string username, string token);
+		Task Create(List<AccuSalesViewModel> data,string username);
 		List<string> CsvHeader { get; }
 		Task<List<AccuSalesInvoice>> MapToModel(List<AccuSalesViewModel> data1);
 		Tuple<List<AccuSalesInvoice>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}");
