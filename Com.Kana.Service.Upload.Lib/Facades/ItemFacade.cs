@@ -86,11 +86,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 {
                     itemType = "INVENTORY",
                     name = string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value : i.title + " - " + i.option1Value,
-                    no = i.variantBarcode.Replace("'", string.Empty).Trim(),
-                    //string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value  : i.title + " - " + i.option1Value,
                     unit1Name = "PCS",
                     unitPrice = string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice),
-                    upcNo = i.variantBarcode.Replace("'", string.Empty).Trim()
+                    upcNo = i.variantBarcode.Replace("'", string.Empty).Trim(),
+                    no = i.variantBarcode.Replace("'", string.Empty).Trim()
+                    //string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value  : i.title + " - " + i.option1Value,
                     //detailGroup = new List<AccuItemDetailGroupViewModel>()
                     //{
                     //    new AccuItemDetailGroupViewModel()

@@ -30,8 +30,7 @@ namespace Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesReturn
         public bool Taxable { get; set; }
         public string ToAddress { get; set; }
         public long TypeAutoNumber { get; set; }
-
-
+        public bool IsAccurate { get; set; }
         public virtual IEnumerable<AccuSalesReturnDetailExpense> DetailExpense { get; set; }
         public virtual IEnumerable<AccuSalesReturnDetailItem> DetailItem { get; set; }
     }

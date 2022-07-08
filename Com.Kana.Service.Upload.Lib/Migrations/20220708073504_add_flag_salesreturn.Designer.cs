@@ -11,9 +11,10 @@ using System;
 namespace Com.Kana.Service.Upload.Lib.Migrations
 {
     [DbContext(typeof(UploadDbContext))]
-    partial class UploadDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220708073504_add_flag_salesreturn")]
+    partial class add_flag_salesreturn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
