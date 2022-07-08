@@ -64,18 +64,18 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                         Csv.Configuration.RegisterClassMap<Lib.Facades.ItemFacade.ItemMap>();
                         Csv.Configuration.HeaderValidated = null;
 
-                        List<ItemCsvViewModel> Data = Csv.GetRecords<ItemCsvViewModel>().ToList();
+                        List<ItemCsvViewModel> viewModel = Csv.GetRecords<ItemCsvViewModel>().ToList();
 
-                        List<AccuItemViewModel> Data1 = await facade.MapToViewModel(Data);
+                        List<AccuItemViewModel> model = await facade.MapToViewModel(viewModel);
 
-                        Tuple<bool, List<object>> Validated = facade.UploadValidate(ref Data, Request.Form.ToList());
+                        Tuple<bool, List<object>> Validated = facade.UploadValidate(ref viewModel, Request.Form.ToList());
 
                         Reader.Close();
 
                         if (Validated.Item1)
                         {
                             //List<AccuItem> data = mapper.Map<List<AccuItem>>(Data1);
-                            List<AccuItem> data = await facade.MapToModel(Data1);
+                            List<AccuItem> data = await facade.MapToModel(model);
                             await facade.UploadData(data, identityService.Username);
 
                             Dictionary<string, object> Result =
@@ -136,7 +136,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
                 identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
 
-                await facade.Create(ViewModel);
+                await facade.Create(ViewModel, identityService.Username);
 
                 Dictionary<string, object> Result =
                     new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
@@ -177,8 +177,10 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                 listData.AddRange(
                     newData.AsQueryable().Select(s => new
                     {
+                        s.Id,
                         s.no,
                         s.name,
+                        s.itemType,
                         s.isAccurate
                     }).ToList()
                 );

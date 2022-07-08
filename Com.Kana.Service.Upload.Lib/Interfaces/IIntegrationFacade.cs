@@ -11,5 +11,6 @@ namespace Com.Kana.Service.Upload.Lib.Interfaces
         Task<AccurateTokenViewModel> RetrieveToken(string code);
         Task<AccurateTokenViewModel> RefreshToken();
         Task<object> GetDbList();
+        Task<AccurateSessionViewModel> OpenDb();
     }
 }
