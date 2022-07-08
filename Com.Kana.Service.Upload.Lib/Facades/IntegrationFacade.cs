@@ -142,5 +142,34 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             }
 
         }
+
+        public async Task<AccurateSessionViewModel> OpenDb()
+        {
+            var httpClient = new HttpClient();
+
+            var url = "https://account.accurate.id/api/open-db.do?id=578154";
+
+            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+
+                var response = await httpClient.SendAsync(request);
+
+                response.EnsureSuccessStatusCode();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var message = response.Content.ReadAsStringAsync().Result;
+                    AccurateSessionViewModel AccuSession = JsonConvert.DeserializeObject<AccurateSessionViewModel>(message);
+                    return AccuSession;
+
+                }
+                else
+                {
+                    var message = response.Content.ReadAsStringAsync().Result;
+                    return null;
+                }
+            }
+        }
     }
 }
