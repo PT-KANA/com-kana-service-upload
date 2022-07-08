@@ -17,6 +17,6 @@ namespace Com.Kana.Service.Upload.Lib.Interfaces.ItemInterface
         List<string> CsvHeader { get; }
         Task<List<AccuItem>> MapToModel(List<AccuItemViewModel> data1);
         Tuple<List<AccuItem>, int, Dictionary<string, string>> ReadForUpload(int page, int size, string order, string keyword, string filter);
-        Task Create(List<AccuItemViewModel> viewModel);
+        Task Create(List<AccuItemViewModel> viewModel, string username);
     }
 }

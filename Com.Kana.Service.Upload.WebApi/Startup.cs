@@ -82,6 +82,7 @@ using Microsoft.ApplicationInsights.AspNetCore;
 using Com.Kana.Service.Upload.Lib.Interfaces.ItemInterface;
 using Com.Kana.Service.Upload.Lib.Facades;
 using Com.Kana.Service.Upload.Lib.Interfaces.SalesUploadInterface;
+using Com.Kana.Service.Upload.Lib.Interfaces.SalesReturnInterface;
 
 namespace Com.Kana.Service.Upload.WebApi
 {
@@ -132,7 +133,8 @@ namespace Com.Kana.Service.Upload.WebApi
                 .AddTransient<IMemoryCacheManager, MemoryCacheManager>()
                 .AddTransient<IItemFacade, ItemFacade>()
 				.AddTransient<ISalesUpload, SalesUploadFacade>()
-                .AddTransient<IIntegrationFacade, IntegrationFacade>();
+                .AddTransient<IIntegrationFacade, IntegrationFacade>()
+                .AddTransient<ISalesReturnUpload, SalesReturnUploadFacade>();
         }
 
 

@@ -1,5 +1,11 @@
 ﻿using AutoMapper;
+using Com.Kana.Service.Upload.Lib.Interfaces.SalesReturnInterface;
+using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesReturnModel;
 using Com.Kana.Service.Upload.Lib.Services;
+using Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesReturnViewModel;
+using Com.Kana.Service.Upload.Lib.ViewModels.SalesReturnViewModel;
+using Com.Kana.Service.Upload.WebApi.Helpers;
+using CsvHelper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -7,47 +13,41 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Com.Kana.Service.Upload.Lib.Interfaces.ItemInterface;
-using CsvHelper;
-using Com.Kana.Service.Upload.WebApi.Helpers;
-using Com.Kana.Service.Upload.Lib.ViewModels.ItemViewModel;
-using Com.DanLiris.Service.Purchasing.Lib.ViewModels.AccuItemViewModel;
-using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuItemModel;
 
 namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 {
     [Produces("application/json")]
     [ApiVersion("1.0")]
-    [Route("v{version:apiVersion}/master/item")]
+    [Route("v{version:apiVersion}/sales-return")]
     [Authorize]
-    public class ItemUploadController : Controller
+    public class SalesReturnUploadController : Controller
     {
         private string ApiVersion = "1.0.0";
         private readonly IMapper mapper;
-        private readonly IItemFacade facade;
+        private readonly ISalesReturnUpload facade;
         private readonly IdentityService identityService;
-
         private readonly string ContentType = "application/vnd.openxmlformats";
-        private readonly string FileName = string.Concat("Error Log - Upload Item - ", DateTime.Now.ToString("dd MMM yyyy"), ".csv");
-
-        public ItemUploadController(IServiceProvider serviceProvider, IItemFacade facade, IMapper mapper)
+        private readonly string FileName = string.Concat("Error Log - ", typeof(AccuSalesReturn).Name, " ", DateTime.Now.ToString("dd MMM yyyy"), ".csv");
+        public SalesReturnUploadController(IMapper mapper, ISalesReturnUpload facade, IServiceProvider serviceProvider) //: base(facade, ApiVersion)
         {
             this.mapper = mapper;
             this.facade = facade;
             this.identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
         }
 
+
         [HttpPost("upload")]
-        public async Task<IActionResult> PostCSVFileAsync()
+        public async Task<IActionResult> PostCSVFileAsync(double source, string sourcec, string sourcen, double destination, string destinationc, string destinationn, DateTimeOffset date)
+        // public async Task<IActionResult> PostCSVFileAsync(double source, double destination,  DateTime date)
         {
             try
             {
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
                 identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
                 identityService.TimezoneOffset = Convert.ToInt32(Request.Headers["x-timezone-offset"]);
-
                 if (Request.Form.Files.Count > 0)
                 {
+                    //VerifyUser();
                     var UploadedFile = Request.Form.Files[0];
                     StreamReader Reader = new StreamReader(UploadedFile.OpenReadStream());
                     List<string> FileHeader = new List<string>(Reader.ReadLine().Replace("\"", string.Empty).Split(","));
@@ -59,52 +59,50 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                         Reader.BaseStream.Seek(0, SeekOrigin.Begin);
                         Reader.BaseStream.Position = 0;
                         CsvReader Csv = new CsvReader(Reader);
-                        Csv.Configuration.IgnoreQuotes = false;
+                        Csv.Configuration.IgnoreQuotes = true;
                         Csv.Configuration.Delimiter = ",";
-                        Csv.Configuration.RegisterClassMap<Lib.Facades.ItemFacade.ItemMap>();
+                        Csv.Configuration.RegisterClassMap<Lib.Facades.SalesReturnUploadFacade.SalesReturnMap>();
                         Csv.Configuration.HeaderValidated = null;
 
-                        List<ItemCsvViewModel> viewModel = Csv.GetRecords<ItemCsvViewModel>().ToList();
+                        List<SalesReturnCsvViewModel> Data = Csv.GetRecords<SalesReturnCsvViewModel>().ToList();
+                        List<AccuSalesReturnViewModel> Data1 = await facade.MapToViewModel(Data);
 
-                        List<AccuItemViewModel> model = await facade.MapToViewModel(viewModel);
 
-                        Tuple<bool, List<object>> Validated = facade.UploadValidate(ref viewModel, Request.Form.ToList());
+                        Tuple<bool, List<object>> Validated = facade.UploadValidate(ref Data, Request.Form.ToList());
 
                         Reader.Close();
 
-                        if (Validated.Item1)
+                        if (Validated.Item1) /* If Data Valid */
                         {
-                            //List<AccuItem> data = mapper.Map<List<AccuItem>>(Data1);
-                            List<AccuItem> data = await facade.MapToModel(model);
+                            List<AccuSalesReturn> data = await facade.MapToModel(Data1);
                             await facade.UploadData(data, identityService.Username);
 
+
                             Dictionary<string, object> Result =
-                               new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
-                               .Ok();
+                                new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
+                                .Ok();
                             return Created(HttpContext.Request.Path, Result);
+
                         }
                         else
                         {
                             using (MemoryStream memoryStream = new MemoryStream())
                             {
                                 using (StreamWriter streamWriter = new StreamWriter(memoryStream))
+                                using (CsvWriter csvWriter = new CsvWriter(streamWriter))
                                 {
-                                    using (CsvWriter csvWriter = new CsvWriter(streamWriter))
-                                    {
-                                        csvWriter.WriteRecords(Validated.Item2);
-                                    }
-
-                                    return File(memoryStream.ToArray(), ContentType, FileName);
-
+                                    csvWriter.WriteRecords(Validated.Item2);
                                 }
+
+                                return File(memoryStream.ToArray(), ContentType, FileName);
                             }
                         }
                     }
                     else
                     {
                         Dictionary<string, object> Result =
-                          new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, General.CSV_ERROR_MESSAGE)
-                          .Fail();
+                           new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, General.CSV_ERROR_MESSAGE)
+                           .Fail();
 
                         return NotFound(Result);
                     }
@@ -124,19 +122,17 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                    .Fail();
 
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
-
             }
         }
-
         [HttpPost("post")]
-        public async Task<IActionResult> Post([FromBody] List<AccuItemViewModel> ViewModel)
+        public async Task<IActionResult> Post([FromBody] List<AccuSalesReturnViewModel> ViewModel)
         {
             try
             {
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
                 identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
 
-                await facade.Create(ViewModel, identityService.Username);
+                await facade.Create(ViewModel, identityService.Username, identityService.Token);
 
                 Dictionary<string, object> Result =
                     new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
@@ -171,17 +167,15 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 
                 var Data = facade.ReadForUpload(page, size, order, keyword, filter);
 
-                var newData = mapper.Map<List<AccuItemViewModel>>(Data.Item1);
+                var newData = mapper.Map<List<AccuSalesReturn>>(Data.Item1);
 
                 List<object> listData = new List<object>();
                 listData.AddRange(
                     newData.AsQueryable().Select(s => new
                     {
-                        s.Id,
-                        s.no,
-                        s.name,
-                        s.itemType,
-                        s.isAccurate
+                        s.TransDate,
+                        s.CustomerNo,
+                        s.ReturnType
                     }).ToList()
                 );
 
@@ -209,6 +203,5 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
-
     }
 }
