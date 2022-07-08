@@ -13,7 +13,7 @@ namespace Com.Kana.Service.Upload.Lib.Interfaces.SalesReturnInterface
     {
         Tuple<bool, List<object>> UploadValidate(ref List<SalesReturnCsvViewModel> data, List<KeyValuePair<string, StringValues>> list);
         Task UploadData(List<AccuSalesReturn> data, string username);
-        Task Create(List<AccuSalesReturnViewModel> data, string username, string token);
+        Task Create(List<AccuSalesReturnViewModel> data, string username);
         List<string> CsvHeader { get; }
         Tuple<List<AccuSalesReturn>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}");
         Task<List<AccuSalesReturnViewModel>> MapToViewModel(List<SalesReturnCsvViewModel> csv);

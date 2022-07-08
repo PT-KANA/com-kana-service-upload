@@ -27,9 +27,9 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesReturnViewModel
         public bool useTax2 { get; set; }
         public bool useTax3 { get; set; }
         public string warehouseName { get; set; }
-        public virtual IEnumerable<AccuSalesReturnDetailSerialNumberViewModel> detailSerialNumber { get; set; }
+        public List<AccuSalesReturnDetailSerialNumberViewModel> detailSerialNumber { get; set; }
         public virtual long accuSalesReturnId { get; set; }
 
-        public virtual AccuSalesReturnViewModel accuSalesReturn { get; set; }
+        //public virtual AccuSalesReturnViewModel accuSalesReturn { get; set; }
     }
 }
