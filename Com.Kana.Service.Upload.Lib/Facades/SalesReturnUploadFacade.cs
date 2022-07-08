@@ -1,6 +1,9 @@
-﻿using Com.Kana.Service.Upload.Lib.Helpers;
+﻿using AutoMapper;
+using Com.Kana.Service.Upload.Lib.Helpers;
+using Com.Kana.Service.Upload.Lib.Interfaces;
 using Com.Kana.Service.Upload.Lib.Interfaces.SalesReturnInterface;
 using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesReturnModel;
+using Com.Kana.Service.Upload.Lib.ViewModels;
 using Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesReturnViewModel;
 using Com.Kana.Service.Upload.Lib.ViewModels.SalesReturnViewModel;
 using Com.Moonlay.Models;
@@ -12,6 +15,8 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,20 +29,24 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         private readonly UploadDbContext dbContext;
         private readonly DbSet<AccuSalesReturn> dbSet;
         public readonly IServiceProvider serviceProvider;
+        public readonly IIntegrationFacade facade;
+        private readonly IMapper mapper;
+
         public object Request { get; private set; }
         public object ApiVersion { get; private set; }
 
-        public SalesReturnUploadFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
+        public SalesReturnUploadFacade(IServiceProvider serviceProvider, IIntegrationFacade integration, UploadDbContext dbContext, IMapper mapper)
         {
             this.serviceProvider = serviceProvider;
+            this.facade = integration;
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<AccuSalesReturn>();
+            this.mapper = mapper;
         }
 
         public List<string> CsvHeader { get; } = new List<string>()
         {
-            "Tanggal Retur",   "No Identitas Customer",   "No Penjualan",    "Kode Barang", "Harga Barang",    "No Faktur Pajak", "Tanggal Faktur Pajak",    "Keterangan"
-            
+            "Tanggal Retur", "No Identitas Customer", "No Penjualan", "Kode Barang", "Harga Barang", "No Faktur Pajak", "Tanggal Faktur Pajak", "Keterangan"
         };
 
         public async Task<List<AccuSalesReturnViewModel>> MapToViewModel(List<SalesReturnCsvViewModel> csv)
@@ -47,19 +56,21 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             List<string> tempNo = new List<string>();
             foreach (var i in csv)
             {
-
                 var isSameSales = tempNo.FirstOrDefault(s => s == i.salesOrderNo);
                 if (isSameSales == null)
                 {
                     tempNo.Add(i.salesOrderNo);
                     AccuSalesReturnViewModel ii = new AccuSalesReturnViewModel
                     {
-                        customerNo = string.IsNullOrWhiteSpace(i.customerNo) ? "CUST" : i.customerNo,
-                        salesOrderNo = i.salesOrderNo,
-                        transDate = Convert.ToDateTime(i.transDate),
-                        taxDate = Convert.ToDateTime(i.taxDate),
+                        //customerNo = string.IsNullOrWhiteSpace(i.customerNo) ? "CUST" : i.customerNo,
+                        customerNo = "PELANGGAN SHOPIFY",
+                        //salesOrderNo = i.salesOrderNo,
+                        invoiceNumber = i.salesOrderNo,
+                        transDate1 = Convert.ToDateTime(i.transDate),
+                        taxDate1 = Convert.ToDateTime(i.taxDate),
                         taxNumber = i.taxNumber,
-                        returnType="Invoice",
+                        returnType= "INVOICE",
+                        
                         detailItem = new List<AccuSalesReturnDetailItemViewModel>()
                         {
                             new AccuSalesReturnDetailItemViewModel()
@@ -69,6 +80,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                                 detailNotes=i.detailNotes
                             }
                         }
+
                     };
 
                     item.Add(ii);
@@ -80,11 +92,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                         unitPrice = Convert.ToDouble(i.unitPrice),
                         itemNo = i.itemNo,
                         detailNotes = i.detailNotes
-
                     };
 
-                    AccuSalesReturnViewModel header = item.Where(a => a.salesOrderNo == i.salesOrderNo).FirstOrDefault();
-
+                    AccuSalesReturnViewModel header = item.Where(a => a.invoiceNumber == i.salesOrderNo).FirstOrDefault();
                     header.detailItem.Add(b);
                 }
             }
@@ -94,13 +104,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         public async Task<List<AccuSalesReturn>> MapToModel(List<AccuSalesReturnViewModel> data1)
         {
             List<AccuSalesReturn> salesReturns = new List<AccuSalesReturn>();
-
-
             foreach (var i in data1)
             {
                 List<AccuSalesReturnDetailItem> ReturnDetailItems = new List<AccuSalesReturnDetailItem>();
-
-
                 foreach (var ii in i.detailItem)
                 {
                     var dd = new AccuSalesReturnDetailItem()
@@ -109,17 +115,19 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                         Quantity = ii.quantity,
                         ItemNo = ii.itemNo,
                         DetailNotes=ii.detailNotes
-
                     };
+
                     ReturnDetailItems.Add(dd);
 
                 };
+
                 AccuSalesReturn accuSales = new AccuSalesReturn
                 {
+                    InvoiceNumber = i.invoiceNumber,
                     CustomerNo = i.customerNo,
-                    TaxDate = i.taxDate,
+                    TaxDate = i.taxDate1,
                     TaxNumber = i.taxNumber,
-                    TransDate = i.transDate,
+                    TransDate = i.transDate1,
                     BranchName = i.branchName,
                     CurrencyCode = i.currencyCode,
                     ReturnType = i.returnType,
@@ -132,11 +140,47 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             return salesReturns;
         }
 
-        public Task Create(List<AccuSalesReturnViewModel> data, string username, string token)
+        public async Task Create(List<AccuSalesReturnViewModel> viewModel, string username)
         {
-            throw new NotImplementedException();
-        }
+            var session = facade.OpenDb();
 
+            var httpClient = new HttpClient();
+            var url = session.Result.host + "/accurate/api/sales-return/save.do";
+            
+            foreach (var i in viewModel)
+            {
+                var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).Include(m => m.DetailItem).FirstOrDefault();
+                var dataToBeConvert = mapper.Map<AccuSalesReturnViewModel>(dataToBeMapped);
+
+                dataToBeConvert.transDate = dataToBeConvert.transDate1.Date.ToString();
+                dataToBeConvert.taxDate = dataToBeConvert.taxDate1.Date.ToString();
+
+                var dataToBeSend = JsonConvert.SerializeObject(dataToBeConvert);
+
+                var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+
+                using(var request = new HttpRequestMessage(HttpMethod.Post, url))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+                    request.Headers.Add("X-Session-ID", session.Result.session);
+                    request.Content = content;
+
+                    var response = await httpClient.SendAsync(request);
+                    var res = response.Content.ReadAsStringAsync().Result;
+                    var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
+
+                    if (response.IsSuccessStatusCode && message.s)
+                    {
+                        dataToBeMapped.IsAccurate = true;
+                        EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
+                    }
+                    else
+                    {
+                        throw new Exception("data " + i.invoiceNumber + " gagal diupload");
+                    }
+                }
+            }
+        }
 
         public Tuple<List<AccuSalesReturn>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
@@ -172,7 +216,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 foreach (var iii in i.DetailItem)
                 {
                     EntityExtension.FlagForCreate(iii, username, USER_AGENT);
-
                 }
                 
                 dbSet.Add(i);

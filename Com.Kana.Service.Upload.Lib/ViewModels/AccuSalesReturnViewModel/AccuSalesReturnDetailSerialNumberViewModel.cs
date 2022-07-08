@@ -12,6 +12,6 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesReturnViewModel
         public double quantity { get; set; }
         public string serialNumberNo { get; set; }
         public virtual long accuSalesInvoceDetailItemId { get; set; }
-        public virtual AccuSalesReturnDetailItemViewModel accuSalesReturnDetailItem { get; set; }
+        //public virtual AccuSalesReturnDetailItemViewModel accuSalesReturnDetailItem { get; set; }
     }
 }
