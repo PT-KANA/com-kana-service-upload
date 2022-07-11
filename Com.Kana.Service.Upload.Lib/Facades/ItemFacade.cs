@@ -68,7 +68,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 Map(p => p.variantInventoryTracker).Index(16);
                 Map(p => p.variantInventoryQty).Index(17);
                 Map(p => p.variantPrice).Index(20);
-                //Map(p => p.variantTaxable).Index(23);
+                Map(p => p.variantTaxable).Index(23);
                 Map(p => p.variantBarcode).Index(24);
                 Map(p => p.variantWeightUnit).Index(45);
                 Map(p => p.variantTaxCode).Index(46);
@@ -89,7 +89,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     unit1Name = "PCS",
                     unitPrice = string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice),
                     upcNo = i.variantBarcode.Replace("'", string.Empty).Trim(),
-                    no = i.variantBarcode.Replace("'", string.Empty).Trim()
+                    no = i.variantBarcode.Replace("'", string.Empty).Trim(),
+                    usePPn = string.IsNullOrWhiteSpace(i.variantTaxable) ? (i.variantTaxable == "TRUE" ? true : false) : false,
+                    preferedVendorName = i.vendor,
+                    vendorPrice = string.IsNullOrWhiteSpace(i.costPeritem) ? 0 : Convert.ToDouble(i.costPeritem)
                     //string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value  : i.title + " - " + i.option1Value,
                     //detailGroup = new List<AccuItemDetailGroupViewModel>()
                     //{
@@ -167,8 +170,12 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     ItemType = i.itemType,
                     Name = i.name,
                     No = i.no,
+                    UpcNo = i.upcNo,
                     Unit1Name = i.unit1Name,
                     UnitPrice = i.unitPrice,
+                    UsePPn = i.usePPn,
+                    VendorPrice = i.vendorPrice,
+                    PreferedVendorName = i.vendorUnitName
                     //DetailGroup = itemDetailGroup,
                     //DetailOpenBalance = itemDetailOpenBalance,
                 };
