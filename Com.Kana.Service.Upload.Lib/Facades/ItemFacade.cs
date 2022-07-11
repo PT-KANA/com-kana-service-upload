@@ -204,12 +204,39 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     ErrorMessage = string.Concat(ErrorMessage, "Barang Sudah Ada, ");
                 }
 
+                if (string.IsNullOrWhiteSpace(item.variantBarcode))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Barcode Tidak Boleh Kosong, ");
+                }
+
+                if (string.IsNullOrWhiteSpace(item.option1Value))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Size Tidak Boleh Kosong, ");
+                }
+
+                decimal domesticSale = 0;
+                if (string.IsNullOrWhiteSpace(item.variantPrice))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Harga tidak boleh kosong, ");
+                }
+                else if (!decimal.TryParse(item.variantPrice, out domesticSale))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Harga harus numerik, ");
+                }
+                else if (domesticSale < 0)
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Harga harus lebih besar dari 0, ");
+                }
+
                 if (!string.IsNullOrEmpty(ErrorMessage))
                 {
                     ErrorMessage = ErrorMessage.Remove(ErrorMessage.Length - 2);
                     var Error = new ExpandoObject() as IDictionary<string, object>;
                     Error.Add("title", item.title);
                     Error.Add("handle", item.handle);
+                    Error.Add("option1Value", item.option1Value);
+                    Error.Add("variantBarcode", item.variantBarcode);
+                    Error.Add("variantPrice", item.variantPrice);
                     Error.Add("error", ErrorMessage);
 
                     ErrorList.Add(Error);
