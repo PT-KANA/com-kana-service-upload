@@ -7,12 +7,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels
     public class AccurateResponseViewModel
     {
         public bool s { get; set; }
-        //public List<AccurateResponseDetailViewModel> d { get; set; }
+        public List<string> d { get; set; }
 
     }
-
-    //public class AccurateResponseDetailViewModel
-    //{
-    //    public string message { get; set; }
-    //}
 }

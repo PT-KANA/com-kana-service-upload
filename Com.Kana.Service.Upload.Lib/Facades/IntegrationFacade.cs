@@ -154,19 +154,24 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
 
                 var response = await httpClient.SendAsync(request);
-
                 response.EnsureSuccessStatusCode();
 
-                if (response.IsSuccessStatusCode)
+                var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+
+                if (response.IsSuccessStatusCode && message.s)
                 {
-                    var message = response.Content.ReadAsStringAsync().Result;
-                    AccurateSessionViewModel AccuSession = JsonConvert.DeserializeObject<AccurateSessionViewModel>(message);
+                    var ses = response.Content.ReadAsStringAsync().Result;
+                    AccurateSessionViewModel AccuSession = JsonConvert.DeserializeObject<AccurateSessionViewModel>(ses);
+
+                    AuthCredential.Session = AccuSession.session;
+                    AuthCredential.Host = AccuSession.host;
+
                     return AccuSession;
 
                 }
                 else
                 {
-                    var message = response.Content.ReadAsStringAsync().Result;
+                    //var ses = response.Content.ReadAsStringAsync().Result;
                     return null;
                 }
             }
