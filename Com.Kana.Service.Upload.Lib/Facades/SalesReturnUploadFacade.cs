@@ -63,13 +63,14 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     AccuSalesReturnViewModel ii = new AccuSalesReturnViewModel
                     {
                         //customerNo = string.IsNullOrWhiteSpace(i.customerNo) ? "CUST" : i.customerNo,
-                        customerNo = "PELANGGAN SHOPIFY",
+                        customerNo = string.IsNullOrWhiteSpace(i.customerNo) ? "C.00004" : i.customerNo,
                         //salesOrderNo = i.salesOrderNo,
                         invoiceNumber = i.salesOrderNo,
                         transDate1 = Convert.ToDateTime(i.transDate),
                         taxDate1 = Convert.ToDateTime(i.taxDate),
                         taxNumber = i.taxNumber,
                         returnType= "INVOICE",
+                        branchName= "JAKARTA",
                         
                         detailItem = new List<AccuSalesReturnDetailItemViewModel>()
                         {
@@ -142,44 +143,67 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public async Task Create(List<AccuSalesReturnViewModel> viewModel, string username)
         {
-            var session = facade.OpenDb();
+            var session = await facade.OpenDb();
 
-            var httpClient = new HttpClient();
-            var url = session.Result.host + "/accurate/api/sales-return/save.do";
-            
+            //var httpClient = new HttpClient();
+            IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
+            IHttpClientService httpClient1 = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
+            var url = $"{AuthCredential.Host}/accurate/api/sales-return/save.do";
+
             foreach (var i in viewModel)
             {
                 var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).Include(m => m.DetailItem).FirstOrDefault();
                 var dataToBeConvert = mapper.Map<AccuSalesReturnViewModel>(dataToBeMapped);
+                dataToBeConvert.transDate = Convert.ToDateTime(dataToBeConvert.transDate).Date.ToString();
+                dataToBeConvert.taxDate = Convert.ToDateTime(dataToBeConvert.taxDate).Date.ToString();
+                dataToBeConvert.branchName = "JAKARTA";
+                dataToBeConvert.customerNo = "C.00004";
+                dataToBeConvert.Id = 0;
 
-                dataToBeConvert.transDate = dataToBeConvert.transDate1.Date.ToString();
-                dataToBeConvert.taxDate = dataToBeConvert.taxDate1.Date.ToString();
+                foreach(var x in dataToBeConvert.detailItem)
+                {
+                    x.Id = 0;
+                }
 
                 var dataToBeSend = JsonConvert.SerializeObject(dataToBeConvert);
-
                 var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
 
-                using(var request = new HttpRequestMessage(HttpMethod.Post, url))
+                var response = httpClient.PostAsync(url, content).Result;
+                var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+
+                if (response.IsSuccessStatusCode && message.s)
                 {
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
-                    request.Headers.Add("X-Session-ID", session.Result.session);
-                    request.Content = content;
-
-                    var response = await httpClient.SendAsync(request);
-                    var res = response.Content.ReadAsStringAsync().Result;
-                    var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
-
-                    if (response.IsSuccessStatusCode && message.s)
-                    {
-                        dataToBeMapped.IsAccurate = true;
-                        EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
-                    }
-                    else
-                    {
-                        throw new Exception("data " + i.invoiceNumber + " gagal diupload");
-                    }
+                    dataToBeMapped.IsAccurate = true;
+                    EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
                 }
+                else
+                {
+                    throw new Exception("data " + i.invoiceNumber + " gagal diupload");
+                }
+
+                //using(var request = new HttpRequestMessage(HttpMethod.Post, url))
+                //{
+                //    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+                //    request.Headers.Add("X-Session-ID", session.Result.session);
+                //    request.Content = content;
+
+                //    var response = await httpClient.SendAsync(request);
+                //    var res = response.Content.ReadAsStringAsync().Result;
+                //    var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
+
+                //    if (response.IsSuccessStatusCode && message.s)
+                //    {
+                //        dataToBeMapped.IsAccurate = true;
+                //        EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
+                //    }
+                //    else
+                //    {
+                //        throw new Exception("data " + i.invoiceNumber + " gagal diupload");
+                //    }
+                //}
             }
+
+            dbContext.SaveChanges();
         }
 
         public Tuple<List<AccuSalesReturn>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
@@ -211,8 +235,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             foreach (var i in data)
             {
                 EntityExtension.FlagForCreate(i, username, USER_AGENT);
-
-
                 foreach (var iii in i.DetailItem)
                 {
                     EntityExtension.FlagForCreate(iii, username, USER_AGENT);
