@@ -144,6 +144,7 @@ namespace Com.Kana.Service.Upload.WebApi
                 .AddScoped<IdentityService>()
                 .AddScoped<ValidateService>()
                 .AddScoped<IHttpClientService, HttpClientService>()
+                .AddScoped<IAccurateClientService, AccurateClientService>()
                 .AddScoped<IValidateService, ValidateService>();
 
             //if (isTest == false)
