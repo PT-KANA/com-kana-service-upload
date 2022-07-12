@@ -173,10 +173,12 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 				listData.AddRange(
 					newData.AsQueryable().Select(s => new
 					{
-						s.orderDownPaymentNumber,
+						
+						s.number,
 						s.transDate, 
 						s.customerNo,
-						s.branchName
+						s.branchName,
+						s.detailItem
 					}).ToList()
 				);
 

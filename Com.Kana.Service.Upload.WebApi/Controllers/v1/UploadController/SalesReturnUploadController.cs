@@ -26,10 +26,8 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
         private readonly IMapper mapper;
         private readonly ISalesReturnUpload facade;
         private readonly IdentityService identityService;
-        
         private readonly string ContentType = "application/vnd.openxmlformats";
         private readonly string FileName = string.Concat("Error Log - ", typeof(AccuSalesReturn).Name, " ", DateTime.Now.ToString("dd MMM yyyy"), ".csv");
-        
         public SalesReturnUploadController(IMapper mapper, ISalesReturnUpload facade, IServiceProvider serviceProvider) //: base(facade, ApiVersion)
         {
             this.mapper = mapper;
@@ -37,8 +35,10 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
             this.identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
         }
 
+
         [HttpPost("upload")]
-        public async Task<IActionResult> PostCSVFileAsync()
+        public async Task<IActionResult> PostCSVFileAsync(double source, string sourcec, string sourcen, double destination, string destinationc, string destinationn, DateTimeOffset date)
+        // public async Task<IActionResult> PostCSVFileAsync(double source, double destination,  DateTime date)
         {
             try
             {
@@ -124,7 +124,6 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
-
         [HttpPost("post")]
         public async Task<IActionResult> Post([FromBody] List<AccuSalesReturnViewModel> ViewModel)
         {
@@ -168,16 +167,15 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 
                 var Data = facade.ReadForUpload(page, size, order, keyword, filter);
 
-                var newData = mapper.Map<List<AccuSalesReturnViewModel>>(Data.Item1);
+                var newData = mapper.Map<List<AccuSalesReturn>>(Data.Item1);
 
                 List<object> listData = new List<object>();
                 listData.AddRange(
                     newData.AsQueryable().Select(s => new
                     {
-                        s.Id,
-                        s.transDate,
-                        s.invoiceNumber,
-                        s.customerNo,
+                        s.TransDate,
+                        s.CustomerNo,
+                        s.ReturnType
                     }).ToList()
                 );
 

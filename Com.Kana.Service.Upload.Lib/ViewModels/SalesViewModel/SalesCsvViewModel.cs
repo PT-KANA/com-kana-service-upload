@@ -22,7 +22,8 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.SalesViewModel
 		public string currency { get; set; }//nilai pajak
 		public string isRefund { get; set; }
 
-
+		public string barcode { get; set; }
+		public string financialStatus { get; set; }
 
 
 
