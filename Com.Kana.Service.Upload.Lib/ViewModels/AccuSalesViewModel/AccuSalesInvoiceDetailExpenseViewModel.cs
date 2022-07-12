@@ -14,7 +14,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesViewModel
 		public string expenseNotes { get; set; }
 		public string salesOrderNumber { get; set; }
 		public string salesQuotationNumber { get; set; }
-		public virtual long accuSalesInvoceId { get; set; }
-		public virtual AccuSalesViewModel accuSalesInvoice { get; set; }
+		public   long accuSalesInvoceId { get; set; }
+		 
 	}
 }

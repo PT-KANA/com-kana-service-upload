@@ -28,9 +28,8 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesViewModel
 		public bool useTax3 { get; set; }
 		public bool isRefund { get; set; }
 		public string warehouseName { get; set; }
-		public virtual IEnumerable<AccuSalesInvoiceDetailSerialNumberViewModel> detailSerialNumber { get; set; }
-		public virtual long AccuSalesInvoceId { get; set; }
-	 
-		public virtual AccuSalesViewModel accuSalesInvoice { get; set; }
+		public List<AccuSalesInvoiceDetailSerialNumberViewModel> detailSerialNumber { get; set; }
+		public   long AccuSalesInvoceId { get; set; }
+	  
 	}
 }

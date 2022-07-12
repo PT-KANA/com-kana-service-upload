@@ -1,4 +1,5 @@
-﻿using Com.Kana.Service.Upload.Lib.Helpers;
+﻿using AutoMapper;
+using Com.Kana.Service.Upload.Lib.Helpers;
 using Com.Kana.Service.Upload.Lib.Interfaces;
 using Com.Kana.Service.Upload.Lib.Interfaces.SalesUploadInterface;
 using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoiceModel;
@@ -30,18 +31,21 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 		public readonly IServiceProvider serviceProvider;
 		public object Request { get; private set; }
 		public object ApiVersion { get; private set; }
-
-		public SalesUploadFacade(IServiceProvider serviceProvider, UploadDbContext dbContext)
+		public readonly IIntegrationFacade facade;
+		private readonly IMapper mapper;
+		public SalesUploadFacade(IServiceProvider serviceProvider, UploadDbContext dbContext, IIntegrationFacade facade, IMapper mapper)
 		{
 			this.serviceProvider = serviceProvider;
 			this.dbContext = dbContext;
 			this.dbSet = dbContext.Set<AccuSalesInvoice>();
+			this.facade = facade;
+			this.mapper = mapper;
 
 		}
 
 		public List<string> CsvHeader { get; } = new List<string>()
 		{
-			"Name", "Email",    "Financial Status", "Paid at",  "Fulfillment Status",   "Fulfilled at", "Accepts Marketing",    "Currency", "Subtotal", "Shipping", "Taxes",    "Total",    "Discount Code",    "Discount Amount",  "Shipping Method",  "Created at",   "Lineitem quantity",    "Lineitem name",    "Lineitem price",   "Lineitem compare at price",    "Lineitem sku", "Lineitem requires shipping",   "Lineitem taxable", "Lineitem fulfillment status",  "Billing Name", "Billing Street",   "Billing Address1", "Billing Address2", "Billing Company",  "Billing City", "Billing Zip",  "Billing Province", "Billing Country",  "Billing Phone",    "Shipping Name",    "Shipping Street",  "Shipping Address1",    "Shipping Address2",    "Shipping Company", "Shipping City",    "Shipping Zip", "Shipping Province",    "Shipping Country", "Shipping Phone",   "Notes",    "Note Attributes",  "Cancelled at", "Payment Method",   "Payment Reference",    "Refunded Amount",  "Vendor",   "Outstanding Balance",  "Employee", "Location", "Device ID",    "Id",   "Tags", "Risk Level",   "Source",   "Lineitem discount",    "Tax 1 Name",   "Tax 1 Value",  "Tax 2 Name",   "Tax 2 Value",  "Tax 3 Name",   "Tax 3 Value",  "Tax 4 Name",   "Tax 4 Value",  "Tax 5 Name",   "Tax 5 Value",  "Phone",    "Receipt Number",   "Duties",   "Billing Province Name",    "Shipping Province Name",   "Payment ID",   "Payment Terms Name",   "Next Payment Due At"
+			"Barcode","Name", "Email",    "Financial Status", "Paid at",  "Fulfillment Status",   "Fulfilled at", "Accepts Marketing",    "Currency", "Subtotal", "Shipping", "Taxes",    "Total",    "Discount Code",    "Discount Amount",  "Shipping Method",  "Created at",   "Lineitem quantity",    "Lineitem name",    "Lineitem price",   "Lineitem compare at price",    "Lineitem sku", "Lineitem requires shipping",   "Lineitem taxable", "Lineitem fulfillment status",  "Billing Name", "Billing Street",   "Billing Address1", "Billing Address2", "Billing Company",  "Billing City", "Billing Zip",  "Billing Province", "Billing Country",  "Billing Phone",    "Shipping Name",    "Shipping Street",  "Shipping Address1",    "Shipping Address2",    "Shipping Company", "Shipping City",    "Shipping Zip", "Shipping Province",    "Shipping Country", "Shipping Phone",   "Notes",    "Note Attributes",  "Cancelled at", "Payment Method",   "Payment Reference",    "Refunded Amount",  "Vendor",   "Outstanding Balance",  "Employee", "Location", "Device ID",    "Id",   "Tags", "Risk Level",   "Source",   "Lineitem discount",    "Tax 1 Name",   "Tax 1 Value",  "Tax 2 Name",   "Tax 2 Value",  "Tax 3 Name",   "Tax 3 Value",  "Tax 4 Name",   "Tax 4 Value",  "Tax 5 Name",   "Tax 5 Value",  "Phone",    "Receipt Number",   "Duties",   "Billing Province Name",    "Shipping Province Name",   "Payment ID",   "Payment Terms Name",   "Next Payment Due At"
 		};
 
 
@@ -62,15 +66,21 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					{
 						customerNo = string.IsNullOrWhiteSpace(i.billingName) ? "CUST" : i.billingName,
 						orderDownPaymentNumber = i.name,
+						documentCode="INVOICE",
+						taxType= "PPN_TDK_DIPUNGUT",
+						number = i.name,
 						branchName = i.location,
 						CreatedUtc = Convert.ToDateTime(i.createdAt),
 						cashDiscount = Convert.ToDouble(i.discountAmount),
-						transDate = Convert.ToDateTime(i.createdAt),
+						transDate1 = Convert.ToDateTime(i.createdAt),
+						transDate = Convert.ToDateTime(i.createdAt).ToShortDateString(),
 						reverseInvoice = false,
-						taxDate = Convert.ToDateTime(i.createdAt),
+						shipDate1= Convert.ToDateTime(i.createdAt),
+						taxDate1 = Convert.ToDateTime(i.createdAt),
 						taxable = Convert.ToBoolean(i.lineitemtaxable),
 						currencyCode = i.currency,
 						isAccurate = false,
+						financialStatus = i.financialStatus,
 						detailItem = new List<AccuSalesInvoiceDetailItemViewModel>()
 						{
 						 new AccuSalesInvoiceDetailItemViewModel()
@@ -91,7 +101,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					{
 						unitPrice = Convert.ToDouble(i.lineitemPrice),
 						quantity = Convert.ToDouble(i.lineItemQuantity),
-						itemNo = i.lineItemName
+						itemNo = i.barcode
 
 					};
 
@@ -108,7 +118,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			List<AccuSalesInvoice> salesInvoices = new List<AccuSalesInvoice>();
 
 
-			foreach (var i in data1)
+			foreach (var i in data1.Where(s=>s.financialStatus =="paid" || s.financialStatus == "Paid"))
 			{
 				List<AccuSalesInvoiceDetailItem> invoiceDetailItems = new List<AccuSalesInvoiceDetailItem>();
 
@@ -129,10 +139,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 				AccuSalesInvoice accuSales = new AccuSalesInvoice
 				{
 					OrderDownPaymentNumber = i.orderDownPaymentNumber,
+					Number  = i.number ,
 					ReverseInvoice = i.reverseInvoice,
 					TaxDate = i.CreatedUtc,
 					TaxNumber = i.taxNumber,
-					TransDate = i.transDate,
+					TransDate = i.transDate1,
 					CustomerNo = i.customerNo,
 					BranchName = i.branchName,
 					CurrencyCode = i.currencyCode,
@@ -159,6 +170,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 				if (string.IsNullOrWhiteSpace(item.name))
 				{
 					ErrorMessage = string.Concat(ErrorMessage, "No Penjualan Tidak Boleh Kosong, ");
+				}
+				if (string.IsNullOrWhiteSpace(item.barcode))
+				{
+					ErrorMessage = string.Concat(ErrorMessage, "Barcode Tidak Boleh Kosong, ");
 				}
 				var isExist = Query.Where(s => s.OrderDownPaymentNumber == item.name);
 				if (isExist.Count() > 0)
@@ -190,25 +205,12 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			foreach (var i in data)
 			{
 				EntityExtension.FlagForCreate(i, username, USER_AGENT);
-
-
 				foreach (var iii in i.DetailItem)
 				{
 					EntityExtension.FlagForCreate(iii, username, USER_AGENT);
 
-					//foreach (var iv in iii.DetailSerialNumber)
-					//{
-					//	EntityExtension.FlagForCreate(iv, username, USER_AGENT);
-					//}
 				}
-				//foreach (var ii in i.DetailExpense)
-				//{
-				//	EntityExtension.FlagForCreate(ii, username, USER_AGENT);
-				//}
-				//foreach (var ii in i.DetailDownPayment)
-				//{
-				//	EntityExtension.FlagForCreate(ii, username, USER_AGENT);
-				//}
+				
 				dbSet.Add(i);
 			}
 			var result = await dbContext.SaveChangesAsync();
@@ -217,31 +219,31 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 		{
 			public SalesInvoiceMap()
 			{
-
-				Map(p => p.name).Index(0);
-				Map(p => p.paidAt).Index(3);
-				Map(p => p.currency).Index(7);
-				Map(p => p.taxes).Index(10);
-				Map(p => p.total).Index(11);
-				Map(p => p.discountAmount).Index(13);
-				Map(p => p.createdAt).Index(15);
-				Map(p => p.lineItemQuantity).Index(16);
-				Map(p => p.lineItemName).Index(17);
-				Map(p => p.lineitemPrice).Index(18);
-				Map(p => p.lineitemsku).Index(20);
-				Map(p => p.lineitemtaxable).Index(22);
-				Map(p => p.billingName).Index(24);
-				Map(p => p.isRefund).Index(49);
-				Map(p => p.location).Index(53);
+				Map(p => p.barcode ).Index(0);
+				Map(p => p.name).Index(1);
+				Map(p => p.paidAt).Index(4);
+				Map(p => p.currency).Index(8);
+				Map(p => p.taxes).Index(11);
+				Map(p => p.total).Index(12);
+				Map(p => p.discountAmount).Index(14);
+				Map(p => p.createdAt).Index(16);
+				Map(p => p.lineItemQuantity).Index(17);
+				Map(p => p.lineItemName).Index(18);
+				Map(p => p.lineitemPrice).Index(19);
+				Map(p => p.lineitemsku).Index(21);
+				Map(p => p.lineitemtaxable).Index(23);
+				Map(p => p.billingName).Index(25);
+				Map(p => p.isRefund).Index(50);
+				Map(p => p.location).Index(54);
 			}
 		}
 		public Tuple<List<AccuSalesInvoice>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
 		{
-			IQueryable<AccuSalesInvoice> Query = this.dbSet.Include(x => x.DetailExpense).Include(x => x.DetailDownPayment).Include(x => x.DetailItem);
+			IQueryable<AccuSalesInvoice> Query = this.dbSet.Include(x => x.DetailExpense).Include(x => x.DetailItem);
 
 			List<string> searchAttributes = new List<string>()
 			{
-				"CustomerNo", "OrderDownPaymentNumber","BranchName"
+				"CustomerNo", "Number","BranchName"
 			};
 
 			Query = QueryHelper<AccuSalesInvoice>.ConfigureSearch(Query, searchAttributes, Keyword);
@@ -289,57 +291,61 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 		}
 		public async Task Create(List<AccuSalesViewModel> dataviewModel,string username)
 		{
-			var Session = OpenDb();
-
+			var session = facade.OpenDb();
+			List<AccuSalesUploadViewModel> data = new List<AccuSalesUploadViewModel>();
+			List<AccuSalesInvoiceDetailItemUploadViewModel> dataDetail = new List<AccuSalesInvoiceDetailItemUploadViewModel>();
 			var httpClient = new HttpClient();
-			var url = Session.Result.host + "/accurate/api/sales-invoice/save.do";
+			var url = session.Result.host + "/accurate/api/sales-invoice/save.do";
 
-			foreach (var item in dataviewModel)
+			foreach (var i in dataviewModel)
 			{
-				item.LastModifiedBy = username;
-				item.LastModifiedUtc = DateTime.Now;
-				item.isAccurate = true;
-				foreach (var detail in item.detailItem)
+
+				var detail = from a in i.detailItem select a;
+				foreach (var d in detail)
 				{
-
-					var data = new[]
-			{
-
-				new KeyValuePair<string, string>("customerNo", "C.00004"),
-				new KeyValuePair<string, string>("orderDownPaymentNumber",item.orderDownPaymentNumber),
-				new KeyValuePair<string, string>("reverseInvoice", "false"),
-				new KeyValuePair<string, string>("taxDate", item.taxDate.ToString()),
-				new KeyValuePair<string, string>("taxNumber", ""),
-				new KeyValuePair<string, string>("branchName", "JAKARTA"),
-				new KeyValuePair<string, string>("detailItem.itemNo", detail.itemNo),
-				new KeyValuePair<string, string>("detailItem.unitPrice", detail.unitPrice.ToString()),
-				new KeyValuePair<string, string>("detailItem.controlQuantity", detail.quantity.ToString()),
-
-				new KeyValuePair<string, string>("transDate", item.transDate.ToString())
-			};
-
-
-					var content = new FormUrlEncodedContent(data);
-
-					using (var request = new HttpRequestMessage(HttpMethod.Post, url))
+					var detailItem=  new AccuSalesInvoiceDetailItemUploadViewModel
 					{
-						request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
-						request.Headers.Add("X-Session-ID", Session.Result.session);
-						request.Content = content;
+							itemNo= d.itemNo,
+							unitPrice = d.unitPrice,
+							quantity= d.quantity
+					};
+					dataDetail.Add(detailItem);
+				}
+				AccuSalesUploadViewModel accuSalesUploadView = new AccuSalesUploadViewModel
+				{
+					branchName= "JAKARTA",
+					customerNo = "C.00004",
+					number = i.number,
+					orderDownPaymentNumber = i.number,
+					reverseInvoice = i.reverseInvoice,
+					taxDate = Convert.ToDateTime( i.transDate).Date.ToShortDateString(),
+					transDate = Convert.ToDateTime(i.transDate).Date.ToShortDateString(),
+					taxNumber = i.taxNumber,
+					detailItem = dataDetail
+				};
 
-						var response = await httpClient.SendAsync(request);
+				var dataToBeSend = JsonConvert.SerializeObject(accuSalesUploadView);
 
-						if (response.IsSuccessStatusCode)
-						{
-							var message = response.Content.ReadAsStringAsync().Result;
-							List<AccuSalesInvoice> data2 = await MapToModel(dataviewModel);
-							await UploadData(data2, username);
-						}
-						else
-						{
-							var message = response.Content.ReadAsStringAsync().Result;
-							//	return message;
-						}
+				var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+			 
+				using (var request = new HttpRequestMessage(HttpMethod.Post, url))
+				{
+					request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+					request.Headers.Add("X-Session-ID", session.Result.session);
+					request.Content = content;
+
+					var response = await httpClient.SendAsync(request);
+					var res = response.Content.ReadAsStringAsync().Result;
+					var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
+
+					if (response.IsSuccessStatusCode && message.s)
+					{
+						//dataToBeMapped.IsAccurate = true;
+						//EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
+					}
+					else
+					{
+						throw new Exception("data " + i.number + " gagal diupload");
 					}
 				}
 			}
