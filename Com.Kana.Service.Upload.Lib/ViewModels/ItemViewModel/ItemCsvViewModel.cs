@@ -35,7 +35,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.ItemViewModel
 
         //public string VariantCompareAtPrice { get; set; }
         //public string VariantRequiresShipping { get; set; }
-        public bool variantTaxable { get; set; } //tax
+        public string variantTaxable { get; set; } //tax
         public string variantBarcode { get; set; } //barcode
 
         //public string imageSrc { get; set; }
