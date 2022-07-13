@@ -178,6 +178,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 						s.transDate, 
 						s.customerNo,
 						s.branchName,
+						s.isAccurate,
 						s.detailItem
 					}).ToList()
 				);
