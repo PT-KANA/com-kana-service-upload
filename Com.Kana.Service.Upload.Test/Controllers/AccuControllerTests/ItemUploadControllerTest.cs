@@ -106,7 +106,7 @@ namespace Com.Kana.Service.Upload.Test.Controllers.AccuControllerTests
 		}
 		 
 		[Fact]
-		public void Should_Error_Get_()
+		public void Should_OK_Get_()
 		{
 			var validateMock = new Mock<IValidateService>();
 			validateMock.Setup(s => s.Validate(It.IsAny<AccuItemViewModel>())).Verifiable();
@@ -123,6 +123,50 @@ namespace Com.Kana.Service.Upload.Test.Controllers.AccuControllerTests
 			ItemUploadController controller = GetController(mockFacade, validateMock, mockMapper);
 			var response = controller.Get();
 			Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
+		}
+
+		[Fact]
+		public void Should_error_PostCSVFileAsync()
+		{
+			var validateMock = new Mock<IValidateService>();
+			validateMock.Setup(s => s.Validate(It.IsAny<AccuItemViewModel>())).Verifiable();
+
+			var mockFacade = new Mock<IItemFacade>();
+
+			mockFacade.Setup(x => x.ReadForUpload(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
+				.Returns(Tuple.Create(new List<AccuItem>(), 0, new Dictionary<string, string>()));
+
+			var mockMapper = new Mock<IMapper>();
+			mockMapper.Setup(x => x.Map<List<AccuItemViewModel>>(It.IsAny<List<AccuItem>>()))
+				.Returns(new List<AccuItemViewModel> { ViewModel });
+
+			ItemUploadController controller = GetController(mockFacade, validateMock, mockMapper);
+			var response = controller.PostCSVFileAsync();
+			Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response.Result));
+		}
+
+		[Fact]
+		public void Should_created_POst_()
+		{
+			var validateMock = new Mock<IValidateService>();
+			validateMock.Setup(s => s.Validate(It.IsAny<AccuItemViewModel>())).Verifiable();
+
+			var mockFacade = new Mock<IItemFacade>();
+
+			mockFacade.Setup(x => x.ReadForUpload(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
+				.Returns(Tuple.Create(new List<AccuItem>(), 0, new Dictionary<string, string>()));
+
+			var mockMapper = new Mock<IMapper>();
+			mockMapper.Setup(x => x.Map<List<AccuItemViewModel>>(It.IsAny<List<AccuItem>>()))
+				.Returns(new List<AccuItemViewModel> { ViewModel });
+			List<AccuItemViewModel> accuItemViewModels = new List<AccuItemViewModel>
+			{
+				new AccuItemViewModel
+				{ }
+			};
+			ItemUploadController controller = GetController(mockFacade, validateMock, mockMapper);
+			var response = controller.Post(accuItemViewModels);
+			Assert.Equal((int)HttpStatusCode.Created, GetStatusCode(response.Result));
 		}
 	}
 }
