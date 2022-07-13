@@ -37,8 +37,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 
 
         [HttpPost("upload")]
-        public async Task<IActionResult> PostCSVFileAsync(double source, string sourcec, string sourcen, double destination, string destinationc, string destinationn, DateTimeOffset date)
-        // public async Task<IActionResult> PostCSVFileAsync(double source, double destination,  DateTime date)
+        public async Task<IActionResult> PostCSVFileAsync()
         {
             try
             {
@@ -167,15 +166,16 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 
                 var Data = facade.ReadForUpload(page, size, order, keyword, filter);
 
-                var newData = mapper.Map<List<AccuSalesReturn>>(Data.Item1);
+                var newData = mapper.Map<List<AccuSalesReturnViewModel>>(Data.Item1);
 
                 List<object> listData = new List<object>();
                 listData.AddRange(
                     newData.AsQueryable().Select(s => new
                     {
-                        s.TransDate,
-                        s.CustomerNo,
-                        s.ReturnType
+                        s.Id,
+                        s.transDate,
+                        s.customerNo,
+                        s.invoiceNumber
                     }).ToList()
                 );
 

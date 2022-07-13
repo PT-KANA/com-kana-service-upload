@@ -15,5 +15,6 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.SalesReturnViewModel
         public string taxDate { get; set; } //Tgl Faktur Pajak
         public string returnType { get; set; } //Retur Tipe
         public string detailNotes { get; set; } //Keterangan
+        public string quantity { get; set; } //Kuantitas
     }
 }
