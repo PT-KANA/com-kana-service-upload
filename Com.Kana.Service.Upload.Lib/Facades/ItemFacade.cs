@@ -21,6 +21,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Com.Kana.Service.Upload.Lib.ViewModels;
 using AutoMapper;
+using Com.Kana.Service.Upload.Lib.ViewModels.AccuItemViewModel.AccuItemUploadViewModel;
 
 namespace Com.Kana.Service.Upload.Lib.Facades
 {
@@ -79,46 +80,57 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         public async Task<List<AccuItemViewModel>> MapToViewModel(List<ItemCsvViewModel> csv)
         {
             List<AccuItemViewModel> item = new List<AccuItemViewModel>();
-
-            foreach(var i in csv)
+            List<string> tempNo = new List<string>();
+            foreach (var i in csv)
             {
-                AccuItemViewModel ii = new AccuItemViewModel
-                {
-                    itemType = "INVENTORY",
-                    name = string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value : i.title + " - " + i.option1Value,
-                    unit1Name = "PCS",
-                    unitPrice = string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice),
-                    upcNo = i.variantBarcode.Replace("'", string.Empty).Trim(),
-                    no = i.variantBarcode.Replace("'", string.Empty).Trim(),
-                    usePPn = string.IsNullOrWhiteSpace(i.variantTaxable) ? (i.variantTaxable == "TRUE" ? true : false) : false,
-                    preferedVendorName = i.vendor,
-                    vendorPrice = string.IsNullOrWhiteSpace(i.costPeritem) ? 0 : Convert.ToDouble(i.costPeritem)
-                    //string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value  : i.title + " - " + i.option1Value,
-                    //detailGroup = new List<AccuItemDetailGroupViewModel>()
-                    //{
-                    //    new AccuItemDetailGroupViewModel()
-                    //    {
-                    //        quantity = string.IsNullOrWhiteSpace(i.variantInventoryQty) ? 0 : Convert.ToDouble(i.variantInventoryQty),
-                    //    }
-                    //},
-                    //detailOpenBalance = new List<AccuItemDetailOpenBalanceViewModel>()
-                    //{
-                    //    new AccuItemDetailOpenBalanceViewModel()
-                    //    {
-                    //        quantity = string.IsNullOrWhiteSpace(i.variantInventoryQty) ? 0 : Convert.ToDouble(i.variantInventoryQty),
-                    //        warehouseName = i.variantInventoryTracker,
-                    //        detailSerialNumber = new List<AccuItemDetailSerialNumberViewModel>()
-                    //        {
-                    //            new AccuItemDetailSerialNumberViewModel
-                    //            {
-                    //                quantity = string.IsNullOrWhiteSpace(i.variantInventoryQty) ? 0 : Convert.ToDouble(i.variantInventoryQty),
-                    //            }
-                    //        }
-                    //    }
-                    //}
-                };
+                var barcode = i.variantBarcode.Replace("'", string.Empty).Trim();
+                var isSameItem = tempNo.FirstOrDefault(s => s == barcode);
 
-                item.Add(ii);
+                if(isSameItem == null)
+                {
+                    tempNo.Add(barcode);
+                    AccuItemViewModel ii = new AccuItemViewModel
+                    {
+                        itemType = "INVENTORY",
+                        name = string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value : i.title + " - " + i.option1Value,
+                        unit1Name = "PCS",
+                        unitPrice = string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice),
+                        upcNo = barcode,
+                        no = barcode,
+                        serialNumberType = "UNIQUE",
+                        usePPn = string.IsNullOrWhiteSpace(i.variantTaxable) ? false : (i.variantTaxable == "TRUE" ? true : false),
+                        preferedVendorName = string.IsNullOrWhiteSpace(i.vendor) ? csv.Find(x => x.handle == i.handle).vendor : i.vendor,
+                        vendorPrice = string.IsNullOrWhiteSpace(i.costPeritem) ? (string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice)) : Convert.ToDouble(i.costPeritem),
+                        vendorUnitName = "PCS",
+                        detailOpenBalance = new List<AccuItemDetailOpenBalanceViewModel>()
+                        {
+                            new AccuItemDetailOpenBalanceViewModel()
+                            {
+                                asOf = DateTimeOffset.Now,
+                                quantity = string.IsNullOrWhiteSpace(i.variantInventoryQty) ? 0 : Convert.ToDouble(i.variantInventoryQty),
+                                warehouseName = i.variantInventoryTracker,
+                                itemUnitName = "PCS",
+                                unitCost = string.IsNullOrWhiteSpace(i.costPeritem) ? (string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice)) : Convert.ToDouble(i.costPeritem)
+                            }
+                        }
+                    };
+
+                    item.Add(ii);
+                }
+                else
+                {
+                    var b = new AccuItemDetailOpenBalanceViewModel()
+                    {
+                        asOf = DateTimeOffset.Now,
+                        quantity = string.IsNullOrWhiteSpace(i.variantInventoryQty) ? 0 : Convert.ToDouble(i.variantInventoryQty),
+                        warehouseName = i.variantInventoryTracker,
+                        itemUnitName = "PCS",
+                        unitCost = string.IsNullOrWhiteSpace(i.costPeritem) ? (string.IsNullOrWhiteSpace(i.variantPrice) ? Convert.ToDouble(i.variantPrice) : 0) : 0
+                    };
+
+                    AccuItemViewModel header = item.Where(a => a.no == barcode).FirstOrDefault();
+                    header.detailOpenBalance.Add(b);
+                }
             }
 
             return item;
@@ -128,11 +140,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         {
             List<AccuItem> item = new List<AccuItem>();
             //List<AccuItemDetailGroup> itemDetailGroup = new List<AccuItemDetailGroup>();
-            //List<AccuItemDetailOpenBalance> itemDetailOpenBalance = new List<AccuItemDetailOpenBalance>();
             //List<AccuItemDetailSerialNumber> itemDetailSerialNumber = new List<AccuItemDetailSerialNumber>();
 
             foreach (var i in data1)
             {
+                List<AccuItemDetailOpenBalance> itemDetailOpenBalance = new List<AccuItemDetailOpenBalance>();
                 //foreach(var ii in i.detailGroup)
                 //{
                 //    AccuItemDetailGroup temp2 = new AccuItemDetailGroup
@@ -143,27 +155,29 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 //    itemDetailGroup.Add(temp2);
                 //}
 
-                //foreach(var iii in i.detailOpenBalance)
-                //{
-                //    foreach(var iv in iii.detailSerialNumber)
-                //    {
-                //        AccuItemDetailSerialNumber temp4 = new AccuItemDetailSerialNumber
-                //        {
-                //            Quantity = iv.quantity
-                //        };
+                foreach (var iii in i.detailOpenBalance)
+                {
+                    //    foreach(var iv in iii.detailSerialNumber)
+                    //    {
+                    //        AccuItemDetailSerialNumber temp4 = new AccuItemDetailSerialNumber
+                    //        {
+                    //            Quantity = iv.quantity
+                    //        };
 
-                //        itemDetailSerialNumber.Add(temp4);
-                //    }
+                    //        itemDetailSerialNumber.Add(temp4);
+                    //    }
 
-                //    AccuItemDetailOpenBalance temp3 = new AccuItemDetailOpenBalance
-                //    {
-                //        Quantity = iii.quantity,
-                //        WarehouseName = iii.warehouseName,
-                //        DetailSerialNumber = itemDetailSerialNumber
-                //    };
+                    AccuItemDetailOpenBalance temp3 = new AccuItemDetailOpenBalance
+                    {
+                        AsOf = iii.asOf,
+                        Quantity = iii.quantity,
+                        ItemUnitName = iii.itemUnitName,
+                        WarehouseName = iii.warehouseName,
+                        UnitCost = iii.unitCost,
+                    };
 
-                //    itemDetailOpenBalance.Add(temp3);
-                //}
+                    itemDetailOpenBalance.Add(temp3);
+                }
 
                 AccuItem temp1 = new AccuItem
                 {
@@ -175,9 +189,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     UnitPrice = i.unitPrice,
                     UsePPn = i.usePPn,
                     VendorPrice = i.vendorPrice,
-                    PreferedVendorName = i.vendorUnitName
-                    //DetailGroup = itemDetailGroup,
-                    //DetailOpenBalance = itemDetailOpenBalance,
+                    VendorUnitName = i.vendorUnitName,
+                    PreferedVendorName = i.preferedVendorName,
+                    SerialNumberType = i.serialNumberType,
+                    DetailOpenBalance = itemDetailOpenBalance,
                 };
 
                 item.Add(temp1);
@@ -235,6 +250,16 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     ErrorMessage = string.Concat(ErrorMessage, "Harga harus lebih besar dari 0, ");
                 }
 
+                decimal qty = 0;
+                if (string.IsNullOrWhiteSpace(item.variantInventoryQty))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Qty tidak boleh kosong, ");
+                }
+                else if (!decimal.TryParse(item.variantInventoryQty, out qty))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Harga harus numerik, ");
+                }
+
                 if (!string.IsNullOrEmpty(ErrorMessage))
                 {
                     ErrorMessage = ErrorMessage.Remove(ErrorMessage.Length - 2);
@@ -244,6 +269,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     Error.Add("option1Value", item.option1Value);
                     Error.Add("variantBarcode", item.variantBarcode);
                     Error.Add("variantPrice", item.variantPrice);
+                    Error.Add("variantInventoryQty", item.variantInventoryQty);
                     Error.Add("error", ErrorMessage);
 
                     ErrorList.Add(Error);
@@ -269,15 +295,15 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 //    EntityExtension.FlagForCreate(ii, username, USER_AGENT);
                 //}
 
-                //foreach (var iii in i.DetailOpenBalance)
-                //{
-                //    EntityExtension.FlagForCreate(iii, username, USER_AGENT);
+                foreach (var iii in i.DetailOpenBalance)
+                {
+                    EntityExtension.FlagForCreate(iii, username, USER_AGENT);
 
-                //    foreach (var iv in iii.DetailSerialNumber)
-                //    {
-                //        EntityExtension.FlagForCreate(iv, username, USER_AGENT);
-                //    }
-                //}
+                    //    foreach (var iv in iii.DetailSerialNumber)
+                    //    {
+                    //        EntityExtension.FlagForCreate(iv, username, USER_AGENT);
+                    //    }
+                }
 
                 dbSet.Add(i);
             }
@@ -379,52 +405,59 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public async Task Create(List<AccuItemViewModel> viewModel, string username)
         {
-            var session = facade.OpenDb();
+            var session = await facade.OpenDb();
 
-            var httpClient = new HttpClient();
-            var url = session.Result.host + "/accurate/api/item/save.do";
+            //var httpClient = new HttpClient();
+            IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
+            var url = $"{AuthCredential.Host}/accurate/api/item/save.do";
 
             foreach(var i in viewModel)
             {
-                var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).FirstOrDefault();
-                var dataToBeConvert = mapper.Map<AccuItemViewModel>(dataToBeMapped);
-                //dataToBeConvert.detailGroup = new List<AccuItemDetailGroupViewModel>();
-                //dataToBeConvert.detailOpenBalance = new List<AccuItemDetailOpenBalanceViewModel>();
+                var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).Include(m => m.DetailOpenBalance).FirstOrDefault();
 
-                //var dataToBeSend = JsonConvert.SerializeObject(dataToBeConvert);
-                //var data = GetValues(i);
-                var data = new[]
+                List<ItemDetailOpenBalanceViewModel> detailOpenBalance = new List<ItemDetailOpenBalanceViewModel>();
+
+                foreach(var x in dataToBeMapped.DetailOpenBalance)
                 {
-                    new KeyValuePair<string, string>("name", dataToBeConvert.name),
-                    new KeyValuePair<string, string>("itemType", dataToBeConvert.itemType),
-                    new KeyValuePair<string, string>("no", dataToBeConvert.no),
-                    new KeyValuePair<string, string>("upcNo", dataToBeConvert.upcNo),
-                    new KeyValuePair<string, string>("unit1Name", dataToBeConvert.unit1Name),
-                    new KeyValuePair<string, string>("unitPrice", dataToBeConvert.unitPrice.ToString())
+                    detailOpenBalance.Add(new ItemDetailOpenBalanceViewModel { 
+                        itemUnitName = x.ItemUnitName,
+                        asOf = x.AsOf.Date.ToShortDateString(),
+                        quantity = x.Quantity,
+                        unitCost = x.UnitCost,
+                        warehouseName = x.WarehouseName
+                    });
+                }
+
+                var dataToBeSerialize = new ItemUploadViewModel 
+                { 
+                    itemType = dataToBeMapped.ItemType,
+                    name = dataToBeMapped.Name,
+                    no = dataToBeMapped.No,
+                    preferedVendorName = dataToBeMapped.PreferedVendorName,
+                    serialNumberType = dataToBeMapped.SerialNumberType,
+                    unit1Name = dataToBeMapped.Unit1Name,
+                    unitPrice = dataToBeMapped.UnitPrice,
+                    upcNo = dataToBeMapped.UpcNo,
+                    usePPn = dataToBeMapped.UsePPn,
+                    vendorPrice = dataToBeMapped.VendorPrice,
+                    vendorUnitName = dataToBeMapped.VendorUnitName,
+                    detailOpenBalance = detailOpenBalance
                 };
 
-                var content = new FormUrlEncodedContent(data);
-                //var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+                var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
 
-                using (var request = new HttpRequestMessage(HttpMethod.Post, url))
+                var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+                var response = httpClient.PostAsync(url, content).Result;
+                var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+
+                if (response.IsSuccessStatusCode && message.s)
                 {
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
-                    request.Headers.Add("X-Session-ID", session.Result.session);
-                    request.Content = content;
-
-                    var response = await httpClient.SendAsync(request);
-                    var res = response.Content.ReadAsStringAsync().Result;
-                    var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
-
-                    if (response.IsSuccessStatusCode && message.s)
-                    {
-                        dataToBeMapped.IsAccurate = true;
-                        EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
-                    }
-                    else
-                    {
-                        throw new Exception("data " + i.name + " gagal diupload");
-                    }
+                    dataToBeMapped.IsAccurate = true;
+                    EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
+                }
+                else
+                {
+                    throw new Exception("data " + i.no + " gagal diupload");
                 }
             }
 
