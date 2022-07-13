@@ -5,6 +5,7 @@ using Com.Kana.Service.Upload.Lib.Interfaces.SalesReturnInterface;
 using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesReturnModel;
 using Com.Kana.Service.Upload.Lib.ViewModels;
 using Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesReturnViewModel;
+using Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesReturnViewModel.UploadSalesReturnViewModel;
 using Com.Kana.Service.Upload.Lib.ViewModels.SalesReturnViewModel;
 using Com.Moonlay.Models;
 using Com.Moonlay.NetCore.Lib;
@@ -46,7 +47,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public List<string> CsvHeader { get; } = new List<string>()
         {
-            "Tanggal Retur", "No Identitas Customer", "No Penjualan", "Kode Barang", "Harga Barang", "No Faktur Pajak", "Tanggal Faktur Pajak", "Keterangan"
+            "Tanggal Retur", "No Identitas Customer", "No Penjualan", "Kode Barang", "Harga Barang", "No Faktur Pajak", "Tanggal Faktur Pajak", "Kuantitas", "Keterangan"
         };
 
         public async Task<List<AccuSalesReturnViewModel>> MapToViewModel(List<SalesReturnCsvViewModel> csv)
@@ -66,8 +67,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                         customerNo = string.IsNullOrWhiteSpace(i.customerNo) ? "C.00004" : i.customerNo,
                         //salesOrderNo = i.salesOrderNo,
                         invoiceNumber = i.salesOrderNo,
-                        transDate1 = Convert.ToDateTime(i.transDate),
-                        taxDate1 = Convert.ToDateTime(i.taxDate),
+                        transDate = Convert.ToDateTime(i.transDate),
+                        taxDate = Convert.ToDateTime(i.taxDate),
                         taxNumber = i.taxNumber,
                         returnType= "INVOICE",
                         branchName= "JAKARTA",
@@ -78,7 +79,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                             {
                                 unitPrice= Convert.ToDouble(i.unitPrice),
                                 itemNo=i.itemNo,
-                                detailNotes=i.detailNotes
+                                detailNotes=i.detailNotes,
+                                quantity= Convert.ToDouble(i.quantity)
                             }
                         }
 
@@ -92,7 +94,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     {
                         unitPrice = Convert.ToDouble(i.unitPrice),
                         itemNo = i.itemNo,
-                        detailNotes = i.detailNotes
+                        detailNotes = i.detailNotes,
+                        quantity = Convert.ToDouble(i.quantity)
                     };
 
                     AccuSalesReturnViewModel header = item.Where(a => a.invoiceNumber == i.salesOrderNo).FirstOrDefault();
@@ -115,7 +118,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                         UnitPrice = ii.unitPrice,
                         Quantity = ii.quantity,
                         ItemNo = ii.itemNo,
-                        DetailNotes=ii.detailNotes
+                        DetailNotes=ii.detailNotes,
                     };
 
                     ReturnDetailItems.Add(dd);
@@ -126,9 +129,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 {
                     InvoiceNumber = i.invoiceNumber,
                     CustomerNo = i.customerNo,
-                    TaxDate = i.taxDate1,
+                    TaxDate = i.taxDate,
                     TaxNumber = i.taxNumber,
-                    TransDate = i.transDate1,
+                    TransDate = i.transDate,
                     BranchName = i.branchName,
                     CurrencyCode = i.currencyCode,
                     ReturnType = i.returnType,
@@ -144,8 +147,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         public async Task Create(List<AccuSalesReturnViewModel> viewModel, string username)
         {
             var session = await facade.OpenDb();
-
-            //var httpClient = new HttpClient();
+            
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             IHttpClientService httpClient1 = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
             var url = $"{AuthCredential.Host}/accurate/api/sales-return/save.do";
@@ -153,21 +155,35 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             foreach (var i in viewModel)
             {
                 var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).Include(m => m.DetailItem).FirstOrDefault();
-                var dataToBeConvert = mapper.Map<AccuSalesReturnViewModel>(dataToBeMapped);
-                dataToBeConvert.transDate = Convert.ToDateTime(dataToBeConvert.transDate).Date.ToString();
-                dataToBeConvert.taxDate = Convert.ToDateTime(dataToBeConvert.taxDate).Date.ToString();
-                dataToBeConvert.branchName = "JAKARTA";
-                dataToBeConvert.customerNo = "C.00004";
-                dataToBeConvert.Id = 0;
 
-                foreach(var x in dataToBeConvert.detailItem)
+                List<SalesReturnDetailItemViewModel> detailItem = new List<SalesReturnDetailItemViewModel>();
+
+                foreach(var x in dataToBeMapped.DetailItem)
                 {
-                    x.Id = 0;
+                    detailItem.Add( new SalesReturnDetailItemViewModel { 
+
+                        itemNo = x.ItemNo,
+                        unitPrice = x.UnitPrice,
+                        quantity = x.Quantity,
+                        detailNotes = x.DetailNotes,
+                        itemUnitName = "PCS"
+                    });
                 }
 
-                var dataToBeSend = JsonConvert.SerializeObject(dataToBeConvert);
-                var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+                var dataToBeSerialize = new SalesReturnUploadViewModel
+                {
+                    customerNo = "C.00004",
+                    branchName = "JAKARTA",
+                    invoiceNumber = dataToBeMapped.InvoiceNumber,
+                    returnType = dataToBeMapped.ReturnType,
+                    taxDate = dataToBeMapped.TaxDate.Date.ToShortDateString(),
+                    transDate = dataToBeMapped.TransDate.Date.ToShortDateString(),
+                    detailItem = detailItem
+                };
 
+                var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
+
+                var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
                 var response = httpClient.PostAsync(url, content).Result;
                 var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
 
@@ -180,30 +196,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 {
                     throw new Exception("data " + i.invoiceNumber + " gagal diupload");
                 }
-
-                //using(var request = new HttpRequestMessage(HttpMethod.Post, url))
-                //{
-                //    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
-                //    request.Headers.Add("X-Session-ID", session.Result.session);
-                //    request.Content = content;
-
-                //    var response = await httpClient.SendAsync(request);
-                //    var res = response.Content.ReadAsStringAsync().Result;
-                //    var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
-
-                //    if (response.IsSuccessStatusCode && message.s)
-                //    {
-                //        dataToBeMapped.IsAccurate = true;
-                //        EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
-                //    }
-                //    else
-                //    {
-                //        throw new Exception("data " + i.invoiceNumber + " gagal diupload");
-                //    }
-                //}
             }
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
         }
 
         public Tuple<List<AccuSalesReturn>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
@@ -250,15 +245,55 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             List<object> ErrorList = new List<object>();
             string ErrorMessage;
             bool Valid = true;
-            IQueryable<AccuSalesReturn> Query = this.dbSet.Include(x => x.DetailItem);
+            IQueryable<AccuSalesReturn> Query = this.dbSet;
 
             foreach (SalesReturnCsvViewModel item in data)
             {
                 ErrorMessage = "";
+                var isExist = Query.Where(s => s.InvoiceNumber == item.salesOrderNo).ToList();
 
                 if (string.IsNullOrWhiteSpace(item.customerNo))
                 {
                     ErrorMessage = string.Concat(ErrorMessage, "No Identitas Customer Tidak Boleh Kosong, ");
+                }
+
+                if (isExist.Count > 0)
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Nomor Penjualan Sudah Ada, ");
+                }
+
+                if (string.IsNullOrWhiteSpace(item.salesOrderNo))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Nomor Penjualan Tidak Boleh Kosong, ");
+                }
+
+                if (string.IsNullOrWhiteSpace(item.itemNo))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Barcode Tidak Boleh Kosong, ");
+                }
+
+                decimal domesticSale = 0;
+                if (string.IsNullOrWhiteSpace(item.unitPrice))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Harga tidak boleh kosong, ");
+                }
+                else if (!decimal.TryParse(item.unitPrice, out domesticSale))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Harga harus numerik, ");
+                }
+                else if (domesticSale < 0)
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Harga harus lebih besar dari 0, ");
+                }
+
+                decimal qty = 0;
+                if (string.IsNullOrWhiteSpace(item.quantity))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Qty tidak boleh kosong, ");
+                }
+                else if (!decimal.TryParse(item.quantity, out qty))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Harga harus numerik, ");
                 }
 
                 if (!string.IsNullOrEmpty(ErrorMessage))
@@ -266,6 +301,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     ErrorMessage = ErrorMessage.Remove(ErrorMessage.Length - 2);
                     var Error = new ExpandoObject() as IDictionary<string, object>;
                     Error.Add("No Identitas Customer", item.customerNo);
+                    Error.Add("No Penjualan", item.salesOrderNo);
+                    Error.Add("Barcode", item.itemNo);
+                    Error.Add("Kuantitas", item.quantity);
+                    Error.Add("Harga", item.unitPrice);
                     Error.Add("Error", ErrorMessage);
                     ErrorList.Add(Error);
                 }
@@ -291,7 +330,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 Map(p => p.unitPrice).Index(4);
                 Map(p => p.taxNumber).Index(5);
                 Map(p => p.taxDate).Index(6);
-                Map(p => p.detailNotes).Index(7);
+                Map(p => p.quantity).Index(7);
+                Map(p => p.detailNotes).Index(8);
+                
             }
         }
     }

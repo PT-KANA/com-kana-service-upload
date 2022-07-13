@@ -10,9 +10,9 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesReturnViewModel
         public string salesOrderNo { get; set; }
         public string customerNo { get; set; }
         public string returnType { get; set; }
-        public DateTimeOffset taxDate1 { get; set; }
+        public DateTimeOffset taxDate { get; set; }
         public string taxNumber { get; set; }
-        public DateTimeOffset transDate1 { get; set; }
+        public DateTimeOffset transDate { get; set; }
         public long branchId { get; set; }
         public string branchName { get; set; }
         public string cashDiscPercent { get; set; }
@@ -32,8 +32,6 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesReturnViewModel
         public string toAddress { get; set; }
         public long typeAutoNumber { get; set; }
         public bool isAccurate { get; set; }
-        public string transDate { get; set; }
-        public string taxDate { get; set; }
         public List<AccuSalesReturnDetailExpenseViewModel> detailExpense { get; set; }
         public List<AccuSalesReturnDetailItemViewModel> detailItem { get; set; }
     }
