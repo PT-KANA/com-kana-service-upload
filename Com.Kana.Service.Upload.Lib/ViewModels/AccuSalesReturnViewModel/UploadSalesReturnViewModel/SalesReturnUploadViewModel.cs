@@ -22,6 +22,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesReturnViewModel.Upload
 		public double quantity { get; set; }
 		public string detailNotes { get; set; }
 		public string itemUnitName { get; set; }
+		public string warehouseName { get; set; }
     }
 
 }

@@ -302,6 +302,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public async Task Create(List<AccuItemViewModel> viewModel, string username)
         {
+            var token = await facade.RefreshToken();
             var session = await facade.OpenDb();
 
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));

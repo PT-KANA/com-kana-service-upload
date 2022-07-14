@@ -64,7 +64,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     AccuSalesReturnViewModel ii = new AccuSalesReturnViewModel
                     {
                         //customerNo = string.IsNullOrWhiteSpace(i.customerNo) ? "CUST" : i.customerNo,
-                        customerNo = string.IsNullOrWhiteSpace(i.customerNo) ? "C.00004" : i.customerNo,
+                        customerNo = string.IsNullOrWhiteSpace(i.customerNo) ? "PELANGGAN SHOPIFY" : i.customerNo,
                         //salesOrderNo = i.salesOrderNo,
                         invoiceNumber = i.salesOrderNo,
                         transDate = Convert.ToDateTime(i.transDate),
@@ -80,7 +80,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                                 unitPrice= Convert.ToDouble(i.unitPrice),
                                 itemNo=i.itemNo,
                                 detailNotes=i.detailNotes,
-                                quantity= Convert.ToDouble(i.quantity)
+                                quantity= Convert.ToDouble(i.quantity),
+                                itemUnitName = "PCS",
+                                warehouseName = "shopify"
                             }
                         }
 
@@ -95,7 +97,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                         unitPrice = Convert.ToDouble(i.unitPrice),
                         itemNo = i.itemNo,
                         detailNotes = i.detailNotes,
-                        quantity = Convert.ToDouble(i.quantity)
+                        quantity = Convert.ToDouble(i.quantity),
+                        itemUnitName = "PCS",
+                        warehouseName = "shopify"
                     };
 
                     AccuSalesReturnViewModel header = item.Where(a => a.invoiceNumber == i.salesOrderNo).FirstOrDefault();
@@ -119,6 +123,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                         Quantity = ii.quantity,
                         ItemNo = ii.itemNo,
                         DetailNotes=ii.detailNotes,
+                        ItemUnitName=ii.itemUnitName,
+                        WarehouseName = ii.warehouseName
                     };
 
                     ReturnDetailItems.Add(dd);
@@ -146,15 +152,16 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public async Task Create(List<AccuSalesReturnViewModel> viewModel, string username)
         {
+            var token = await facade.RefreshToken();
             var session = await facade.OpenDb();
             
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
-            IHttpClientService httpClient1 = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
             var url = $"{AuthCredential.Host}/accurate/api/sales-return/save.do";
 
             foreach (var i in viewModel)
             {
                 var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).Include(m => m.DetailItem).FirstOrDefault();
+                var Customer = SearchCustomerNo(dataToBeMapped.CustomerNo);
 
                 List<SalesReturnDetailItemViewModel> detailItem = new List<SalesReturnDetailItemViewModel>();
 
@@ -166,14 +173,15 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                         unitPrice = x.UnitPrice,
                         quantity = x.Quantity,
                         detailNotes = x.DetailNotes,
-                        itemUnitName = "PCS"
+                        itemUnitName = x.ItemUnitName,
+                        warehouseName = x.WarehouseName
                     });
                 }
 
                 var dataToBeSerialize = new SalesReturnUploadViewModel
                 {
-                    customerNo = "C.00004",
-                    branchName = "JAKARTA",
+                    customerNo = Customer.customerNo,
+                    branchName = Customer.branch["name"],
                     invoiceNumber = dataToBeMapped.InvoiceNumber,
                     returnType = dataToBeMapped.ReturnType,
                     taxDate = dataToBeMapped.TaxDate.Date.ToShortDateString(),
@@ -192,13 +200,43 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     dataToBeMapped.IsAccurate = true;
                     EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
                 }
-                else
-                {
-                    throw new Exception("data " + i.invoiceNumber + " gagal diupload");
-                }
             }
 
             await dbContext.SaveChangesAsync();
+        }
+
+        private AccuCustomerViewModel SearchCustomerNo(string name)
+        {
+            IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
+            var url = $"{AuthCredential.Host}/accurate/api/customer/list.do";
+
+            var dataToBeSerialize = new DetailSearch
+            {
+                fields = "name,customerNo,branch",
+                filter = new Dictionary<string, string>
+                {
+                    { "keywords", name }
+                }
+            };
+
+            var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
+
+            var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+            var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
+
+            var message = JsonConvert.DeserializeObject<AccuResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+            //result.GetValueOrDefault("data").ToString()
+
+            if (response.IsSuccessStatusCode && message.s)
+            {
+                var customer = message.d;
+                return customer.First();
+            }
+            else
+            {
+                return null;
+            }
+
         }
 
         public Tuple<List<AccuSalesReturn>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
@@ -334,6 +372,25 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 Map(p => p.detailNotes).Index(8);
                 
             }
+        }
+
+        private class DetailSearch
+        {
+            public string fields { get; set; }
+            public Dictionary<string, string> filter { get; set; }
+        }
+
+        private class AccuResponseViewModel
+        {
+            public bool s { get; set; }
+            public List<AccuCustomerViewModel> d { get; set; }
+        }
+
+        private class AccuCustomerViewModel
+        {
+            public string name { get; set; }
+            public Dictionary<string, string> branch { get; set; }
+            public string customerNo { get; set; }
         }
     }
 }
