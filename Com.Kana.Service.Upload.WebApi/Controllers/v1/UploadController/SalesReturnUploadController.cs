@@ -35,7 +35,6 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
             this.identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
         }
 
-
         [HttpPost("upload")]
         public async Task<IActionResult> PostCSVFileAsync()
         {
@@ -146,7 +145,6 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
-
         [HttpGet]
         public IActionResult Get(int page = 1, int size = 25, string order = "{}", string keyword = null, string filter = "{}")
         {
@@ -175,7 +173,8 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                         s.Id,
                         s.transDate,
                         s.customerNo,
-                        s.invoiceNumber
+                        s.invoiceNumber,
+                        s.isAccurate
                     }).ToList()
                 );
 
