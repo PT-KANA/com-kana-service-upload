@@ -87,7 +87,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 						{
 							unitPrice= Convert.ToDouble(i.lineitemPrice),
 							quantity= Convert.ToDouble(i.lineItemQuantity),
-							itemNo=i.lineItemName
+							itemNo=i.barcode
 
 						 }
 						}
@@ -296,10 +296,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			List<AccuSalesInvoiceDetailItemUploadViewModel> dataDetail = new List<AccuSalesInvoiceDetailItemUploadViewModel>();
 			var httpClient = new HttpClient();
 			var url = session.Result.host + "/accurate/api/sales-invoice/save.do";
-
+			 
 			foreach (var i in dataviewModel)
 			{
-
+			 
+				
 				var detail = from a in i.detailItem select a;
 				foreach (var d in detail)
 				{
@@ -313,7 +314,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 				}
 				AccuSalesUploadViewModel accuSalesUploadView = new AccuSalesUploadViewModel
 				{
-					branchName= "JAKARTA",
+					saveAsStatusType= "UNAPPROVED",
+					branchName = "JAKARTA",
 					customerNo = "C.00004",
 					number = i.number,
 					orderDownPaymentNumber = i.number,
@@ -340,15 +342,21 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 					if (response.IsSuccessStatusCode && message.s)
 					{
-						//dataToBeMapped.IsAccurate = true;
-						//EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
+						AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
+												   where a.Number == i.number
+												   select a).FirstOrDefault();
+						invoice.IsAccurate = true;
+						 
+						EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
+						
 					}
-					else
-					{
-						throw new Exception("data " + i.number + " gagal diupload");
-					}
+					//else
+					//{
+					//	throw new Exception("data " + i.number + " gagal diupload");
+					//}
 				}
 			}
+			await dbContext.SaveChangesAsync();
 		}
 	}
 }

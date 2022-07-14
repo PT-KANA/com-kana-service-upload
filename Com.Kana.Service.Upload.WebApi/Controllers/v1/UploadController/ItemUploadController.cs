@@ -130,7 +130,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 
         [HttpPost("post")]
         public async Task<IActionResult> Post([FromBody] List<AccuItemViewModel> ViewModel)
-        {
+       {
             try
             {
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;

@@ -31,8 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DataUtils\" />
-    <Folder Include="Facades\" />
     <Folder Include="ViewModels\" />
   </ItemGroup>
 
