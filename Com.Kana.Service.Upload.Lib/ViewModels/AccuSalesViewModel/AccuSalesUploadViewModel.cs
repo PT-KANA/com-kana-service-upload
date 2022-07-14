@@ -9,6 +9,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesViewModel
 		public string customerNo { get; set; }
 		public string orderDownPaymentNumber { get; set; }
 		public bool reverseInvoice { get; set; }
+		public double cashDiscount { get; set; }
 		public string taxDate { get; set; }
 		public string taxNumber { get; set; }
 		public string transDate { get; set; }

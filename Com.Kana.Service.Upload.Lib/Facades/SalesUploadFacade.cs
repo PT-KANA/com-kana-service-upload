@@ -87,7 +87,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 						{
 							unitPrice= Convert.ToDouble(i.lineitemPrice),
 							quantity= Convert.ToDouble(i.lineItemQuantity),
-							itemNo=i.barcode
+							itemNo=i.barcode,
+							itemUnitName="PCS"
 
 						 }
 						}
@@ -130,8 +131,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 						UnitPrice = ii.unitPrice,
 						Quantity = ii.quantity,
 						ItemNo = ii.itemNo,
-						
-
 					};
 					invoiceDetailItems.Add(dd);
 
@@ -148,7 +147,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					BranchName = i.branchName,
 					CurrencyCode = i.currencyCode,
 					IsAccurate = i.isAccurate,
-					DetailItem = invoiceDetailItems
+					DetailItem = invoiceDetailItems,
+					CashDiscount= i.cashDiscount
 				};
 
 				salesInvoices.Add(accuSales);
@@ -221,6 +221,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			{
 				Map(p => p.barcode ).Index(0);
 				Map(p => p.name).Index(1);
+				Map(p => p.financialStatus).Index(3);
 				Map(p => p.paidAt).Index(4);
 				Map(p => p.currency).Index(8);
 				Map(p => p.taxes).Index(11);
@@ -260,7 +261,29 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 			return Tuple.Create(Data, TotalData, OrderDictionary);
 		}
-		 
+		public Tuple<List<AccuSalesInvoice>, int, Dictionary<string, string>> ReadForApproved(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
+		{
+			IQueryable<AccuSalesInvoice> Query = this.dbSet.Where(s=>s.IsAccurate== true && s.IsAccurateReceipt == false).Include(x => x.DetailExpense).Include(x => x.DetailItem);
+
+			List<string> searchAttributes = new List<string>()
+			{
+				"CustomerNo", "Number","BranchName"
+			};
+
+			Query = QueryHelper<AccuSalesInvoice>.ConfigureSearch(Query, searchAttributes, Keyword);
+
+			Dictionary<string, string> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Filter);
+			Query = QueryHelper<AccuSalesInvoice>.ConfigureFilter(Query, FilterDictionary);
+
+			Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+			Query = QueryHelper<AccuSalesInvoice>.ConfigureOrder(Query, OrderDictionary);
+
+			Pageable<AccuSalesInvoice> pageable = new Pageable<AccuSalesInvoice>(Query, Page - 1, Size);
+			List<AccuSalesInvoice> Data = pageable.Data.ToList<AccuSalesInvoice>();
+			int TotalData = pageable.TotalCount;
+
+			return Tuple.Create(Data, TotalData, OrderDictionary);
+		}
 		private async Task<AccurateSessionViewModel> OpenDb()
 		{
 			var httpClient = new HttpClient();
@@ -323,7 +346,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					taxDate = Convert.ToDateTime( i.transDate).Date.ToShortDateString(),
 					transDate = Convert.ToDateTime(i.transDate).Date.ToShortDateString(),
 					taxNumber = i.taxNumber,
-					detailItem = dataDetail
+					detailItem = dataDetail,
+					cashDiscount = i.cashDiscount
 				};
 
 				var dataToBeSend = JsonConvert.SerializeObject(accuSalesUploadView);
@@ -343,12 +367,85 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					if (response.IsSuccessStatusCode && message.s)
 					{
 						AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
-												   where a.Number == i.number
-												   select a).FirstOrDefault();
+													where a.Number == i.number
+													select a).FirstOrDefault();
 						invoice.IsAccurate = true;
-						 
+
 						EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
-						
+					}
+				}
+				
+			}
+			await dbContext.SaveChangesAsync();
+		}
+		public async Task CreateSalesReceipt(List<AccuSalesViewModel> dataviewModel, string username)
+		{
+			var session = facade.OpenDb();
+			List<AccuSalesReceiptViewModel> data = new List<AccuSalesReceiptViewModel>();
+			List<AccuSalesReceiptDetailInvoiceViewModel> detailInvoice = new List<AccuSalesReceiptDetailInvoiceViewModel>();
+			List<AccuSalesReceiptDetailDiscountViewModel> detailDiscount = new List<AccuSalesReceiptDetailDiscountViewModel>();
+			var httpClient = new HttpClient();
+			double totalPayment = 0;
+			var url = session.Result.host + "/accurate/api/sales-receipt/save.do";
+
+			foreach (var i in dataviewModel)
+			{
+
+				var detail = from a in i.detailItem select a;
+				foreach (var d in detail)
+				{
+					var detailDiscounts = new AccuSalesReceiptDetailDiscountViewModel
+					{
+						accountNo = "422.000-01",
+						amount = d.itemCashDiscount
+
+					};
+					detailDiscount.Add(detailDiscounts);
+
+					var detailItem = new AccuSalesReceiptDetailInvoiceViewModel
+					{
+						invoiceNo= i.number,
+						detailDiscount= detailDiscount,
+						paymentAmount = d.unitPrice * d.quantity
+
+					};
+					totalPayment += d.unitPrice * d.quantity;
+					detailInvoice.Add(detailItem);
+				}
+				AccuSalesReceiptViewModel accuSalesUploadView = new AccuSalesReceiptViewModel
+				{
+					bankNo ="12356489",
+					branchName = "JAKARTA",
+					customerNo = "C.00004",
+					number = i.number,
+					chequeAmount= totalPayment,
+					transDate = Convert.ToDateTime(i.transDate).Date.ToShortDateString(),
+					detailInvoice= detailInvoice
+				};
+
+				var dataToBeSend = JsonConvert.SerializeObject(accuSalesUploadView);
+
+				var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+
+				using (var request = new HttpRequestMessage(HttpMethod.Post, url))
+				{
+					request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+					request.Headers.Add("X-Session-ID", session.Result.session);
+					request.Content = content;
+
+					var response = await httpClient.SendAsync(request);
+					var res = response.Content.ReadAsStringAsync().Result;
+					var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
+
+					if (response.IsSuccessStatusCode && message.s)
+					{
+
+						AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
+													where a.Number == i.number
+													select a).FirstOrDefault();
+						invoice.IsAccurateReceipt = true;
+
+						EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
 					}
 					//else
 					//{
@@ -358,5 +455,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			}
 			await dbContext.SaveChangesAsync();
 		}
+		
 	}
 }

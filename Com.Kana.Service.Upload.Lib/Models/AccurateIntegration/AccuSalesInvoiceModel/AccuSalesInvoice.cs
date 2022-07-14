@@ -39,6 +39,7 @@ namespace Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoic
         public string ToAddress { get; set; }
         public long TypeAutoNumber { get; set; }
 		public bool IsAccurate { get; set; }
+		public bool IsAccurateReceipt { get; set; }
 		public virtual IEnumerable<AccuSalesInvoiceDetailDownPayment> DetailDownPayment { get; set; }
         public virtual IEnumerable<AccuSalesInvoiceDetailExpense> DetailExpense { get; set; }
         public virtual IEnumerable<AccuSalesInvoiceDetailItem> DetailItem { get; set; }
