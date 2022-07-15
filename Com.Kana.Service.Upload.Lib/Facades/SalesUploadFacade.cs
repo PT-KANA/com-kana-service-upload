@@ -392,11 +392,14 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			{
 
 				var detail = from a in i.detailItem select a;
+				var Customer = SearchCustomerNo(i.customerNo);
+				var Bank = SearchGLAccount( "");
+				var Account = SearchGLAccount("");
 				foreach (var d in detail)
 				{
 					var detailDiscounts = new AccuSalesReceiptDetailDiscountViewModel
 					{
-						accountNo = "422.000-01",
+						accountNo = Account.no,
 						amount = d.itemCashDiscount
 
 					};
@@ -406,7 +409,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					{
 						invoiceNo= i.number,
 						detailDiscount= detailDiscount,
-						paymentAmount = d.unitPrice * d.quantity
+						paymentAmount = (d.unitPrice * d.quantity)- i.cashDiscount
 
 					};
 					totalPayment += d.unitPrice * d.quantity;
@@ -414,11 +417,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 				}
 				AccuSalesReceiptViewModel accuSalesUploadView = new AccuSalesReceiptViewModel
 				{
-					bankNo ="12356489",
-					branchName = "JAKARTA",
-					customerNo = "C.00004",
+					bankNo = Bank.no,
+					branchName = Customer.branch["name"],
+					customerNo = Customer.customerNo,
 					number = i.number,
-					chequeAmount= totalPayment,
+					chequeAmount= totalPayment-i.cashDiscount,
 					transDate = Convert.ToDateTime(i.transDate).Date.ToShortDateString(),
 					detailInvoice= detailInvoice
 				};
@@ -455,6 +458,99 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			}
 			await dbContext.SaveChangesAsync();
 		}
+		private AccuCustomerViewModel SearchCustomerNo(string name)
+        {
+            IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
+            var url = $"{AuthCredential.Host}/accurate/api/customer/list.do";
+
+            var dataToBeSerialize = new DetailSearch
+            {
+                fields = "name,customerNo,branch",
+                filter = new Dictionary<string, string>
+                {
+                    { "keywords", name }
+                }
+            };
+
+            var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
+
+            var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+            var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
+
+            var message = JsonConvert.DeserializeObject<AccuResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+            //result.GetValueOrDefault("data").ToString()
+
+            if (response.IsSuccessStatusCode && message.s)
+            {
+                var customer = message.d;
+                return customer.First();
+            }
+            else
+            {
+                return null;
+            }
+
+        }
+
+		private GLAccountViewModel SearchGLAccount(string name)
+		{
+			IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
+			var url = $"{AuthCredential.Host}/accurate/api/glaccount/list.do";
+
+			var dataToBeSerialize = new DetailSearch
+			{
+				fields = "name,no",
+				filter = new Dictionary<string, string>
+				{
+					{ "keywords", name }
+				}
+			};
+
+			var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
+			var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+			var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
+			var message = JsonConvert.DeserializeObject<GLAccountResponseViewModel>(response.Content.ReadAsStringAsync().Result);
 		
+			if (response.IsSuccessStatusCode && message.s)
+			{
+				var acc = message.d;
+				return acc.First();
+			}
+			else
+			{
+				return null;
+			}
+
+		}
+		private class DetailSearch
+		{
+			public string fields { get; set; }
+			public Dictionary<string, string> filter { get; set; }
+		}
+
+		private class AccuResponseViewModel
+		{
+			public bool s { get; set; }
+			public List<AccuCustomerViewModel> d { get; set; }
+		}
+		private class AccuCustomerViewModel
+		{
+			public string name { get; set; }
+			public Dictionary<string, string> branch { get; set; }
+			public string customerNo { get; set; }
+		}
+		private class GLAccountViewModel
+		{
+			public string name { get; set; }			
+			public string no { get; set; }
+		}
+		private class GLAccountResponseViewModel
+		{
+			public bool s { get; set; }
+			public List<GLAccountViewModel> d { get; set; }
+		}
+
+
 	}
+
 }
