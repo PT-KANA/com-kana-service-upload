@@ -87,7 +87,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 						{
 							unitPrice= Convert.ToDouble(i.lineitemPrice),
 							quantity= Convert.ToDouble(i.lineItemQuantity),
-							itemNo=i.barcode
+							itemNo=i.barcode,
+							itemUnitName="PCS"
 
 						 }
 						}
@@ -130,8 +131,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 						UnitPrice = ii.unitPrice,
 						Quantity = ii.quantity,
 						ItemNo = ii.itemNo,
-						
-
 					};
 					invoiceDetailItems.Add(dd);
 
@@ -148,7 +147,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					BranchName = i.branchName,
 					CurrencyCode = i.currencyCode,
 					IsAccurate = i.isAccurate,
-					DetailItem = invoiceDetailItems
+					DetailItem = invoiceDetailItems,
+					CashDiscount= i.cashDiscount
 				};
 
 				salesInvoices.Add(accuSales);
@@ -221,6 +221,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			{
 				Map(p => p.barcode ).Index(0);
 				Map(p => p.name).Index(1);
+				Map(p => p.financialStatus).Index(3);
 				Map(p => p.paidAt).Index(4);
 				Map(p => p.currency).Index(8);
 				Map(p => p.taxes).Index(11);
@@ -260,35 +261,30 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 			return Tuple.Create(Data, TotalData, OrderDictionary);
 		}
-		 
-		private async Task<AccurateSessionViewModel> OpenDb()
+		public Tuple<List<AccuSalesInvoice>, int, Dictionary<string, string>> ReadForApproved(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
 		{
-			var httpClient = new HttpClient();
+			IQueryable<AccuSalesInvoice> Query = this.dbSet.Where(s=>s.IsAccurate== true && s.IsAccurateReceipt == false).Include(x => x.DetailExpense).Include(x => x.DetailItem);
 
-			var url = "https://account.accurate.id/api/open-db.do?id=578154";
-
-			using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+			List<string> searchAttributes = new List<string>()
 			{
-				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+				"CustomerNo", "Number","BranchName"
+			};
 
-				var response = await httpClient.SendAsync(request);
+			Query = QueryHelper<AccuSalesInvoice>.ConfigureSearch(Query, searchAttributes, Keyword);
 
-				response.EnsureSuccessStatusCode();
+			Dictionary<string, string> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Filter);
+			Query = QueryHelper<AccuSalesInvoice>.ConfigureFilter(Query, FilterDictionary);
 
-				if (response.IsSuccessStatusCode)
-				{
-					var message = response.Content.ReadAsStringAsync().Result;
-					AccurateSessionViewModel AccuSession = JsonConvert.DeserializeObject<AccurateSessionViewModel>(message);
-					return AccuSession;
+			Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+			Query = QueryHelper<AccuSalesInvoice>.ConfigureOrder(Query, OrderDictionary);
 
-				}
-				else
-				{
-					var message = response.Content.ReadAsStringAsync().Result;
-					return null;
-				}
-			}
+			Pageable<AccuSalesInvoice> pageable = new Pageable<AccuSalesInvoice>(Query, Page - 1, Size);
+			List<AccuSalesInvoice> Data = pageable.Data.ToList<AccuSalesInvoice>();
+			int TotalData = pageable.TotalCount;
+
+			return Tuple.Create(Data, TotalData, OrderDictionary);
 		}
+	
 		public async Task Create(List<AccuSalesViewModel> dataviewModel,string username)
 		{
 			var session = facade.OpenDb();
@@ -300,7 +296,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			foreach (var i in dataviewModel)
 			{
 			 
-				
 				var detail = from a in i.detailItem select a;
 				foreach (var d in detail)
 				{
@@ -323,7 +318,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					taxDate = Convert.ToDateTime( i.transDate).Date.ToShortDateString(),
 					transDate = Convert.ToDateTime(i.transDate).Date.ToShortDateString(),
 					taxNumber = i.taxNumber,
-					detailItem = dataDetail
+					detailItem = dataDetail,
+					cashDiscount = i.cashDiscount
 				};
 
 				var dataToBeSend = JsonConvert.SerializeObject(accuSalesUploadView);
@@ -343,12 +339,88 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					if (response.IsSuccessStatusCode && message.s)
 					{
 						AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
-												   where a.Number == i.number
-												   select a).FirstOrDefault();
+													where a.Number == i.number
+													select a).FirstOrDefault();
 						invoice.IsAccurate = true;
-						 
+
 						EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
-						
+					}
+				}
+				
+			}
+			await dbContext.SaveChangesAsync();
+		}
+		public async Task CreateSalesReceipt(List<AccuSalesViewModel> dataviewModel, string username)
+		{
+			var session = facade.OpenDb();
+			List<AccuSalesReceiptViewModel> data = new List<AccuSalesReceiptViewModel>();
+			List<AccuSalesReceiptDetailInvoiceViewModel> detailInvoice = new List<AccuSalesReceiptDetailInvoiceViewModel>();
+			List<AccuSalesReceiptDetailDiscountViewModel> detailDiscount = new List<AccuSalesReceiptDetailDiscountViewModel>();
+			var httpClient = new HttpClient();
+			double totalPayment = 0;
+			var url = session.Result.host + "/accurate/api/sales-receipt/save.do";
+
+			foreach (var i in dataviewModel)
+			{
+
+				var detail = from a in i.detailItem select a;
+				var Customer = SearchCustomerNo(i.customerNo);
+				var Bank = SearchGLAccount( "");
+				var Account = SearchGLAccount("");
+				foreach (var d in detail)
+				{
+					var detailDiscounts = new AccuSalesReceiptDetailDiscountViewModel
+					{
+						accountNo = Account.no,
+						amount = d.itemCashDiscount
+
+					};
+					detailDiscount.Add(detailDiscounts);
+
+					var detailItem = new AccuSalesReceiptDetailInvoiceViewModel
+					{
+						invoiceNo= i.number,
+						detailDiscount= detailDiscount,
+						paymentAmount = (d.unitPrice * d.quantity)- i.cashDiscount
+
+					};
+					totalPayment += d.unitPrice * d.quantity;
+					detailInvoice.Add(detailItem);
+				}
+				AccuSalesReceiptViewModel accuSalesUploadView = new AccuSalesReceiptViewModel
+				{
+					bankNo = Bank.no,
+					branchName = Customer.branch["name"],
+					customerNo = Customer.customerNo,
+					number = i.number,
+					chequeAmount= totalPayment-i.cashDiscount,
+					transDate = Convert.ToDateTime(i.transDate).Date.ToShortDateString(),
+					detailInvoice= detailInvoice
+				};
+
+				var dataToBeSend = JsonConvert.SerializeObject(accuSalesUploadView);
+
+				var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+
+				using (var request = new HttpRequestMessage(HttpMethod.Post, url))
+				{
+					request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+					request.Headers.Add("X-Session-ID", session.Result.session);
+					request.Content = content;
+
+					var response = await httpClient.SendAsync(request);
+					var res = response.Content.ReadAsStringAsync().Result;
+					var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
+
+					if (response.IsSuccessStatusCode && message.s)
+					{
+
+						AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
+													where a.Number == i.number
+													select a).FirstOrDefault();
+						invoice.IsAccurateReceipt = true;
+
+						EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
 					}
 					//else
 					//{
@@ -358,5 +430,99 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			}
 			await dbContext.SaveChangesAsync();
 		}
+		private AccuCustomerViewModel SearchCustomerNo(string name)
+        {
+            IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
+            var url = $"{AuthCredential.Host}/accurate/api/customer/list.do";
+
+            var dataToBeSerialize = new DetailSearch
+            {
+                fields = "name,customerNo,branch",
+                filter = new Dictionary<string, string>
+                {
+                    { "keywords", name }
+                }
+            };
+
+            var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
+
+            var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+            var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
+
+            var message = JsonConvert.DeserializeObject<AccuResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+            //result.GetValueOrDefault("data").ToString()
+
+            if (response.IsSuccessStatusCode && message.s)
+            {
+                var customer = message.d;
+                return customer.First();
+            }
+            else
+            {
+                return null;
+            }
+
+        }
+
+		private GLAccountViewModel SearchGLAccount(string name)
+		{
+			IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
+			var url = $"{AuthCredential.Host}/accurate/api/glaccount/list.do";
+
+			var dataToBeSerialize = new DetailSearch
+			{
+				fields = "name,no",
+				filter = new Dictionary<string, string>
+				{
+					{ "keywords", name }
+				}
+			};
+
+			var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
+			var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+			var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
+			var message = JsonConvert.DeserializeObject<GLAccountResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+		
+			if (response.IsSuccessStatusCode && message.s)
+			{
+				var acc = message.d;
+				return acc.First();
+			}
+			else
+			{
+				return null;
+			}
+
+		}
+		private class DetailSearch
+		{
+			public string fields { get; set; }
+			public Dictionary<string, string> filter { get; set; }
+		}
+
+		private class AccuResponseViewModel
+		{
+			public bool s { get; set; }
+			public List<AccuCustomerViewModel> d { get; set; }
+		}
+		private class AccuCustomerViewModel
+		{
+			public string name { get; set; }
+			public Dictionary<string, string> branch { get; set; }
+			public string customerNo { get; set; }
+		}
+		private class GLAccountViewModel
+		{
+			public string name { get; set; }			
+			public string no { get; set; }
+		}
+		private class GLAccountResponseViewModel
+		{
+			public bool s { get; set; }
+			public List<GLAccountViewModel> d { get; set; }
+		}
+
+
 	}
+
 }

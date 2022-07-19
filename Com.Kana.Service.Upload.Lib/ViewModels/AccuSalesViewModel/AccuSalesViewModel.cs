@@ -40,6 +40,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels.AccuSalesViewModel
 		public string taxType { get; set; }
 		public bool taxable { get; set; }
 		public bool isAccurate { get; set; }
+		public bool isAccurateReceipt { get; set; }
 		public string toAddress { get; set; }
 		public string financialStatus { get; set; }
 		public long typeAutoNumber { get; set; }

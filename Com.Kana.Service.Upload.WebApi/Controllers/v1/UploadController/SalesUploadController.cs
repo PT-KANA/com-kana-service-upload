@@ -21,7 +21,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 	[ApiVersion("1.0")]
 	[Route("v{version:apiVersion}/sales")]
 	[Authorize]
-	public class SalesUploadController :Controller
+	public class SalesUploadController : Controller
 	{
 		private string ApiVersion = "1.0.0";
 		private readonly IMapper mapper;
@@ -36,9 +36,9 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 			this.identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
 		}
 
-	  
+
 		[HttpPost("upload")]
-		public async Task<IActionResult> PostCSVFileAsync(double source, string sourcec, string sourcen, double destination, string destinationc, string destinationn, DateTimeOffset date)
+		public async Task<IActionResult> PostCSVFileAsync()
 		// public async Task<IActionResult> PostCSVFileAsync(double source, double destination,  DateTime date)
 		{
 			try
@@ -67,17 +67,13 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 
 						List<SalesCsvViewModel> Data = Csv.GetRecords<SalesCsvViewModel>().ToList();
 						List<AccuSalesViewModel> Data1 = await facade.MapToViewModel(Data);
-						 
-
 						Tuple<bool, List<object>> Validated = facade.UploadValidate(ref Data, Request.Form.ToList());
-
 						Reader.Close();
 
 						if (Validated.Item1) /* If Data Valid */
-						{ 
+						{
 							List<AccuSalesInvoice> data = await facade.MapToModel(Data1);
 							await facade.UploadData(data, identityService.Username);
-
 
 							Dictionary<string, object> Result =
 								new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
@@ -131,8 +127,8 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 			try
 			{
 				identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
-				 
-				await facade.Create(ViewModel,identityService.Username );
+
+				await facade.Create(ViewModel, identityService.Username);
 
 				Dictionary<string, object> Result =
 					new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
@@ -173,13 +169,76 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 				listData.AddRange(
 					newData.AsQueryable().Select(s => new
 					{
-						
+
 						s.number,
-						s.transDate, 
+						s.transDate,
+						s.cashDiscount,
 						s.customerNo,
 						s.branchName,
 						s.isAccurate,
 						s.detailItem
+					}).ToList().OrderBy(s=>s.isAccurate)
+				);
+
+				return Ok(new
+				{
+					apiVersion = ApiVersion,
+					statusCode = General.OK_STATUS_CODE,
+					message = General.OK_MESSAGE,
+					data = listData,
+					info = new Dictionary<string, object>
+					{
+						{ "count", listData.Count },
+						{ "total", Data.Item2 },
+						{ "order", Data.Item3 },
+						{ "page", page },
+						{ "size", size }
+					},
+				});
+			}
+			catch (Exception e)
+			{
+				Dictionary<string, object> Result =
+					new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+					.Fail();
+				return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+			}
+		}
+
+
+		[HttpGet("approve")]
+		public IActionResult GetApproved(int page = 1, int size = 25, string order = "{}", string keyword = null, string filter = "{}")
+		{
+			identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+
+			try
+			{
+				string filterUser = string.Concat("'CreatedBy':'", identityService.Username, "'");
+				if (filter == null || !(filter.Trim().StartsWith("{") && filter.Trim().EndsWith("}")) || filter.Replace(" ", "").Equals("{}"))
+				{
+					filter = string.Concat("{", filterUser, "}");
+				}
+				else
+				{
+					filter = filter.Replace("}", string.Concat(", ", filterUser, "}"));
+				}
+
+				var Data = facade.ReadForApproved(page, size, order, keyword, filter);
+
+				var newData = mapper.Map<List<AccuSalesViewModel>>(Data.Item1);
+
+				List<object> listData = new List<object>();
+				listData.AddRange(
+					newData.AsQueryable().Select(s => new
+					{
+
+						s.number,
+						s.transDate,
+						s.customerNo,
+						s.branchName,
+						s.isAccurateReceipt,
+						s.detailItem,
+						s.cashDiscount
 					}).ToList()
 				);
 
@@ -198,6 +257,29 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 						{ "size", size }
 					},
 				});
+			}
+			catch (Exception e)
+			{
+				Dictionary<string, object> Result =
+					new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+					.Fail();
+				return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+			}
+		}
+
+		[HttpPost("postApproved")]
+		public async Task<IActionResult> PostApproved([FromBody] List<AccuSalesViewModel> ViewModel)
+		{
+			try
+			{
+				identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+
+				await facade.CreateSalesReceipt(ViewModel, identityService.Username);
+
+				Dictionary<string, object> Result =
+					new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
+					.Ok();
+				return Created(String.Concat(Request.Path, "/", 0), Result);
 			}
 			catch (Exception e)
 			{
