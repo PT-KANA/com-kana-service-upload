@@ -64,7 +64,11 @@ namespace Com.Kana.Service.Upload.Test.DataUtils.SalesDataUtils
 
 			var accurateSessions = new AccurateResponseViewModel()
 			{
-				s = true
+				s = true,
+				d = new List<string>()
+				{
+
+				}
 			};
 			return accurateSessions;
 		}
@@ -186,15 +190,12 @@ namespace Com.Kana.Service.Upload.Test.DataUtils.SalesDataUtils
 			return JsonConvert.SerializeObject(result);
 		}
 
-		public Dictionary<string, object> GetResponseOk()
+		public AccurateResponseViewModel GetResponseOk()
 		{
 			var data = GetDataResponse();
 
-			Dictionary<string, object> result =
-				new ResultFormatter("1.0", General.OK_STATUS_CODE, General.OK_MESSAGE)
-				.Ok(data);
-
-			return result;
+		 
+			return data;
 		}
 
 	}

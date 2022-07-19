@@ -91,6 +91,14 @@ namespace Com.Kana.Service.Upload.Test.Facades.SalesUploadFacadeTests
 				.Setup(x => x.PostAsync(It.Is<string>(s => s.Contains("accurate/api/sales-return/save.do")), It.IsAny<HttpContent>()))
 				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{\"s\":true, \"d\":[\"Proses Berhasil Dilakukan\"]}") });
 
+			accurateProvider
+				.Setup(x => x.SendAsync(HttpMethod.Post, It.Is<string>(s => s.Contains("accurate/api/sales-invoice/save.do")), It.IsAny<HttpContent>()))
+				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new SalesDataUtil(SalesUploadFacade).GetResponseOkString()) });
+
+			accurateProvider
+			  .Setup(x => x.SendAsync(HttpMethod.Get, It.Is<string>(s => s.Contains("accurate/api/customer/list.do")), It.IsAny<HttpContent>()))
+			  .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new SalesDataUtil(SalesUploadFacade).GetResponseOkString()) });
+
 			serviceProvider
 				.Setup(x => x.GetService(typeof(IIntegrationFacade)))
 				.Returns(integrationProvider.Object);
@@ -266,6 +274,29 @@ namespace Com.Kana.Service.Upload.Test.Facades.SalesUploadFacadeTests
 			List<AccuSalesViewModel> data = new List<AccuSalesViewModel>();
 			data.Add(model);
 			var Response = facade.Create(data, "user");
+
+			Assert.NotNull(Response);
+		}
+
+		[Fact]
+		public async Task ShouldSuccesApprove()
+		{
+			var HttpClientService = new Mock<IHttpClientService>();
+			var mockIntegrationFacade = new Mock<IIntegrationFacade>();
+			var accurateProvider = new Mock<IAccurateClientService>();
+			SalesUploadFacade facade = new SalesUploadFacade(GetServiceProvider().Object, _dbContext("user"), mockIntegrationFacade.Object, mapper);
+			mockIntegrationFacade
+				.Setup(x => x.RefreshToken())
+				.ReturnsAsync(new AccurateTokenViewModel { access_token = "2201921" });
+
+			mockIntegrationFacade
+				.Setup(x => x.OpenDb())
+				.ReturnsAsync(new AccurateSessionViewModel { session = "1201201", host = "https://zeus.accurate.co.id" });
+
+			var model = dataUtilViewModel(facade, GetCurrentMethod()).GetNewDataValid();
+			List<AccuSalesViewModel> data = new List<AccuSalesViewModel>();
+			data.Add(model);
+			var Response = facade.CreateSalesReceipt(data, "user");
 
 			Assert.NotNull(Response);
 		}
