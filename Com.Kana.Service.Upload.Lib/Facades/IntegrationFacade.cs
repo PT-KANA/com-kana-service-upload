@@ -23,9 +23,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public Task<AccurateTokenViewModel> RetrieveToken(string code)
         {
-            var basic_token = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(AuthCredential.ClientId+":"+AuthCredential.ClientSecret));
-            //var code = AuthCredential.ClientCode;
-            var AccurateToken = RequestTokenAsync(code, basic_token);
+            var AccurateToken = RequestTokenAsync(code);
 
             if(AccurateToken != null)
             {
@@ -36,144 +34,98 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             return AccurateToken;
         }
 
-        private async Task<AccurateTokenViewModel> RequestTokenAsync(string code, string token)
+        private async Task<AccurateTokenViewModel> RequestTokenAsync(string code)
         {
-            var httpClient = new HttpClient();
-            var data = new[]
+            IAuthorizationClientService httpClient = (IAuthorizationClientService)serviceProvider.GetService(typeof(IAuthorizationClientService));
+            var send = new[]
             {
                 new KeyValuePair<string, string>("code", code),
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
                 new KeyValuePair<string, string>("redirect_uri", APIEndpoint.Upload+"integration/authcallback"),
             };
 
-            var content = new FormUrlEncodedContent(data);
+            var content = new FormUrlEncodedContent(send);
+            var response = httpClient.SendAsync(HttpMethod.Post, APIEndpoint.Accurate + "oauth/token", content).Result;
 
-            using (var request = new HttpRequestMessage(HttpMethod.Post, APIEndpoint.Accurate+"oauth/token"))
+            response.EnsureSuccessStatusCode();
+            var data = response.Content.ReadAsStringAsync().Result;
+
+            if(response.IsSuccessStatusCode)
             {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", token);
-                request.Content = content;
-
-                var response = await httpClient.SendAsync(request);
-                response.EnsureSuccessStatusCode();
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var message = response.Content.ReadAsStringAsync().Result;
-                    AccurateTokenViewModel AccuToken = JsonConvert.DeserializeObject<AccurateTokenViewModel>(message);
-
-                    return AccuToken;
-                }
-                else
-                {
-                    return null;
-                }
+                AccurateTokenViewModel AccuToken = JsonConvert.DeserializeObject<AccurateTokenViewModel>(data);
+                return AccuToken;
+            }
+            else
+            {
+                return null;
             }
         }
 
-        public Task<AccurateTokenViewModel> RefreshToken()
+        public async Task<AccurateTokenViewModel> RefreshToken()
         {
-            var basic_token = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(AuthCredential.ClientId + ":" + AuthCredential.ClientSecret));
             var refresh_token = AuthCredential.RefreshToken;
 
-            var AccurateToken = RenewTokenAsync(basic_token, refresh_token);
+            var AccurateToken = await RenewTokenAsync(refresh_token);
 
             if (AccurateToken != null)
             {
-                AuthCredential.AccessToken = AccurateToken.Result.access_token;
-                AuthCredential.RefreshToken = AccurateToken.Result.refresh_token;
+                AuthCredential.AccessToken = AccurateToken.access_token;
+                AuthCredential.RefreshToken = AccurateToken.refresh_token;
             }
 
             return AccurateToken;
         }
 
-        private async Task<AccurateTokenViewModel> RenewTokenAsync(string token, string refToken)
+        private async Task<AccurateTokenViewModel> RenewTokenAsync(string refToken)
         {
-            var httpClient = new HttpClient();
-            var data = new[]
+            IAuthorizationClientService httpClient = (IAuthorizationClientService)serviceProvider.GetService(typeof(IAuthorizationClientService));
+            var send = new[]
             {
                 new KeyValuePair<string, string>("grant_type", "refresh_token"),
                 new KeyValuePair<string, string>("redirect_uri", APIEndpoint.Upload+"integration/authcallback"),
                 new KeyValuePair<string, string>("refresh_token", refToken),
             };
 
-            var content = new FormUrlEncodedContent(data);
+            var content = new FormUrlEncodedContent(send);
+            var response = httpClient.SendAsync(HttpMethod.Post, APIEndpoint.Accurate + "oauth/token", content).Result;
 
-            using (var request = new HttpRequestMessage(HttpMethod.Post, APIEndpoint.Accurate + "oauth/token"))
+            response.EnsureSuccessStatusCode();
+
+            var data = response.Content.ReadAsStringAsync().Result;
+            var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(data);
+
+            if (response.IsSuccessStatusCode)
             {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", token);
-                request.Content = content;
-
-                var response = await httpClient.SendAsync(request);
-                response.EnsureSuccessStatusCode();
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var message = response.Content.ReadAsStringAsync().Result;
-                    AccurateTokenViewModel AccuToken = JsonConvert.DeserializeObject<AccurateTokenViewModel>(message);
-
-                    return AccuToken;
-                }
-                else
-                {
-                    return null;
-                }
+                AccurateTokenViewModel AccuToken = JsonConvert.DeserializeObject<AccurateTokenViewModel>(data);
+                return AccuToken;
             }
-        }
-
-        public async Task<object> GetDbList()
-        {
-            var httpClient = new HttpClient();
-            using (var request = new HttpRequestMessage(HttpMethod.Get, APIEndpoint.Accurate + "api/db-list.do"))
+            else
             {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
-
-                var response = await httpClient.SendAsync(request);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var message = response.Content.ReadAsStringAsync().Result;
-
-                    return message;
-                }
-                else
-                {
-                    return null;
-                }
+                return null;
             }
-
         }
 
         public async Task<AccurateSessionViewModel> OpenDb()
         {
-            var httpClient = new HttpClient();
-
+            IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = "https://account.accurate.id/api/open-db.do?id=578154";
 
-            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+            var response = httpClient.GetAsync(url).Result;
+            var data = response.Content.ReadAsStringAsync().Result;
+            var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(data);
+
+            if (response.IsSuccessStatusCode && message.s)
             {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+                AccurateSessionViewModel AccuSession = JsonConvert.DeserializeObject<AccurateSessionViewModel>(data);
 
-                var response = await httpClient.SendAsync(request);
-                response.EnsureSuccessStatusCode();
+                AuthCredential.Session = AccuSession.session;
+                AuthCredential.Host = AccuSession.host;
 
-                var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
-
-                if (response.IsSuccessStatusCode && message.s)
-                {
-                    var ses = response.Content.ReadAsStringAsync().Result;
-                    AccurateSessionViewModel AccuSession = JsonConvert.DeserializeObject<AccurateSessionViewModel>(ses);
-
-                    AuthCredential.Session = AccuSession.session;
-                    AuthCredential.Host = AccuSession.host;
-
-                    return AccuSession;
-
-                }
-                else
-                {
-                    //var ses = response.Content.ReadAsStringAsync().Result;
-                    return null;
-                }
+                return AccuSession;
+            }
+            else
+            {
+                return null;
             }
         }
     }

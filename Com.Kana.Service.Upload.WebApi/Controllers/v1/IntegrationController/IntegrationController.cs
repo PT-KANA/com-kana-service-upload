@@ -117,37 +117,6 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
             }
         }
 
-        [HttpGet("db")]
-        public IActionResult GetDb()
-        {
-            try
-            {
-                var data = facade.GetDbList();
-                if (data.Result == null)
-                {
-                    throw new Exception("Terjadi Kesalahan");
-                }
-                else
-                {
-                    return Ok(new
-                    {
-                        apiVersion = ApiVersion,
-                        statusCode = General.OK_STATUS_CODE,
-                        message = General.OK_MESSAGE,
-                        data = data.Result
-                    });
-                }
-            }
-            catch (Exception e)
-            {
-                Dictionary<string, object> Result =
-                   new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
-                   .Fail();
-
-                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
-            }
-        }
-
         [HttpGet("open")]
         public IActionResult OpenDb()
         {

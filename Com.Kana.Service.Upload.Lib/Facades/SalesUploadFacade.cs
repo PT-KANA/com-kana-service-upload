@@ -48,8 +48,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			"Barcode","Name", "Email",    "Financial Status", "Paid at",  "Fulfillment Status",   "Fulfilled at", "Accepts Marketing",    "Currency", "Subtotal", "Shipping", "Taxes",    "Total",    "Discount Code",    "Discount Amount",  "Shipping Method",  "Created at",   "Lineitem quantity",    "Lineitem name",    "Lineitem price",   "Lineitem compare at price",    "Lineitem sku", "Lineitem requires shipping",   "Lineitem taxable", "Lineitem fulfillment status",  "Billing Name", "Billing Street",   "Billing Address1", "Billing Address2", "Billing Company",  "Billing City", "Billing Zip",  "Billing Province", "Billing Country",  "Billing Phone",    "Shipping Name",    "Shipping Street",  "Shipping Address1",    "Shipping Address2",    "Shipping Company", "Shipping City",    "Shipping Zip", "Shipping Province",    "Shipping Country", "Shipping Phone",   "Notes",    "Note Attributes",  "Cancelled at", "Payment Method",   "Payment Reference",    "Refunded Amount",  "Vendor",   "Outstanding Balance",  "Employee", "Location", "Device ID",    "Id",   "Tags", "Risk Level",   "Source",   "Lineitem discount",    "Tax 1 Name",   "Tax 1 Value",  "Tax 2 Name",   "Tax 2 Value",  "Tax 3 Name",   "Tax 3 Value",  "Tax 4 Name",   "Tax 4 Value",  "Tax 5 Name",   "Tax 5 Value",  "Phone",    "Receipt Number",   "Duties",   "Billing Province Name",    "Shipping Province Name",   "Payment ID",   "Payment Terms Name",   "Next Payment Due At"
 		};
 
-
-
 		public async Task<List<AccuSalesViewModel>> MapToViewModel(List<SalesCsvViewModel> csv)
 		{
 			List<AccuSalesViewModel> item = new List<AccuSalesViewModel>();
@@ -57,7 +55,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			List<string> tempNo = new List<string>();
 			foreach (var i in csv)
 			{
-
 				var isSameSales = tempNo.FirstOrDefault(s => s == i.name);
 				if (isSameSales == null)
 				{
@@ -117,8 +114,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 		public async Task<List<AccuSalesInvoice>> MapToModel(List<AccuSalesViewModel> data1)
 		{
 			List<AccuSalesInvoice> salesInvoices = new List<AccuSalesInvoice>();
-
-
 			foreach (var i in data1.Where(s=>s.financialStatus =="paid" || s.financialStatus == "Paid"))
 			{
 				List<AccuSalesInvoiceDetailItem> invoiceDetailItems = new List<AccuSalesInvoiceDetailItem>();
@@ -287,15 +282,17 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 	
 		public async Task Create(List<AccuSalesViewModel> dataviewModel,string username)
 		{
-			var session = facade.OpenDb();
+			var token = await facade.RefreshToken();
+			var session = await facade.OpenDb();
+
 			List<AccuSalesUploadViewModel> data = new List<AccuSalesUploadViewModel>();
 			List<AccuSalesInvoiceDetailItemUploadViewModel> dataDetail = new List<AccuSalesInvoiceDetailItemUploadViewModel>();
-			var httpClient = new HttpClient();
-			var url = session.Result.host + "/accurate/api/sales-invoice/save.do";
+
+			IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
+			var url = $"{AuthCredential.Host}/accurate/api/sales-invoice/save.do";
 			 
 			foreach (var i in dataviewModel)
 			{
-			 
 				var detail = from a in i.detailItem select a;
 				foreach (var d in detail)
 				{
@@ -325,48 +322,63 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 				var dataToBeSend = JsonConvert.SerializeObject(accuSalesUploadView);
 
 				var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
-			 
-				using (var request = new HttpRequestMessage(HttpMethod.Post, url))
-				{
-					request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
-					request.Headers.Add("X-Session-ID", session.Result.session);
-					request.Content = content;
+				var response = httpClient.PostAsync(url, content).Result;
+				var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
 
-					var response = await httpClient.SendAsync(request);
-					var res = response.Content.ReadAsStringAsync().Result;
-					var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
+                if (response.IsSuccessStatusCode && message.s)
+                {
+                    AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
+                                                where a.Number == i.number
+                                                select a).FirstOrDefault();
+                    invoice.IsAccurate = true;
 
-					if (response.IsSuccessStatusCode && message.s)
-					{
-						AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
-													where a.Number == i.number
-													select a).FirstOrDefault();
-						invoice.IsAccurate = true;
+                    EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
+                }
 
-						EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
-					}
-				}
-				
-			}
+                //using (var request = new HttpRequestMessage(HttpMethod.Post, url))
+                //{
+                //	request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+                //	request.Headers.Add("X-Session-ID", session.Result.session);
+                //	request.Content = content;
+
+                //	var response = await httpClient.SendAsync(request);
+                //	var res = response.Content.ReadAsStringAsync().Result;
+                //	var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
+
+                //	if (response.IsSuccessStatusCode && message.s)
+                //	{
+                //		AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
+                //									where a.Number == i.number
+                //									select a).FirstOrDefault();
+                //		invoice.IsAccurate = true;
+
+                //		EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
+                //	}
+                //}
+
+            }
 			await dbContext.SaveChangesAsync();
 		}
 		public async Task CreateSalesReceipt(List<AccuSalesViewModel> dataviewModel, string username)
 		{
-			var session = facade.OpenDb();
+			var token = await facade.RefreshToken();
+			var session = await facade.OpenDb();
+
 			List<AccuSalesReceiptViewModel> data = new List<AccuSalesReceiptViewModel>();
 			List<AccuSalesReceiptDetailInvoiceViewModel> detailInvoice = new List<AccuSalesReceiptDetailInvoiceViewModel>();
 			List<AccuSalesReceiptDetailDiscountViewModel> detailDiscount = new List<AccuSalesReceiptDetailDiscountViewModel>();
-			var httpClient = new HttpClient();
+
+			IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
 			double totalPayment = 0;
-			var url = session.Result.host + "/accurate/api/sales-receipt/save.do";
+			var url = $"{AuthCredential.Host}/accurate/api/sales-receipt/save.do";
 
 			foreach (var i in dataviewModel)
 			{
-
 				var detail = from a in i.detailItem select a;
 				var Customer = SearchCustomerNo(i.customerNo);
-				var Bank = SearchGLAccount( "");
+				var Bank = SearchGLAccount("");
 				var Account = SearchGLAccount("");
+
 				foreach (var d in detail)
 				{
 					var detailDiscounts = new AccuSalesReceiptDetailDiscountViewModel
@@ -387,6 +399,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					totalPayment += d.unitPrice * d.quantity;
 					detailInvoice.Add(detailItem);
 				}
+
 				AccuSalesReceiptViewModel accuSalesUploadView = new AccuSalesReceiptViewModel
 				{
 					bankNo = Bank.no,
@@ -401,35 +414,49 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 				var dataToBeSend = JsonConvert.SerializeObject(accuSalesUploadView);
 
 				var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+				var response = httpClient.PostAsync(url, content).Result;
 
-				using (var request = new HttpRequestMessage(HttpMethod.Post, url))
-				{
-					request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
-					request.Headers.Add("X-Session-ID", session.Result.session);
-					request.Content = content;
+				var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+				if (response.IsSuccessStatusCode && message.s)
+                {
 
-					var response = await httpClient.SendAsync(request);
-					var res = response.Content.ReadAsStringAsync().Result;
-					var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
+                    AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
+                                                where a.Number == i.number
+                                                select a).FirstOrDefault();
+                    invoice.IsAccurateReceipt = true;
 
-					if (response.IsSuccessStatusCode && message.s)
-					{
+                    EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
+                }
 
-						AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
-													where a.Number == i.number
-													select a).FirstOrDefault();
-						invoice.IsAccurateReceipt = true;
+                //using (var request = new HttpRequestMessage(HttpMethod.Post, url))
+                //{
+                //	request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
+                //	request.Headers.Add("X-Session-ID", session.Result.session);
+                //	request.Content = content;
 
-						EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
-					}
-					//else
-					//{
-					//	throw new Exception("data " + i.number + " gagal diupload");
-					//}
-				}
-			}
+                //	var response = await httpClient.SendAsync(request);
+                //	var res = response.Content.ReadAsStringAsync().Result;
+                //	var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(res);
+
+                //	if (response.IsSuccessStatusCode && message.s)
+                //	{
+
+                //		AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
+                //									where a.Number == i.number
+                //									select a).FirstOrDefault();
+                //		invoice.IsAccurateReceipt = true;
+
+                //		EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
+                //	}
+                //	//else
+                //	//{
+                //	//	throw new Exception("data " + i.number + " gagal diupload");
+                //	//}
+                //}
+            }
 			await dbContext.SaveChangesAsync();
 		}
+
 		private AccuCustomerViewModel SearchCustomerNo(string name)
         {
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
