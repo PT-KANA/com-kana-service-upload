@@ -312,19 +312,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             {
                 var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).FirstOrDefault();
 
-                //List<ItemDetailOpenBalanceViewModel> detailOpenBalance = new List<ItemDetailOpenBalanceViewModel>();
-
-                //foreach(var x in dataToBeMapped.DetailOpenBalance)
-                //{
-                //    detailOpenBalance.Add(new ItemDetailOpenBalanceViewModel { 
-                //        itemUnitName = x.ItemUnitName,
-                //        asOf = x.AsOf.Date.ToShortDateString(),
-                //        quantity = x.Quantity,
-                //        unitCost = x.UnitCost,
-                //        warehouseName = x.WarehouseName
-                //    });
-                //}
-
                 var dataToBeSerialize = new ItemUploadViewModel 
                 { 
                     itemType = dataToBeMapped.ItemType,

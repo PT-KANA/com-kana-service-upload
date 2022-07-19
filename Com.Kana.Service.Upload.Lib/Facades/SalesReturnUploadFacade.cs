@@ -193,7 +193,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
                 var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
                 var response = httpClient.PostAsync(url, content).Result;
-                var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+
+                var msg = response.Content.ReadAsStringAsync().Result;
+
+                var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(msg);
 
                 if (response.IsSuccessStatusCode && message.s)
                 {
@@ -205,7 +208,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             await dbContext.SaveChangesAsync();
         }
 
-        private AccuCustomerViewModel SearchCustomerNo(string name)
+        private AccurateCustomerViewModel SearchCustomerNo(string name)
         {
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = $"{AuthCredential.Host}/accurate/api/customer/list.do";
@@ -224,7 +227,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
             var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
 
-            var message = JsonConvert.DeserializeObject<AccuResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+            var message = JsonConvert.DeserializeObject<AccurateSearchCustomerViewModel>(response.Content.ReadAsStringAsync().Result);
             //result.GetValueOrDefault("data").ToString()
 
             if (response.IsSuccessStatusCode && message.s)
@@ -241,7 +244,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public Tuple<List<AccuSalesReturn>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<AccuSalesReturn> Query = this.dbSet.Include(x => x.DetailExpense).Include(x => x.DetailItem);
+            IQueryable<AccuSalesReturn> Query = this.dbSet.Include(x => x.DetailItem);
 
             List<string> searchAttributes = new List<string>()
             {
@@ -380,17 +383,17 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             public Dictionary<string, string> filter { get; set; }
         }
 
-        private class AccuResponseViewModel
-        {
-            public bool s { get; set; }
-            public List<AccuCustomerViewModel> d { get; set; }
-        }
+        //private class AccuResponseViewModel
+        //{
+        //    public bool s { get; set; }
+        //    public List<AccuCustomerViewModel> d { get; set; }
+        //}
 
-        private class AccuCustomerViewModel
-        {
-            public string name { get; set; }
-            public Dictionary<string, string> branch { get; set; }
-            public string customerNo { get; set; }
-        }
+        //private class AccuCustomerViewModel
+        //{
+        //    public string name { get; set; }
+        //    public Dictionary<string, string> branch { get; set; }
+        //    public string customerNo { get; set; }
+        //}
     }
 }
