@@ -38,7 +38,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 
 
 		[HttpPost("upload")]
-		public async Task<IActionResult> PostCSVFileAsync(double source, string sourcec, string sourcen, double destination, string destinationc, string destinationn, DateTimeOffset date)
+		public async Task<IActionResult> PostCSVFileAsync()
 		// public async Task<IActionResult> PostCSVFileAsync(double source, double destination,  DateTime date)
 		{
 			try
@@ -67,17 +67,13 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 
 						List<SalesCsvViewModel> Data = Csv.GetRecords<SalesCsvViewModel>().ToList();
 						List<AccuSalesViewModel> Data1 = await facade.MapToViewModel(Data);
-
-
 						Tuple<bool, List<object>> Validated = facade.UploadValidate(ref Data, Request.Form.ToList());
-
 						Reader.Close();
 
 						if (Validated.Item1) /* If Data Valid */
 						{
 							List<AccuSalesInvoice> data = await facade.MapToModel(Data1);
 							await facade.UploadData(data, identityService.Username);
-
 
 							Dictionary<string, object> Result =
 								new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
@@ -227,7 +223,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 					filter = filter.Replace("}", string.Concat(", ", filterUser, "}"));
 				}
 
-				var Data = facade.ReadForUpload(page, size, order, keyword, filter);
+				var Data = facade.ReadForApproved(page, size, order, keyword, filter);
 
 				var newData = mapper.Map<List<AccuSalesViewModel>>(Data.Item1);
 

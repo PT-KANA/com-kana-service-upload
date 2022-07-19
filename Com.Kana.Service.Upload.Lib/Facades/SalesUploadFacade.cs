@@ -284,34 +284,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 			return Tuple.Create(Data, TotalData, OrderDictionary);
 		}
-		private async Task<AccurateSessionViewModel> OpenDb()
-		{
-			var httpClient = new HttpClient();
-
-			var url = "https://account.accurate.id/api/open-db.do?id=578154";
-
-			using (var request = new HttpRequestMessage(HttpMethod.Get, url))
-			{
-				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthCredential.AccessToken);
-
-				var response = await httpClient.SendAsync(request);
-
-				response.EnsureSuccessStatusCode();
-
-				if (response.IsSuccessStatusCode)
-				{
-					var message = response.Content.ReadAsStringAsync().Result;
-					AccurateSessionViewModel AccuSession = JsonConvert.DeserializeObject<AccurateSessionViewModel>(message);
-					return AccuSession;
-
-				}
-				else
-				{
-					var message = response.Content.ReadAsStringAsync().Result;
-					return null;
-				}
-			}
-		}
+	
 		public async Task Create(List<AccuSalesViewModel> dataviewModel,string username)
 		{
 			var session = facade.OpenDb();
@@ -323,7 +296,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			foreach (var i in dataviewModel)
 			{
 			 
-				
 				var detail = from a in i.detailItem select a;
 				foreach (var d in detail)
 				{
