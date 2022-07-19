@@ -79,25 +79,26 @@ namespace Com.Kana.Service.Upload.Test.Facades.SalesUploadFacadeTests
 			HttpClientService
 				.Setup(x => x.PostAsync(It.IsAny<string>(), It.IsAny<HttpContent>()))
 				.ReturnsAsync(messagePost);
-			 accurateProvider
-			  .Setup(x => x.SendAsync(HttpMethod.Get, It.Is<string>(s => s.Contains("https://account.accurate.id/api/open-db.do?id=578154")), It.IsAny<HttpContent>()))
+			accurateProvider
+				.Setup(x => x.PostAsync(It.Is<string>(s => s.Contains("sales-invoice/save.do")), It.IsAny<HttpContent>()))
+				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new SalesDataUtil(SalesUploadFacade).GetResultFormatterResponseOkString()) });
+			accurateProvider
+				.Setup(x => x.PostAsync(It.Is<string>(s => s.Contains("sales-receipt/save.do")), It.IsAny<HttpContent>()))
+				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new SalesDataUtil(SalesUploadFacade).GetResultFormatterResponseOkString()) });
+
+			accurateProvider
+			 .Setup(x => x.SendAsync(HttpMethod.Get, It.Is<string>(s => s.Contains("https://account.accurate.id/api/open-db.do?id=578154")), It.IsAny<HttpContent>()))
 			  .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new SalesDataUtil(SalesUploadFacade).GetResultFormatterOkString()) });
 
-			accurateProvider
-			  .Setup(x => x.SendAsync(HttpMethod.Get, It.Is<string>(s => s.Contains("accurate/api/customer/list.do")), It.IsAny<HttpContent>()))
-			  .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("") });
-
-			accurateProvider
-				.Setup(x => x.PostAsync(It.Is<string>(s => s.Contains("accurate/api/sales-return/save.do")), It.IsAny<HttpContent>()))
-				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{\"s\":true, \"d\":[\"Proses Berhasil Dilakukan\"]}") });
-
-			accurateProvider
-				.Setup(x => x.SendAsync(HttpMethod.Post, It.Is<string>(s => s.Contains("accurate/api/sales-invoice/save.do")), It.IsAny<HttpContent>()))
-				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new SalesDataUtil(SalesUploadFacade).GetResponseOkString()) });
-
+			 
+		 
 			accurateProvider
 			  .Setup(x => x.SendAsync(HttpMethod.Get, It.Is<string>(s => s.Contains("accurate/api/customer/list.do")), It.IsAny<HttpContent>()))
 			  .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new SalesDataUtil(SalesUploadFacade).GetResponseOkString()) });
+
+			accurateProvider
+			  .Setup(x => x.SendAsync(HttpMethod.Get, It.Is<string>(s => s.Contains("accurate/api/glaccount/list.do")), It.IsAny<HttpContent>()))
+			  .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new SalesDataUtil(SalesUploadFacade).GetResponseGAOkString()) });
 
 			serviceProvider
 				.Setup(x => x.GetService(typeof(IIntegrationFacade)))
@@ -220,7 +221,6 @@ namespace Com.Kana.Service.Upload.Test.Facades.SalesUploadFacadeTests
 			List<AccuSalesInvoice> data = new List<AccuSalesInvoice>();
 			data.Add(model);
 			var upload = facade.UploadData(data, USERNAME);
-
 			var Response = facade.ReadForApproved(1, 25, "{}", "", "");
 
 			Assert.NotNull(Response);
@@ -265,10 +265,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.SalesUploadFacadeTests
 				.Setup(x => x.OpenDb())
 				.ReturnsAsync(new AccurateSessionViewModel { session = "1201201", host = "https://zeus.accurate.co.id" });
 
-			HttpClientService
-				.Setup(x => x.SendAsync(HttpMethod.Post,It.Is<string>(s => s.Contains("https://zeus.accurate.co.id/accurate/api/sales-invoice/save.do")), It.IsAny<HttpContent>()))
-				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new SalesDataUtil(facade).GetResponseOkString()) });
-
+			
 
 			var model = dataUtilViewModel(facade, GetCurrentMethod()).GetNewDataValid();
 			List<AccuSalesViewModel> data = new List<AccuSalesViewModel>();
@@ -296,6 +293,11 @@ namespace Com.Kana.Service.Upload.Test.Facades.SalesUploadFacadeTests
 			var model = dataUtilViewModel(facade, GetCurrentMethod()).GetNewDataValid();
 			List<AccuSalesViewModel> data = new List<AccuSalesViewModel>();
 			data.Add(model);
+
+			var model2 = await dataUtil(facade, GetCurrentMethod()).GetTestData();
+			List<AccuSalesInvoice> data2 = new List<AccuSalesInvoice>();
+			data2.Add(model2);
+			var ResponseCreate =  facade.UploadData(data2, USERNAME);
 			var Response = facade.CreateSalesReceipt(data, "user");
 
 			Assert.NotNull(Response);

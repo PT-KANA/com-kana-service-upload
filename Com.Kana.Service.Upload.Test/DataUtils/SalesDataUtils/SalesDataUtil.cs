@@ -59,15 +59,48 @@ namespace Com.Kana.Service.Upload.Test.DataUtils.SalesDataUtils
 			};
 			return accurateSessions;
 		}
-		public AccurateResponseViewModel GetDataResponse()
+
+		public AccurateResponseViewModel GetAccResponse()
 		{
 
 			var accurateSessions = new AccurateResponseViewModel()
 			{
-				s = true,
-				d = new List<string>()
-				{
+				 s=true
+			};
+			return accurateSessions;
+		}
+		public AccurateSearchCustomerViewModel GetDataResponse()
+		{
+			Dictionary<string, string> branch = new Dictionary<string, string>();
+			branch.Add("name", "branch");
 
+			var accurateSessions = new AccurateSearchCustomerViewModel()
+			{
+				s = true,
+				d = new List<AccurateCustomerViewModel>()
+				{
+					new AccurateCustomerViewModel()
+					{
+						name= "customer",
+						customerNo="customer",
+						branch = branch
+					}
+				}
+			};
+			return accurateSessions;
+		}
+		public AccurateSearchGAViewModel GetGADataResponse()
+		{
+
+			var accurateSessions = new AccurateSearchGAViewModel()
+			{
+				s = true,
+				d = new List<AccurateGeneralAccountViewModel>()
+				{
+					new AccurateGeneralAccountViewModel()
+					{
+						no="no"
+					}
 				}
 			};
 			return accurateSessions;
@@ -172,7 +205,18 @@ namespace Com.Kana.Service.Upload.Test.DataUtils.SalesDataUtils
 
 			return JsonConvert.SerializeObject(result);
 		}
+		public string GetResultFormatterResponseOkString()
+		{
+			var result = GetResultFormatterResponseOk();
 
+			return JsonConvert.SerializeObject(result);
+		}
+
+		public AccurateResponseViewModel GetResultFormatterResponseOk()
+		{
+			var data = GetAccResponse();
+			return data;
+		}
 		public Dictionary<string, object> GetResultFormatterOk()
 		{
 			var data = GetDataSession();
@@ -190,11 +234,22 @@ namespace Com.Kana.Service.Upload.Test.DataUtils.SalesDataUtils
 			return JsonConvert.SerializeObject(result);
 		}
 
-		public AccurateResponseViewModel GetResponseOk()
+		public AccurateSearchCustomerViewModel GetResponseOk()
 		{
 			var data = GetDataResponse();
+			return data;
+		}
 
-		 
+		public string GetResponseGAOkString()
+		{
+			var result = GetGAResponseOk();
+
+			return JsonConvert.SerializeObject(result);
+		}
+
+		public AccurateSearchGAViewModel GetGAResponseOk()
+		{
+			var data = GetGADataResponse();
 			return data;
 		}
 

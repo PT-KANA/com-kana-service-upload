@@ -415,7 +415,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 				var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
 				var response = httpClient.PostAsync(url, content).Result;
-
+				var tt = response.Content.ReadAsStringAsync(); 
 				var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
 				if (response.IsSuccessStatusCode && message.s)
                 {
@@ -457,7 +457,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			await dbContext.SaveChangesAsync();
 		}
 
-		private AccuCustomerViewModel SearchCustomerNo(string name)
+		private AccurateCustomerViewModel SearchCustomerNo(string name)
         {
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = $"{AuthCredential.Host}/accurate/api/customer/list.do";
@@ -476,7 +476,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
             var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
 
-            var message = JsonConvert.DeserializeObject<AccuResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+            var message = JsonConvert.DeserializeObject<AccurateSearchCustomerViewModel>(response.Content.ReadAsStringAsync().Result);
             //result.GetValueOrDefault("data").ToString()
 
             if (response.IsSuccessStatusCode && message.s)
@@ -491,7 +491,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         }
 
-		private GLAccountViewModel SearchGLAccount(string name)
+		private AccurateGeneralAccountViewModel SearchGLAccount(string name)
 		{
 			IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
 			var url = $"{AuthCredential.Host}/accurate/api/glaccount/list.do";
@@ -508,7 +508,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
 			var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
 			var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
-			var message = JsonConvert.DeserializeObject<GLAccountResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+			var message = JsonConvert.DeserializeObject<AccurateSearchGAViewModel>(response.Content.ReadAsStringAsync().Result);
 		
 			if (response.IsSuccessStatusCode && message.s)
 			{
@@ -526,30 +526,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			public string fields { get; set; }
 			public Dictionary<string, string> filter { get; set; }
 		}
-
-		private class AccuResponseViewModel
-		{
-			public bool s { get; set; }
-			public List<AccuCustomerViewModel> d { get; set; }
-		}
-		private class AccuCustomerViewModel
-		{
-			public string name { get; set; }
-			public Dictionary<string, string> branch { get; set; }
-			public string customerNo { get; set; }
-		}
-		private class GLAccountViewModel
-		{
-			public string name { get; set; }			
-			public string no { get; set; }
-		}
-		private class GLAccountResponseViewModel
-		{
-			public bool s { get; set; }
-			public List<GLAccountViewModel> d { get; set; }
-		}
-
-
+		
 	}
 
 }
