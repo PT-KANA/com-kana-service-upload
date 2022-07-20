@@ -5,8 +5,10 @@ using Com.Kana.Service.Upload.Lib.Facades;
 using Com.Kana.Service.Upload.Lib.Interfaces;
 using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuItemModel;
 using Com.Kana.Service.Upload.Lib.Services;
+using Com.Kana.Service.Upload.Lib.ViewModels;
 using Com.Kana.Service.Upload.Lib.ViewModels.ItemViewModel;
 using Com.Kana.Service.Upload.Test.DataUtils.ItemDataUtils;
+using Com.Kana.Service.Upload.Test.Helpers;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
@@ -45,8 +47,61 @@ namespace Com.Kana.Service.Upload.Test.Facades.ItemUploadFacadeTests
 
 			return string.Concat(sf.GetMethod().Name, "_", ENTITY);
 		}
+		private Mock<IServiceProvider> GetServiceProvider()
+		{
+			HttpResponseMessage message = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+			message.Content = new StringContent("{\"apiVersion\":\"1.0\",\"statusCode\":200,\"message\":\"Ok\",\"data\":[{\"Id\":7,\"code\":\"USD\",\"rate\":13700.0,\"date\":\"2018/10/20\"}],\"info\":{\"count\":1,\"page\":1,\"size\":1,\"total\":2,\"order\":{\"date\":\"desc\"},\"select\":[\"Id\",\"code\",\"rate\",\"date\"]}}");
+			HttpResponseMessage messagePost = new HttpResponseMessage();
+
+			var serviceProvider = new Mock<IServiceProvider>();
+			var integrationProvider = new Mock<IIntegrationFacade>();
+			var accurateProvider = new Mock<IAccurateClientService>();
+			var HttpClientService = new Mock<IHttpClientService>();
+			serviceProvider
+				.Setup(x => x.GetService(typeof(IHttpClientService)))
+				.Returns(new HttpClientTestService());
  
-	
+
+			var facade = new ItemFacade(ServiceProvider, integrationProvider.Object, _dbContext("user"), mapper);
+
+
+			HttpClientService
+				.Setup(x => x.GetAsync(It.IsAny<string>()))
+				.ReturnsAsync(message);
+			HttpClientService
+				.Setup(x => x.GetAsync(It.Is<string>(s => s.Contains("https://account.accurate.id/api/open-db.do?id=578154"))))
+				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new ItemDataUtil(facade).GetResultFormatterOkString()) });
+			HttpClientService
+				.Setup(x => x.PostAsync(It.IsAny<string>(), It.IsAny<HttpContent>()))
+				.ReturnsAsync(messagePost);
+			accurateProvider
+				.Setup(x => x.PostAsync(It.Is<string>(s => s.Contains("item/save.do")), It.IsAny<HttpContent>()))
+				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new ItemDataUtil(facade).GetResultFormatterResponseOkString()) });
+			 
+			accurateProvider
+			 .Setup(x => x.SendAsync(HttpMethod.Get, It.Is<string>(s => s.Contains("https://account.accurate.id/api/open-db.do?id=578154")), It.IsAny<HttpContent>()))
+			  .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new ItemDataUtil(facade).GetResultFormatterOkString()) });
+
+
+ 
+			serviceProvider
+				.Setup(x => x.GetService(typeof(IIntegrationFacade)))
+				.Returns(integrationProvider.Object);
+
+			serviceProvider
+				.Setup(x => x.GetService(typeof(IAccurateClientService)))
+				.Returns(accurateProvider.Object);
+			serviceProvider
+				.Setup(x => x.GetService(typeof(IdentityService)))
+				.Returns(new IdentityService() { Token = "Token", Username = "Test" });
+
+			serviceProvider
+				.Setup(x => x.GetService(typeof(IHttpClientService)))
+				.Returns(HttpClientService.Object);
+
+			return serviceProvider;
+		}
+
 		private UploadDbContext _dbContext(string testName)
 		{
 			DbContextOptionsBuilder<UploadDbContext> optionsBuilder = new DbContextOptionsBuilder<UploadDbContext>();
@@ -169,8 +224,37 @@ namespace Com.Kana.Service.Upload.Test.Facades.ItemUploadFacadeTests
 
 			Assert.NotNull(Response);
 		}
+		[Fact]
+		public async Task ShouldSuccesUploadToAccurate()
+		{
+			var HttpClientService = new Mock<IHttpClientService>();
+			var mockIntegrationFacade = new Mock<IIntegrationFacade>();
+			ItemFacade facade = new ItemFacade(GetServiceProvider().Object,  mockIntegrationFacade.Object, _dbContext("user"), mapper);
+			mockIntegrationFacade
+				.Setup(x => x.RefreshToken())
+				.ReturnsAsync(new AccurateTokenViewModel { access_token = "2201921" });
 
-	 
+			mockIntegrationFacade
+				.Setup(x => x.OpenDb())
+				.ReturnsAsync(new AccurateSessionViewModel { session = "1201201", host = "https://zeus.accurate.co.id" });
+
+
+
+			var model = dataUtilViewModel(facade, GetCurrentMethod()).GetNewDataValid();
+			List<AccuItemViewModel> data = new List<AccuItemViewModel>();
+			data.Add(model);
+			 
+			var model2 = await dataUtil(facade, GetCurrentMethod()).GetTestData();
+			List<AccuItem> data2 = new List<AccuItem>();
+			data2.Add(model2);
+			data2.Add(model2);
+
+			var ResponseCreated = facade.UploadData(data2, USERNAME);
+			var Response = facade.Create(data, "user");
+
+			Assert.NotNull(Response);
+		}
+
 
 	}
 }
