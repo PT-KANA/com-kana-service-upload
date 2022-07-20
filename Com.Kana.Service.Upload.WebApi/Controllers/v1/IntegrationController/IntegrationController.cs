@@ -60,8 +60,8 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
         {
             try
             {
-                var data = facade.RetrieveToken(code);
-                if(data.Result == null)
+                var data = facade.RetrieveToken(code).Result;
+                if(data == null)
                 {
                     throw new Exception("Terjadi Kesalahan");
                 }
@@ -72,7 +72,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
                         apiVersion = ApiVersion,
                         statusCode = General.OK_STATUS_CODE,
                         message = General.OK_MESSAGE,
-                        data = data.Result.access_token
+                        data = data.access_token
                     });
                 }
             }
@@ -91,8 +91,8 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
         {
             try
             {
-                var data = facade.RefreshToken();
-                if (data.Result == null)
+                var data = facade.RefreshToken().Result;
+                if (data == null)
                 {
                     throw new Exception("Terjadi Kesalahan");
                 }
@@ -103,7 +103,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
                         apiVersion = ApiVersion,
                         statusCode = General.OK_STATUS_CODE,
                         message = General.OK_MESSAGE,
-                        data = data.Result.access_token
+                        data = data.access_token
                     });
                 }
             }
@@ -122,8 +122,8 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
         {
             try
             {
-                var data = facade.OpenDb();
-                if (data.Result == null)
+                var data = facade.OpenDb().Result;
+                if (data == null)
                 {
                     throw new Exception("Terjadi Kesalahan");
                 }
@@ -134,7 +134,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
                         apiVersion = ApiVersion,
                         statusCode = General.OK_STATUS_CODE,
                         message = General.OK_MESSAGE,
-                        data = data.Result
+                        data = data
                     });
                 }
             }
