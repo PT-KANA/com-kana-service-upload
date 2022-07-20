@@ -21,44 +21,17 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             this.serviceProvider = serviceProvider;
         }
 
-        public Task<AccurateTokenViewModel> RetrieveToken(string code)
+        public async Task<AccurateTokenViewModel> RetrieveToken(string code)
         {
-            var AccurateToken = RequestTokenAsync(code);
+            var AccurateToken = await RequestTokenAsync(code);
 
             if(AccurateToken != null)
             {
-                AuthCredential.AccessToken = AccurateToken.Result.access_token;
-                AuthCredential.RefreshToken = AccurateToken.Result.refresh_token;
+                AuthCredential.AccessToken = AccurateToken.access_token;
+                AuthCredential.RefreshToken = AccurateToken.refresh_token;
             }
 
             return AccurateToken;
-        }
-
-        private async Task<AccurateTokenViewModel> RequestTokenAsync(string code)
-        {
-            IAuthorizationClientService httpClient = (IAuthorizationClientService)serviceProvider.GetService(typeof(IAuthorizationClientService));
-            var send = new[]
-            {
-                new KeyValuePair<string, string>("code", code),
-                new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                new KeyValuePair<string, string>("redirect_uri", APIEndpoint.Upload+"integration/authcallback"),
-            };
-
-            var content = new FormUrlEncodedContent(send);
-            var response = httpClient.SendAsync(HttpMethod.Post, APIEndpoint.Accurate + "oauth/token", content).Result;
-
-            response.EnsureSuccessStatusCode();
-            var data = response.Content.ReadAsStringAsync().Result;
-
-            if(response.IsSuccessStatusCode)
-            {
-                AccurateTokenViewModel AccuToken = JsonConvert.DeserializeObject<AccurateTokenViewModel>(data);
-                return AccuToken;
-            }
-            else
-            {
-                return null;
-            }
         }
 
         public async Task<AccurateTokenViewModel> RefreshToken()
@@ -76,23 +49,48 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             return AccurateToken;
         }
 
+        private async Task<AccurateTokenViewModel> RequestTokenAsync(string code)
+        {
+            IAuthorizationClientService httpClient = (IAuthorizationClientService)serviceProvider.GetService(typeof(IAuthorizationClientService));
+            var send = new[]
+            {
+                new KeyValuePair<string, string>("code", code),
+                new KeyValuePair<string, string>("grant_type", "authorization_code"),
+                new KeyValuePair<string, string>("redirect_uri", APIEndpoint.Upload + "integration/authcallback"),
+            };
+
+            var content = new FormUrlEncodedContent(send);
+            var response = await httpClient.SendAsync(HttpMethod.Post, APIEndpoint.Accurate + "oauth/token", content);
+
+            response.EnsureSuccessStatusCode();
+            var data = response.Content.ReadAsStringAsync().Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                AccurateTokenViewModel AccuToken = JsonConvert.DeserializeObject<AccurateTokenViewModel>(data);
+                return AccuToken;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         private async Task<AccurateTokenViewModel> RenewTokenAsync(string refToken)
         {
             IAuthorizationClientService httpClient = (IAuthorizationClientService)serviceProvider.GetService(typeof(IAuthorizationClientService));
             var send = new[]
             {
                 new KeyValuePair<string, string>("grant_type", "refresh_token"),
-                new KeyValuePair<string, string>("redirect_uri", APIEndpoint.Upload+"integration/authcallback"),
+                new KeyValuePair<string, string>("redirect_uri", APIEndpoint.Upload + "integration/authcallback"),
                 new KeyValuePair<string, string>("refresh_token", refToken),
             };
 
             var content = new FormUrlEncodedContent(send);
-            var response = httpClient.SendAsync(HttpMethod.Post, APIEndpoint.Accurate + "oauth/token", content).Result;
+            var response = await httpClient.SendAsync(HttpMethod.Post, APIEndpoint.Accurate + "oauth/token", content);
 
             response.EnsureSuccessStatusCode();
-
             var data = response.Content.ReadAsStringAsync().Result;
-            var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(data);
 
             if (response.IsSuccessStatusCode)
             {
@@ -107,13 +105,16 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public async Task<AccurateSessionViewModel> OpenDb()
         {
+ 
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = "https://account.accurate.id/api/open-db.do?id=592232";
 
-            var response = httpClient.GetAsync(url).Result;
+            var response = await httpClient.GetAsync(url);
             var data = response.Content.ReadAsStringAsync().Result;
-            var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(data);
 
+            response.EnsureSuccessStatusCode();
+
+            var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(data);
             if (response.IsSuccessStatusCode && message.s)
             {
                 AccurateSessionViewModel AccuSession = JsonConvert.DeserializeObject<AccurateSessionViewModel>(data);
@@ -128,5 +129,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 return null;
             }
         }
+
     }
 }

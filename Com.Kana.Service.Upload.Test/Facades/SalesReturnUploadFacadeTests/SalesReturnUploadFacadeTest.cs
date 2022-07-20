@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Primitives;
 using Moq;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -76,7 +77,6 @@ namespace Com.Kana.Service.Upload.Test.Facades.SalesReturnUploadFacadeTests
         {
             var serviceProvider = new Mock<IServiceProvider>();
             var accurateProvider = new Mock<IAccurateClientService>();
-            //var integrationProvider = new Mock<IIntegrationFacade>();
 
             serviceProvider
                 .Setup(x => x.GetService(typeof(IHttpClientService)))
@@ -84,7 +84,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.SalesReturnUploadFacadeTests
             
             accurateProvider
                 .Setup(x => x.SendAsync(HttpMethod.Get, It.Is<string>(s => s.Contains("accurate/api/customer/list.do")), It.IsAny<HttpContent>()))
-                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent( new AccurateSearchCustomerViewModel { s = true, d = new List<AccurateCustomerViewModel> { new AccurateCustomerViewModel { customerNo = "C.00004", name = "PELANGGAN SHOPIFY", branch = new Dictionary<string, string>() } } }.ToString()) });
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(JsonConvert.SerializeObject(new AccurateSearchCustomerViewModel { s = true, d = new List<AccurateCustomerViewModel> { new AccurateCustomerViewModel { customerNo = "C.00004", name = "PELANGGAN SHOPIFY", branch = new Dictionary<string, string> { { "name", "JAKARTA" } } } } })) });
 
             accurateProvider
                 .Setup(x => x.PostAsync(It.Is<string>(s => s.Contains("accurate/api/sales-return/save.do")), It.IsAny<HttpContent>()))
@@ -93,18 +93,6 @@ namespace Com.Kana.Service.Upload.Test.Facades.SalesReturnUploadFacadeTests
             serviceProvider
                 .Setup(x => x.GetService(typeof(IAccurateClientService)))
                 .Returns(accurateProvider.Object);
-
-            //serviceProvider
-            //    .Setup(x => x.GetService(typeof(IIntegrationFacade)))
-            //    .Returns(integrationProvider.Object);
-
-            //integrationProvider
-            //    .Setup(x => x.RefreshToken().Result)
-            //    .Returns(new AccurateTokenViewModel { access_token = "1212121" });
-
-            //integrationProvider
-            //    .Setup(x => x.OpenDb().Result)
-            //    .Returns(new AccurateSessionViewModel { host = "http://public.accurate.co.id", session = "1212112" });
 
             return serviceProvider;
         }
@@ -218,10 +206,16 @@ namespace Com.Kana.Service.Upload.Test.Facades.SalesReturnUploadFacadeTests
                 .Setup(x => x.OpenDb())
                 .ReturnsAsync(new AccurateSessionViewModel { session = "1201201", host = "https://zeus.accurate.co.id" });
 
-            SalesReturnUploadFacade facade = new SalesReturnUploadFacade(GetServiceProvider(GetCurrentMethod()).Object, mockIntegrationFacade.Object, _dbContext("user"), mapper);
+            SalesReturnUploadFacade facade = new SalesReturnUploadFacade(GetServiceProvider(GetCurrentMethod()).Object, mockIntegrationFacade.Object, _dbContext(GetCurrentMethod()), mapper);
 
             var model = await dataUtil(facade, GetCurrentMethod()).GetTestData();
-            var viewModel = mapper.Map<AccuSalesReturnViewModel>(model);
+            var viewModel = dataUtilViewModel(facade, GetCurrentMethod()).GetNewDataValid();
+
+            viewModel.Id = 1;
+            foreach(var i in viewModel.detailItem)
+            {
+                i.Id = 1;
+            }
 
             List<AccuSalesReturnViewModel> data = new List<AccuSalesReturnViewModel>();
             data.Add(viewModel);
