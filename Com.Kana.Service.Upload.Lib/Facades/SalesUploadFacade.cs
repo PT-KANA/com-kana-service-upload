@@ -376,8 +376,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			{
 				var detail = from a in i.detailItem select a;
 				var Customer = SearchCustomerNo(i.customerNo);
-				var Bank = SearchGLAccount("");
-				var Account = SearchGLAccount("");
+				var Bank = SearchGLAccount("12356489");
+				var Account = SearchGLAccount("12356489");
 
 				foreach (var d in detail)
 				{
