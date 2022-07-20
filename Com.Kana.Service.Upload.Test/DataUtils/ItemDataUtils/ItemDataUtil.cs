@@ -1,8 +1,11 @@
 ﻿using Com.DanLiris.Service.Purchasing.Lib.ViewModels.AccuItemViewModel;
 using Com.Kana.Service.Upload.Lib.Facades;
 using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuItemModel;
+using Com.Kana.Service.Upload.Lib.ViewModels;
 using Com.Kana.Service.Upload.Lib.ViewModels.AccuItemViewModel.AccuItemUploadViewModel;
 using Com.Kana.Service.Upload.Lib.ViewModels.ItemViewModel;
+using Com.Kana.Service.Upload.WebApi.Helpers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -65,6 +68,7 @@ namespace Com.Kana.Service.Upload.Test.DataUtils.ItemDataUtils
 				//var datas = await Task.Run(() => garmentPurchaseOrderDataUtil.GetTestDataByTags());
 				return new AccuItemViewModel
 				{
+					Id=1,
 					itemType = "INVENTORY",
 					name = "title",
 					unit1Name = "PCS",
@@ -147,6 +151,53 @@ namespace Com.Kana.Service.Upload.Test.DataUtils.ItemDataUtils
 				await itemFacade.UploadData(accuItems, "Unit Test");
 				return data;
 			}
-		 
+		public string GetResultFormatterOkString()
+		{
+			var result = GetResultFormatterOk();
+
+			return JsonConvert.SerializeObject(result);
+		}
+		public string GetResultFormatterResponseOkString()
+		{
+			var result = GetResultFormatterResponseOk();
+
+			return JsonConvert.SerializeObject(result);
+		}
+
+		public AccurateResponseViewModel GetResultFormatterResponseOk()
+		{
+			var data = GetAccResponse();
+			return data;
+		}
+		public AccurateResponseViewModel GetAccResponse()
+		{
+
+			var accurateSessions = new AccurateResponseViewModel()
+			{
+				s = true
+			};
+			return accurateSessions;
+		}
+
+		public Dictionary<string, object> GetResultFormatterOk()
+		{
+			var data = GetDataSession();
+
+			Dictionary<string, object> result =
+				new ResultFormatter("1.0", General.OK_STATUS_CODE, General.OK_MESSAGE)
+				.Ok(data);
+
+			return result;
+		}
+		public AccurateSessionViewModel GetDataSession()
+		{
+
+			var accurateSessions = new AccurateSessionViewModel()
+			{
+				host = "host",
+				session = "Result"
+			};
+			return accurateSessions;
+		}
 	}
 }

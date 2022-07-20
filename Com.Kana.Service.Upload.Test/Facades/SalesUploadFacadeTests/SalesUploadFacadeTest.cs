@@ -252,7 +252,7 @@ namespace Com.Kana.Service.Upload.Test.Facades.SalesUploadFacadeTests
 		}
 
 		[Fact]
-		public async Task ShouldSuccesObenDP()
+		public async Task ShouldSuccesUploadToAccurate()
 		{
 			var HttpClientService = new Mock<IHttpClientService>();
 			var mockIntegrationFacade = new Mock<IIntegrationFacade>();
