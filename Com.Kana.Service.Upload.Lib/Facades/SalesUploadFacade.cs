@@ -19,6 +19,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using static Com.Kana.Service.Upload.Lib.ViewModels.AccurateSalesViewModel;
 
 namespace Com.Kana.Service.Upload.Lib.Facades
 {
@@ -28,6 +29,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 		protected readonly IHttpClientService _http;
 		private readonly UploadDbContext dbContext;
 		private readonly DbSet<AccuSalesInvoice> dbSet;
+		private readonly DbSet<AccuSalesTemp> dbSetTemp;
 		public readonly IServiceProvider serviceProvider;
 		public object Request { get; private set; }
 		public object ApiVersion { get; private set; }
@@ -40,6 +42,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			this.dbSet = dbContext.Set<AccuSalesInvoice>();
 			this.facade = facade;
 			this.mapper = mapper;
+			this.dbSetTemp = dbContext.Set<AccuSalesTemp>();
 
 		}
 
@@ -84,8 +87,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 						{
 							unitPrice= Convert.ToDouble(i.lineitemPrice),
 							quantity= Convert.ToDouble(i.lineItemQuantity),
-							itemNo=i.barcode,
-							itemUnitName="PCS"
+							itemNo=i.barcode.Replace("'", string.Empty).Trim(),
+							itemUnitName ="PCS"
 
 						 }
 						}
@@ -210,6 +213,15 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			}
 			var result = await dbContext.SaveChangesAsync();
 		}
+		public async Task InsertTemp(List<AccuSalesTemp> data, string username)
+		{
+			foreach (var i in data)
+			{
+				EntityExtension.FlagForCreate(i, username, USER_AGENT);
+				dbSetTemp.Add(i);
+			}
+			var result = await dbContext.SaveChangesAsync();
+		}
 		public sealed class SalesInvoiceMap : CsvHelper.Configuration.ClassMap<SalesCsvViewModel>
 		{
 			public SalesInvoiceMap()
@@ -290,9 +302,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 			IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
 			var url = $"{AuthCredential.Host}/accurate/api/sales-invoice/save.do";
-			 
+
 			foreach (var i in dataviewModel)
 			{
+				
 				var detail = from a in i.detailItem select a;
 				foreach (var d in detail)
 				{
@@ -323,12 +336,32 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 				var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
 				var response = httpClient.PostAsync(url, content).Result;
-				var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+				var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(await response.Content.ReadAsStringAsync());
 
                 if (response.IsSuccessStatusCode && message.s)
                 {
-                    AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
-                                                where a.Number == i.number
+					var Sales = await SearchSalesNo(DateTime.Now.ToShortDateString());
+					List<AccuSalesTemp> temps = new List<AccuSalesTemp>();
+					foreach (var _sales in Sales)
+					{
+						AccuSalesTemp salesTemp = new AccuSalesTemp
+						{
+							Number = _sales.number
+						};
+						temps.Add(salesTemp);
+					}
+
+					await InsertTemp(temps, username);
+					List<string> listNumber = new List<string>();
+					var dataTemp = from a in dbContext.AccuSalesTemps
+								   select a ;
+					foreach(var  dt in dataTemp)
+					{
+						listNumber.Add(dt.Number);
+					}
+
+					AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
+                                                where listNumber.Contains( a.Number )
                                                 select a).FirstOrDefault();
                     invoice.IsAccurate = true;
 
@@ -375,9 +408,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			foreach (var i in dataviewModel)
 			{
 				var detail = from a in i.detailItem select a;
-				var Customer = SearchCustomerNo(i.customerNo);
-				var Bank = SearchGLAccount("12356489");
-				var Account = SearchGLAccount("12356489");
+				var Customer = await SearchCustomerNo(i.customerNo);
+				var Bank = await  SearchGLAccount("12356489");
+				var Account = await SearchGLAccount("12356489");
 
 				foreach (var d in detail)
 				{
@@ -416,7 +449,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 				var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
 				var response = httpClient.PostAsync(url, content).Result;
 				var tt = response.Content.ReadAsStringAsync(); 
-				var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+				var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(await response.Content.ReadAsStringAsync());
 				if (response.IsSuccessStatusCode && message.s)
                 {
 
@@ -456,19 +489,59 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             }
 			await dbContext.SaveChangesAsync();
 		}
+		private async Task<List<AccurateSalesViewModel>> SearchSalesNo(string date)
+		{
+			IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
+			var url = $"{AuthCredential.Host}/accurate/api/sales-invoice/list.do";
+		 
+			var dataToBeSerialize = new DetailSearch
+			{
+				fields = "number",
+				filter = new Dictionary<string, Dictionary<string, string>>
+				{
+					{
+						"lastUpdate" , new Dictionary<string, string>
+						{
+							{"op", "LESS_THAN" },
+							{"val",date   }
+						}
+					}
+					
+				}
+			};
 
-		private AccurateCustomerViewModel SearchCustomerNo(string name)
+			var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
+
+			var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+			var response = await httpClient.SendAsync(HttpMethod.Get, url, content);
+			 
+			var message = JsonConvert.DeserializeObject<AccurateSearchSalesViewModel>(await response.Content.ReadAsStringAsync());
+
+
+			if (response.IsSuccessStatusCode && message.s)
+			{
+				var customer = message.d;
+				return customer;
+			}
+			else
+			{
+				return null;
+			}
+
+		}
+
+		private async Task<AccurateCustomerViewModel> SearchCustomerNo(string name)
         {
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = $"{AuthCredential.Host}/accurate/api/customer/list.do";
 
             var dataToBeSerialize = new DetailSearch
             {
-                fields = "name,customerNo,branch",
-                filter = new Dictionary<string, string>
-                {
-                    { "keywords", name }
-                }
+                //fields = "name,customerNo,branch",
+                //filter = new Dictionary<string, string>
+                //{
+                //    { "keywords", name }
+                //}
             };
 
             var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
@@ -476,8 +549,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
             var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
 
-            var message = JsonConvert.DeserializeObject<AccurateSearchCustomerViewModel>(response.Content.ReadAsStringAsync().Result);
-            //result.GetValueOrDefault("data").ToString()
+            var message = JsonConvert.DeserializeObject<AccurateSearchCustomerViewModel>(await response.Content.ReadAsStringAsync());
+          
 
             if (response.IsSuccessStatusCode && message.s)
             {
@@ -491,24 +564,24 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         }
 
-		private AccurateGeneralAccountViewModel SearchGLAccount(string name)
+		private async Task<AccurateGeneralAccountViewModel> SearchGLAccount(string name)
 		{
 			IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
 			var url = $"{AuthCredential.Host}/accurate/api/glaccount/list.do";
 
 			var dataToBeSerialize = new DetailSearch
 			{
-				fields = "name,no",
-				filter = new Dictionary<string, string>
-				{
-					{ "keywords", name }
-				}
+				//fields = "name,no",
+				//filter = new Dictionary<string, string>
+				//{
+				//	{ "keywords", name }
+				//}
 			};
 
 			var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
 			var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
 			var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
-			var message = JsonConvert.DeserializeObject<AccurateSearchGAViewModel>(response.Content.ReadAsStringAsync().Result);
+			var message = JsonConvert.DeserializeObject<AccurateSearchGAViewModel>( await  response.Content.ReadAsStringAsync());
 		
 			if (response.IsSuccessStatusCode && message.s)
 			{
@@ -524,7 +597,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 		private class DetailSearch
 		{
 			public string fields { get; set; }
-			public Dictionary<string, string> filter { get; set; }
+			public Dictionary<string, Dictionary<string, string>> filter { get; set; }
 		}
 		
 	}

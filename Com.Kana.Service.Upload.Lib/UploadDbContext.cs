@@ -24,7 +24,8 @@ namespace Com.Kana.Service.Upload.Lib
 
         #region sales-invoice
         public DbSet<AccuSalesInvoice> AccuSalesInvoices { get; set; }
-        public DbSet<AccuSalesInvoiceDetailDownPayment> AccuSalesInvoiceDetailDownPayments { get; set; }
+		public DbSet<AccuSalesTemp> AccuSalesTemps { get; set; }
+		public DbSet<AccuSalesInvoiceDetailDownPayment> AccuSalesInvoiceDetailDownPayments { get; set; }
         public DbSet<AccuSalesInvoiceDetailExpense> AccuSalesInvoiceDetailExpenses { get; set; }
         public DbSet<AccuSalesInvoiceDetailItem> AccuSalesInvoiceDetailItems { get; set; }
         public DbSet<AccuSalesInvoiceDetailSerialNumber> AccuSalesInvoiceDetailSerialNumbers { get; set; }

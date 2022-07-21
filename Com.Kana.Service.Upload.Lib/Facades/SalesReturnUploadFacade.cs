@@ -152,11 +152,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public async Task Create(List<AccuSalesReturnViewModel> viewModel, string username)
         {
-            await facade.RefreshToken();
-            await facade.OpenDb();
-
-            //await Task.WhenAll(facade.RefreshToken(), facade.OpenDb());
-
+            var token = await facade.RefreshToken();
+            var session = await facade.OpenDb();
+            
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = $"{AuthCredential.Host}/accurate/api/sales-return/save.do";
 
@@ -228,6 +226,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
             var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
+
             var message = JsonConvert.DeserializeObject<AccurateSearchCustomerViewModel>(response.Content.ReadAsStringAsync().Result);
             //result.GetValueOrDefault("data").ToString()
 
@@ -249,7 +248,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             List<string> searchAttributes = new List<string>()
             {
-                "CustomerNo", "ReturnType"
+                "CustomerNo", "SalesReturnReturnType"
             };
 
             Query = QueryHelper<AccuSalesReturn>.ConfigureSearch(Query, searchAttributes, Keyword);
