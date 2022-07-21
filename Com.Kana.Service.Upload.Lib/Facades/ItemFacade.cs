@@ -332,7 +332,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
                 var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
                 var response = httpClient.PostAsync(url, content).Result;
-                var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(response.Content.ReadAsStringAsync().Result);
+                var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(await response.Content.ReadAsStringAsync());
 
                 if (response.IsSuccessStatusCode && message.s)
                 {

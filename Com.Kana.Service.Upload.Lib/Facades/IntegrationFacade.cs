@@ -105,7 +105,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public async Task<AccurateSessionViewModel> OpenDb()
         {
+
             ISessionClientService httpClient = (ISessionClientService)serviceProvider.GetService(typeof(ISessionClientService));
+
             var url = "https://account.accurate.id/api/open-db.do?id=592232";
 
             var response = await httpClient.GetAsync(url);

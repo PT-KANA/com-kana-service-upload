@@ -11,9 +11,10 @@ using System;
 namespace Com.Kana.Service.Upload.Lib.Migrations
 {
     [DbContext(typeof(UploadDbContext))]
-    partial class UploadDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220721071809_addSalesTemp")]
+    partial class addSalesTemp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -350,55 +351,6 @@ namespace Com.Kana.Service.Upload.Lib.Migrations
                     b.HasIndex("AccuItemDetailOpenBalanceId");
 
                     b.ToTable("AccuItemDetailSerialNumbers");
-                });
-
-            modelBuilder.Entity("Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoiceModel.AccuItemTemp", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<bool>("Active");
-
-                    b.Property<string>("CreatedAgent")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<DateTime>("CreatedUtc");
-
-                    b.Property<string>("DeletedAgent")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<string>("DeletedBy")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<DateTime>("DeletedUtc");
-
-                    b.Property<bool>("IsDeleted");
-
-                    b.Property<string>("LastModifiedAgent")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<string>("LastModifiedBy")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<DateTime>("LastModifiedUtc");
-
-                    b.Property<string>("No");
-
-                    b.Property<string>("UId")
-                        .HasMaxLength(255);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AccuItemTemp");
                 });
 
             modelBuilder.Entity("Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoiceModel.AccuSalesInvoice", b =>
