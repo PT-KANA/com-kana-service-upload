@@ -56,11 +56,11 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
         //}
 
         [HttpGet("authcallback")]
-        public IActionResult GetToken(string code)
+        public async Task<IActionResult> GetTokenAsync(string code)
         {
             try
             {
-                var data = facade.RetrieveToken(code).Result;
+                var data = await facade.RetrieveToken(code);
                 if(data == null)
                 {
                     throw new Exception("Terjadi Kesalahan");
@@ -87,11 +87,11 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
         }
 
         [HttpGet("refresh")]
-        public IActionResult RefreshToken()
+        public async Task<IActionResult> RefreshTokenAsync()
         {
             try
             {
-                var data = facade.RefreshToken().Result;
+                var data = await facade.RefreshToken();
                 if (data == null)
                 {
                     throw new Exception("Terjadi Kesalahan");
@@ -117,12 +117,12 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.IntegrationController
             }
         }
 
-        [HttpGet("open")]
-        public IActionResult OpenDb()
+        [HttpGet("opendb")]
+        public async Task<IActionResult> OpenDbAsync()
         {
             try
             {
-                var data = facade.OpenDb().Result;
+                var data = await facade.OpenDb();
                 if (data == null)
                 {
                     throw new Exception("Terjadi Kesalahan");

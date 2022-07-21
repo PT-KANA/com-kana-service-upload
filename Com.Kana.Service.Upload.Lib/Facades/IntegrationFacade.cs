@@ -63,7 +63,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             var response = await httpClient.SendAsync(HttpMethod.Post, APIEndpoint.Accurate + "oauth/token", content);
 
             response.EnsureSuccessStatusCode();
-            var data = response.Content.ReadAsStringAsync().Result;
+            var data = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
@@ -90,7 +90,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             var response = await httpClient.SendAsync(HttpMethod.Post, APIEndpoint.Accurate + "oauth/token", content);
 
             response.EnsureSuccessStatusCode();
-            var data = response.Content.ReadAsStringAsync().Result;
+            var data = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
@@ -106,10 +106,10 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         public async Task<AccurateSessionViewModel> OpenDb()
         {
             ISessionClientService httpClient = (ISessionClientService)serviceProvider.GetService(typeof(ISessionClientService));
-            var url = "https://account.accurate.id/api/open-db.do?id=578154";
+            var url = "https://account.accurate.id/api/open-db.do?id=592232";
 
             var response = await httpClient.GetAsync(url);
-            var data = response.Content.ReadAsStringAsync().Result;
+            var data = await response.Content.ReadAsStringAsync();
 
             response.EnsureSuccessStatusCode();
 
