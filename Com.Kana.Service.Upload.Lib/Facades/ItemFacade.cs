@@ -22,6 +22,8 @@ using System.Net.Http.Headers;
 using Com.Kana.Service.Upload.Lib.ViewModels;
 using AutoMapper;
 using Com.Kana.Service.Upload.Lib.ViewModels.AccuItemViewModel.AccuItemUploadViewModel;
+using Com.Kana.Service.Upload.Lib.ViewModels.AccuItemViewModel.ResponseViewModel;
+using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoiceModel;
 
 namespace Com.Kana.Service.Upload.Lib.Facades
 {
@@ -31,6 +33,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         private readonly UploadDbContext dbContext;
         private readonly DbSet<AccuItem> dbSet;
+        private readonly DbSet<AccuItemTemp> dbSetTemp;
+
         public readonly IServiceProvider serviceProvider;
         public readonly IIntegrationFacade facade;
         private readonly IMapper mapper;
@@ -45,6 +49,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             this.dbContext = dbContext;
             this.mapper = mapper;
             this.dbSet = dbContext.Set<AccuItem>();
+            this.dbSetTemp = dbContext.Set<AccuItemTemp>();
         }
 
         public List<string> CsvHeader { get; } = new List<string>()
@@ -80,53 +85,23 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             foreach (var i in csv)
             {
                 var barcode = i.variantBarcode.Replace("'", string.Empty).Trim();
-                //var isSameItem = tempNo.FirstOrDefault(s => s == barcode);
+                AccuItemViewModel ii = new AccuItemViewModel
+                {
+                    itemType = "INVENTORY",
+                    name = string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value : i.title + " - " + i.option1Value,
+                    unit1Name = "PCS",
+                    unitPrice = string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice),
+                    upcNo = barcode,
+                    no = barcode,
+                    serialNumberType = "UNIQUE",
+                    usePPn = string.IsNullOrWhiteSpace(i.variantTaxable) ? false : (i.variantTaxable == "TRUE" ? true : false),
+                    preferedVendorName = string.IsNullOrWhiteSpace(i.vendor) ? csv.Find(x => x.handle == i.handle).vendor : i.vendor,
+                    vendorPrice = string.IsNullOrWhiteSpace(i.costPeritem) ? (string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice)) : Convert.ToDouble(i.costPeritem),
+                    vendorUnitName = "PCS",
 
-                //if(isSameItem == null)
-                //{
-                //    tempNo.Add(barcode);
-                    AccuItemViewModel ii = new AccuItemViewModel
-                    {
-                        itemType = "INVENTORY",
-                        name = string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value : i.title + " - " + i.option1Value,
-                        unit1Name = "PCS",
-                        unitPrice = string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice),
-                        upcNo = barcode,
-                        no = barcode,
-                        serialNumberType = "UNIQUE",
-                        usePPn = string.IsNullOrWhiteSpace(i.variantTaxable) ? false : (i.variantTaxable == "TRUE" ? true : false),
-                        preferedVendorName = string.IsNullOrWhiteSpace(i.vendor) ? csv.Find(x => x.handle == i.handle).vendor : i.vendor,
-                        vendorPrice = string.IsNullOrWhiteSpace(i.costPeritem) ? (string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice)) : Convert.ToDouble(i.costPeritem),
-                        vendorUnitName = "PCS",
-                        //detailOpenBalance = new List<AccuItemDetailOpenBalanceViewModel>()
-                        //{
-                        //    new AccuItemDetailOpenBalanceViewModel()
-                        //    {
-                        //        asOf = DateTimeOffset.Now,
-                        //        quantity = string.IsNullOrWhiteSpace(i.variantInventoryQty) ? 0 : Convert.ToDouble(i.variantInventoryQty),
-                        //        warehouseName = i.variantInventoryTracker,
-                        //        itemUnitName = "PCS",
-                        //        unitCost = string.IsNullOrWhiteSpace(i.costPeritem) ? (string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice)) : Convert.ToDouble(i.costPeritem)
-                        //    }
-                        //}
-                    };
+                };
 
-                    item.Add(ii);
-                //}
-                //else
-                //{
-                //    var b = new AccuItemDetailOpenBalanceViewModel()
-                //    {
-                //        asOf = DateTimeOffset.Now,
-                //        quantity = string.IsNullOrWhiteSpace(i.variantInventoryQty) ? 0 : Convert.ToDouble(i.variantInventoryQty),
-                //        warehouseName = i.variantInventoryTracker,
-                //        itemUnitName = "PCS",
-                //        unitCost = string.IsNullOrWhiteSpace(i.costPeritem) ? (string.IsNullOrWhiteSpace(i.variantPrice) ? Convert.ToDouble(i.variantPrice) : 0) : 0
-                //    };
-
-                //    AccuItemViewModel header = item.Where(a => a.no == barcode).FirstOrDefault();
-                //    header.detailOpenBalance.Add(b);
-                //}
+                item.Add(ii);
             }
 
             return item;
@@ -189,7 +164,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 ErrorMessage = "";
 
                 var x = data.Find(y => y.handle == item.handle && !string.IsNullOrWhiteSpace(y.handle));
-                var isExist = Query.Where(s => s.Name == x.title).ToList();
+                var name = x != null ? x.title + " - " + item.option1Value : item.title;
+
+                var isExist = Query.Where(s => s.Name == name).ToList();
 
                 if (x == null && string.IsNullOrWhiteSpace(x.title))
                 {
@@ -225,16 +202,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     ErrorMessage = string.Concat(ErrorMessage, "Harga harus lebih besar dari 0, ");
                 }
 
-                //decimal qty = 0;
-                //if (string.IsNullOrWhiteSpace(item.variantInventoryQty))
-                //{
-                //    ErrorMessage = string.Concat(ErrorMessage, "Qty tidak boleh kosong, ");
-                //}
-                //else if (!decimal.TryParse(item.variantInventoryQty, out qty))
-                //{
-                //    ErrorMessage = string.Concat(ErrorMessage, "Harga harus numerik, ");
-                //}
-
                 if (!string.IsNullOrEmpty(ErrorMessage))
                 {
                     ErrorMessage = ErrorMessage.Remove(ErrorMessage.Length - 2);
@@ -261,7 +228,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public async Task UploadData(List<AccuItem> data, string username)
         {
-            foreach(var i in data)
+            foreach (var i in data)
             {
                 EntityExtension.FlagForCreate(i, username, USER_AGENT);
 
@@ -300,20 +267,23 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             return Tuple.Create(Data, TotalData, OrderDictionary);
         }
 
-        public async Task Create(List<AccuItemViewModel> viewModel, string username)
+        public async Task<int> Create(List<AccuItemViewModel> viewModel, string username)
         {
             var token = await facade.RefreshToken();
             var session = await facade.OpenDb();
+            var temp = await BulkIntoTemp();
+            var created = 0;
 
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = $"{AuthCredential.Host}/accurate/api/item/save.do";
 
-            foreach(var i in viewModel)
+            foreach (var i in viewModel)
             {
                 var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).FirstOrDefault();
+                var dataToBeChecked = dbSetTemp.Where(x => x.No == dataToBeMapped.No).FirstOrDefault();
 
-                var dataToBeSerialize = new ItemUploadViewModel 
-                { 
+                var dataToBeSerialize = new ItemUploadViewModel
+                {
                     itemType = dataToBeMapped.ItemType,
                     name = dataToBeMapped.Name,
                     no = dataToBeMapped.No,
@@ -325,13 +295,12 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     usePPn = dataToBeMapped.UsePPn,
                     vendorPrice = dataToBeMapped.VendorPrice,
                     vendorUnitName = dataToBeMapped.VendorUnitName,
-                    //detailOpenBalance = detailOpenBalance
                 };
 
                 var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
 
                 var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
-                var response = httpClient.PostAsync(url, content).Result;
+                var response = await httpClient.PostAsync(url, content);
                 var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(await response.Content.ReadAsStringAsync());
 
                 if (response.IsSuccessStatusCode && message.s)
@@ -339,9 +308,96 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     dataToBeMapped.IsAccurate = true;
                     EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
                 }
+
+                if(dataToBeChecked != null)
+                {
+                    dataToBeMapped.IsAccurate = true;
+                    EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
+                }
             }
 
-            await dbContext.SaveChangesAsync();
+            created += await dbContext.SaveChangesAsync();
+
+            return created;
+        }
+
+        private async Task<ItemSearchResultViewModel> SearchNo(int page, DateTime date)
+        {
+            IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
+            var url = $"{AuthCredential.Host}/accurate/api/item/list.do";
+            var list = new List<string>();
+            var now = date.Date.ToShortDateString();
+
+            list.Add(now);
+
+            var dataToBeSerialize = new DetailSearch
+            {
+                fields = "no",
+                filter = new Filter
+                {
+                    lastUpdate = new Val
+                    {
+                        op = "LESS_THAN",
+                        val = list
+                    }
+                },
+                sp = new Sp
+                {
+                    page = page,
+                    pageSize = 100,
+                    sort = "no|asc"
+                }
+            };
+
+            var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
+
+            var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
+            var response = await httpClient.SendAsync(HttpMethod.Get, url, content);
+            var message = await response.Content.ReadAsStringAsync();
+
+            var res = JsonConvert.DeserializeObject<AccurateResponseViewModel>(message);
+
+            if (res.s)
+            {
+                var data = JsonConvert.DeserializeObject<ItemSearchResultViewModel>(message);
+                return data;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private async Task<int> BulkIntoTemp()
+        {
+            var date = DateTime.Now;
+            var page = 1;
+            var created = 0;
+            List<AccuItemTemp> temp = new List<AccuItemTemp>();
+            var st = await SearchNo(page, date);
+
+            if(st != null)
+            {
+                for(var x = 1; x <= st.sp.pageCount; x++)
+                {
+                    var data = await SearchNo(x, date);
+                    foreach(var i in data.d)
+                    {
+                        temp.Add(new AccuItemTemp { No = i.no});
+                    }
+                }
+
+                foreach(var i in temp)
+                {
+                    EntityExtension.FlagForCreate(i, "YOKS", USER_AGENT);
+                    dbSetTemp.Add(i);
+                }
+
+                
+            }
+
+            return created += await dbContext.SaveChangesAsync();
         }
     }
 }
+
