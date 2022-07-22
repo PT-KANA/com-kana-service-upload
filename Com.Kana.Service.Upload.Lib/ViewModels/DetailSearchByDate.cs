@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Com.Kana.Service.Upload.Lib.ViewModels.AccuItemViewModel.ResponseViewModel
+namespace Com.Kana.Service.Upload.Lib.ViewModels
 {
-    public class DetailSearch
+    public class DetailSearchByDate
     {
         public string fields { get; set; }
         public Filter filter { get; set; }
