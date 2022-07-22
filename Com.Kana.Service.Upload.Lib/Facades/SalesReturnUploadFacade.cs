@@ -63,9 +63,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     tempNo.Add(i.salesOrderNo);
                     AccuSalesReturnViewModel ii = new AccuSalesReturnViewModel
                     {
-                        //customerNo = string.IsNullOrWhiteSpace(i.customerNo) ? "CUST" : i.customerNo,
                         customerNo = string.IsNullOrWhiteSpace(i.customerNo) ? "PELANGGAN SHOPIFY" : i.customerNo,
-                        //salesOrderNo = i.salesOrderNo,
                         invoiceNumber = i.salesOrderNo,
                         transDate = Convert.ToDateTime(i.transDate),
                         taxDate = Convert.ToDateTime(i.taxDate),
