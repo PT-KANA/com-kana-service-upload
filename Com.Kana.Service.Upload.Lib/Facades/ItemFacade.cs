@@ -22,8 +22,7 @@ using System.Net.Http.Headers;
 using Com.Kana.Service.Upload.Lib.ViewModels;
 using AutoMapper;
 using Com.Kana.Service.Upload.Lib.ViewModels.AccuItemViewModel.AccuItemUploadViewModel;
-using Com.Kana.Service.Upload.Lib.ViewModels.AccuItemViewModel.ResponseViewModel;
-using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoiceModel;
+ 
 
 namespace Com.Kana.Service.Upload.Lib.Facades
 {
@@ -330,8 +329,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             list.Add(now);
 
-            var dataToBeSerialize = new DetailSearch
-            {
+            var dataToBeSerialize = new DetailSearchByDate
+			{
                 fields = "no",
                 filter = new Filter
                 {
