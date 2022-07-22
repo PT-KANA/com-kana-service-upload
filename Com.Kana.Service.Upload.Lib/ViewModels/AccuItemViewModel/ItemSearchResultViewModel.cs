@@ -8,7 +8,7 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels
     public class ItemSearchResultViewModel
     {
         public bool s { get; set; }
-        public List<ItemUploadViewModel> d { get; set; }
+        public List<ItemSearchResponse> d { get; set; }
         public Page sp { get; set; }
     }
 
@@ -17,5 +17,11 @@ namespace Com.Kana.Service.Upload.Lib.ViewModels
         public long page { get; set; }
         public long pageCount { get; set; }
         public long rowCount { get; set; }
+    }
+
+    public class ItemSearchResponse
+    {
+        public string no { get; set; }
+        public string createDate { get; set; }
     }
 }
