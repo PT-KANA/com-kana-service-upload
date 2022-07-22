@@ -215,11 +215,19 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 		}
 		public async Task InsertTemp(List<AccuSalesTemp> data, string username)
 		{
-			foreach (var i in data)
+			 
+			foreach(var b in data)
 			{
-				EntityExtension.FlagForCreate(i, username, USER_AGENT);
-				dbSetTemp.Add(i);
+				AccuSalesTemp accu = (from d in dbContext.AccuSalesTemps
+									  where d.Number == b.Number
+									  select d).FirstOrDefault();
+				if(accu ==null)
+				{
+					EntityExtension.FlagForCreate(b, username, USER_AGENT);
+					dbSetTemp.Add(b);
+				}
 			}
+		 
 			var result = await dbContext.SaveChangesAsync();
 		}
 		public sealed class SalesInvoiceMap : CsvHelper.Configuration.ClassMap<SalesCsvViewModel>
@@ -352,20 +360,20 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 					}
 
 					await InsertTemp(temps, username);
-					List<string> listNumber = new List<string>();
+					 
 					var dataTemp = from a in dbContext.AccuSalesTemps
 								   select a ;
-					foreach(var  dt in dataTemp)
+					foreach(var  dt in dataTemp.Where(s=>s.Number.Contains("PLR")))
 					{
-						listNumber.Add(dt.Number);
+						var invoice = (from a in dbContext.AccuSalesInvoices
+									   where a.Number == dt.Number
+									   select a).FirstOrDefault();
+						invoice.IsAccurate = true;
+
+						EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
 					}
 
-					AccuSalesInvoice invoice = (from a in dbContext.AccuSalesInvoices
-                                                where listNumber.Contains( a.Number )
-                                                select a).FirstOrDefault();
-                    invoice.IsAccurate = true;
-
-                    EntityExtension.FlagForUpdate(invoice, username, USER_AGENT);
+					
                 }
 
                 //using (var request = new HttpRequestMessage(HttpMethod.Post, url))
@@ -494,7 +502,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
 			var url = $"{AuthCredential.Host}/accurate/api/sales-invoice/list.do";
 		 
-			var dataToBeSerialize = new DetailSearch
+			var dataToBeSerialize = new DetailSearchSales
 			{
 				fields = "number",
 				filter = new Dictionary<string, Dictionary<string, string>>
@@ -536,13 +544,13 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             var url = $"{AuthCredential.Host}/accurate/api/customer/list.do";
 
             var dataToBeSerialize = new DetailSearch
-            {
-                //fields = "name,customerNo,branch",
-                //filter = new Dictionary<string, string>
-                //{
-                //    { "keywords", name }
-                //}
-            };
+			{
+				fields = "name,customerNo,branch",
+				filter = new Dictionary<string, string>
+				{
+					{ "keywords", name }
+				}
+			};
 
             var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
 
@@ -571,11 +579,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 			var dataToBeSerialize = new DetailSearch
 			{
-				//fields = "name,no",
-				//filter = new Dictionary<string, string>
-				//{
-				//	{ "keywords", name }
-				//}
+				fields = "name,no",
+				filter = new Dictionary<string, string>
+				{
+					{ "keywords", name }
+				}
 			};
 
 			var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
@@ -594,12 +602,18 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			}
 
 		}
-		private class DetailSearch
+		private class DetailSearchSales
 		{
 			public string fields { get; set; }
 			public Dictionary<string, Dictionary<string, string>> filter { get; set; }
 		}
-		
+
+		private class DetailSearch
+		{
+			public string fields { get; set; }
+			public Dictionary<string,  string> filter { get; set; }
+		}
+
 	}
 
 }
