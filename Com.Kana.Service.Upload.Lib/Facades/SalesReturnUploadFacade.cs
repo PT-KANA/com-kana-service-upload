@@ -150,18 +150,19 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             return salesReturns;
         }
 
-        public async Task Create(List<AccuSalesReturnViewModel> viewModel, string username)
+        public async Task<int> Create(List<AccuSalesReturnViewModel> viewModel, string username)
         {
-            var token = await facade.RefreshToken();
-            var session = await facade.OpenDb();
-            
+            await facade.RefreshToken();
+            await facade.OpenDb();
+            var created = 0;
+
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = $"{AuthCredential.Host}/accurate/api/sales-return/save.do";
 
             foreach (var i in viewModel)
             {
                 var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).Include(m => m.DetailItem).FirstOrDefault();
-                var Customer = SearchCustomerNo(dataToBeMapped.CustomerNo);
+                var Customer = await SearchCustomerNo(dataToBeMapped.CustomerNo);
 
                 List<SalesReturnDetailItemViewModel> detailItem = new List<SalesReturnDetailItemViewModel>();
 
@@ -192,10 +193,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
 
                 var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
-                var response = httpClient.PostAsync(url, content).Result;
-
-                var msg = response.Content.ReadAsStringAsync().Result;
-
+                var response = await httpClient.PostAsync(url, content);
+                var msg = await response.Content.ReadAsStringAsync();
                 var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(msg);
 
                 if (response.IsSuccessStatusCode && message.s)
@@ -205,10 +204,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 }
             }
 
-            await dbContext.SaveChangesAsync();
+            created += await dbContext.SaveChangesAsync();
+            return created;
         }
 
-        private AccurateCustomerViewModel SearchCustomerNo(string name)
+        private async Task<AccurateCustomerViewModel> SearchCustomerNo(string name)
         {
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = $"{AuthCredential.Host}/accurate/api/customer/list.do";
@@ -225,9 +225,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
 
             var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
-            var response = httpClient.SendAsync(HttpMethod.Get, url, content).Result;
-
-            var message = JsonConvert.DeserializeObject<AccurateSearchCustomerViewModel>(response.Content.ReadAsStringAsync().Result);
+            var response = await httpClient.SendAsync(HttpMethod.Get, url, content);
+            var message = JsonConvert.DeserializeObject<AccurateSearchCustomerViewModel>(await response.Content.ReadAsStringAsync());
             //result.GetValueOrDefault("data").ToString()
 
             if (response.IsSuccessStatusCode && message.s)
@@ -382,18 +381,5 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             public string fields { get; set; }
             public Dictionary<string, string> filter { get; set; }
         }
-
-        //private class AccuResponseViewModel
-        //{
-        //    public bool s { get; set; }
-        //    public List<AccuCustomerViewModel> d { get; set; }
-        //}
-
-        //private class AccuCustomerViewModel
-        //{
-        //    public string name { get; set; }
-        //    public Dictionary<string, string> branch { get; set; }
-        //    public string customerNo { get; set; }
-        //}
     }
 }

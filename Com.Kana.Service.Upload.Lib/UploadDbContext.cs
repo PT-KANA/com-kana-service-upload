@@ -17,6 +17,7 @@ namespace Com.Kana.Service.Upload.Lib
 
         #region items
         public DbSet<AccuItem> AccuItems { get; set; }
+        public DbSet<AccuItemTemp> AccuItemTemps { get; set; }
         public DbSet<AccuItemDetailGroup> AccuItemDetailGroups { get; set; }
         public DbSet<AccuItemDetailOpenBalance> AccuItemDetailOpenBalances { get; set; }
         public DbSet<AccuItemDetailSerialNumber> AccuItemDetailSerialNumbers { get; set; }

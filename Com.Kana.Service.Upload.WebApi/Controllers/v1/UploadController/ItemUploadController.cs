@@ -136,11 +136,11 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
                 identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
 
-                await facade.Create(ViewModel, identityService.Username);
+                var res = await facade.Create(ViewModel, identityService.Username);
 
                 Dictionary<string, object> Result =
                     new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
-                    .Ok();
+                    .Ok(res);
                 return Created(String.Concat(Request.Path, "/", 0), Result);
             }
             catch (Exception e)
