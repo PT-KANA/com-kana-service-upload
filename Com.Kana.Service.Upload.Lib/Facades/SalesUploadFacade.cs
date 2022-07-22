@@ -315,6 +315,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 			{
 				
 				var detail = from a in i.detailItem select a;
+				var Customer = await SearchCustomerNo(i.customerNo);
 				foreach (var d in detail)
 				{
 					var detailItem=  new AccuSalesInvoiceDetailItemUploadViewModel
@@ -329,7 +330,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 				{
 					saveAsStatusType= "UNAPPROVED",
 					branchName = "JAKARTA",
-					customerNo = "C.00004",
+					customerNo = Customer.customerNo,
 					number = i.number,
 					orderDownPaymentNumber = i.number,
 					reverseInvoice = i.reverseInvoice,
@@ -347,20 +348,21 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 				var message = JsonConvert.DeserializeObject<AccurateResponseViewModel>(await response.Content.ReadAsStringAsync());
 
                 if (response.IsSuccessStatusCode && message.s)
-                {
-					var Sales = await SearchSalesNo(DateTime.Now.ToShortDateString());
-					List<AccuSalesTemp> temps = new List<AccuSalesTemp>();
-					foreach (var _sales in Sales)
-					{
-						AccuSalesTemp salesTemp = new AccuSalesTemp
-						{
-							Number = _sales.number
-						};
-						temps.Add(salesTemp);
-					}
+				{
 
-					await InsertTemp(temps, username);
-					 
+					//var Sales = await SearchSalesNo(DateTime.Now.ToShortDateString());
+					//List<AccuSalesTemp> temps = new List<AccuSalesTemp>();
+					//foreach (var _sales in Sales)
+					//{
+					//	AccuSalesTemp salesTemp = new AccuSalesTemp
+					//	{
+					//		Number = _sales.number
+					//	};
+					//	temps.Add(salesTemp);
+					//}
+
+					//await InsertTemp(temps, username);
+					await BulkIntoTemp();
 					var dataTemp = from a in dbContext.AccuSalesTemps
 								   select a ;
 					foreach(var  dt in dataTemp.Where(s=>s.Number.Contains("PLR")))
@@ -399,6 +401,32 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             }
 			await dbContext.SaveChangesAsync();
+		}
+		private async Task<int> BulkIntoTemp()
+		{
+			var date = DateTime.Now;
+			var page = 1;
+			var created = 0;
+			List<AccuSalesTemp> temp = new List<AccuSalesTemp>();
+			var st = await SearchSalesNo(page, date);
+
+			if (st != null)
+			{
+				for (var x = 1; x <= st.sp.pageCount; x++)
+				{
+					var data = await SearchSalesNo(x, date);
+					foreach (var i in data.d)
+					{
+						temp.Add(new AccuSalesTemp { Number = i.number,TransDate = Convert.ToDateTime(i.transDate) });
+					}
+				}
+
+				await InsertTemp(temp, "user");
+
+
+			}
+
+			return created += await dbContext.SaveChangesAsync();
 		}
 		public async Task CreateSalesReceipt(List<AccuSalesViewModel> dataviewModel, string username)
 		{
@@ -497,24 +525,37 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             }
 			await dbContext.SaveChangesAsync();
 		}
-		private async Task<List<AccurateSalesViewModel>> SearchSalesNo(string date)
+		private async Task<SalesSearchResultViewModel> SearchSalesNo(int page, DateTime date)
 		{
 			IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
 			var url = $"{AuthCredential.Host}/accurate/api/sales-invoice/list.do";
-		 
-			var dataToBeSerialize = new DetailSearchSales
+			var list = new List<string>();
+			var dateFirst = (from a in dbContext.AccuSalesTemps
+							orderby a.TransDate descending
+							select a.TransDate.ToShortDateString()).FirstOrDefault() == null? date.Date.AddDays(-1).ToShortDateString(): (from a in dbContext.AccuSalesTemps
+																																		   orderby a.TransDate descending
+																																		   select a.TransDate.ToShortDateString()).FirstOrDefault() ;
+			
+			var now = date.Date.ToShortDateString();
+			list.Add(dateFirst);
+			list.Add(now);
+
+			var dataToBeSerialize = new DetailSearchByDate
 			{
-				fields = "number",
-				filter = new Dictionary<string, Dictionary<string, string>>
+				fields = "number,transDate",
+				filter = new Filter
 				{
+					lastUpdate = new Val
 					{
-						"lastUpdate" , new Dictionary<string, string>
-						{
-							{"op", "LESS_THAN" },
-							{"val",date   }
-						}
+						op = "BETWEEN",
+						val = list
 					}
-					
+				},
+				sp = new Sp
+				{
+					page = page,
+					pageSize = 100,
+					sort = "number|asc"
 				}
 			};
 
@@ -522,14 +563,14 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
 			var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
 			var response = await httpClient.SendAsync(HttpMethod.Get, url, content);
-			 
-			var message = JsonConvert.DeserializeObject<AccurateSearchSalesViewModel>(await response.Content.ReadAsStringAsync());
+			var message = await response.Content.ReadAsStringAsync();
 
+			var res = JsonConvert.DeserializeObject<AccurateSearchSalesViewModel>(message);
 
-			if (response.IsSuccessStatusCode && message.s)
+			if (res.s)
 			{
-				var customer = message.d;
-				return customer;
+				var data = JsonConvert.DeserializeObject<SalesSearchResultViewModel>(message);
+				return data;
 			}
 			else
 			{
