@@ -8,6 +8,6 @@ namespace Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuSalesInvoic
 	public class AccuSalesTemp :BaseModel
 	{
 		public string Number { get; set; }
-		public DateTimeOffset TransDate { get; set; }
+		public DateTime TransDate { get; set; }
 	}
 }

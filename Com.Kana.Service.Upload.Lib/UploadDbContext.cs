@@ -34,7 +34,8 @@ namespace Com.Kana.Service.Upload.Lib
 
         #region sales-return
         public DbSet<AccuSalesReturn> AccuSalesReturns { get; set; }
-        public DbSet<AccuSalesReturnDetailExpense> AccuSalesReturnDetailExpenses { get; set; }
+		public DbSet<AccuSalesReturnTemp> AccuSalesReturnTemps { get; set; }
+		public DbSet<AccuSalesReturnDetailExpense> AccuSalesReturnDetailExpenses { get; set; }
         public DbSet<AccuSalesReturnDetailItem> AccuSalesReturnDetailItems { get; set; }
         public DbSet<AccuSalesReturnDetailSerialNumber> AccuSalesReturnDetailSerialNumbers { get; set; }
         #endregion
