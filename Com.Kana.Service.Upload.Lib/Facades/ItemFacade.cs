@@ -19,6 +19,8 @@ using System.Net.Http;
 using Com.Kana.Service.Upload.Lib.ViewModels;
 using AutoMapper;
 using Com.Kana.Service.Upload.Lib.ViewModels.AccuItemViewModel.AccuItemUploadViewModel;
+using Newtonsoft.Json.Linq;
+
 
 namespace Com.Kana.Service.Upload.Lib.Facades
 {
@@ -49,7 +51,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public List<string> CsvHeader { get; } = new List<string>()
         {
-            "Handle", "Title", "Body (HTML)", "Vendor", "Standardized Product Type", "Custom Product Type", "Tags", "Published", "Option1 Name", "Option1 Value", "Option2 Name", "Option2 Value", "Option3 Name", "Option3 Value", "Variant SKU", "Variant Grams", "Variant Inventory Tracker", "Variant Inventory Qty", "Variant Inventory Policy", "Variant Fulfillment Service", "Variant Price", "Variant Compare At Price", "Variant Requires Shipping", "Variant Taxable", "Variant Barcode", "Image Src", "Image Position", "Image Alt Text", "Gift Card", "SEO Title", "SEO Description", "Google Shopping / Google Product Category", "Google Shopping / Gender", "Google Shopping / Age Group",  "Google Shopping / MPN",    "Google Shopping / AdWords Grouping",   "Google Shopping / AdWords Labels", "Google Shopping / Condition",  "Google Shopping / Custom Product", "Google Shopping / Custom Label 0", "Google Shopping / Custom Label 1", "Google Shopping / Custom Label 2", "Google Shopping / Custom Label 3", "Google Shopping / Custom Label 4", "Variant Image", "Variant Weight Unit", "Variant Tax Code", "Cost per item", "Status",
+          //  "Handle", "Title", "Body (HTML)", "Vendor", "Standardized Product Type", "Custom Product Type", "Tags", "Published", "Option1 Name", "Option1 Value", "Option2 Name", "Option2 Value", "Option3 Name", "Option3 Value", "Variant SKU", "Variant Grams", "Variant Inventory Tracker", "Variant Inventory Qty", "Variant Inventory Policy", "Variant Fulfillment Service", "Variant Price", "Variant Compare At Price", "Variant Requires Shipping", "Variant Taxable", "Variant Barcode", "Image Src", "Image Position", "Image Alt Text", "Gift Card", "SEO Title", "SEO Description", "Google Shopping / Google Product Category", "Google Shopping / Gender", "Google Shopping / Age Group",  "Google Shopping / MPN",    "Google Shopping / AdWords Grouping",   "Google Shopping / AdWords Labels", "Google Shopping / Condition",  "Google Shopping / Custom Product", "Google Shopping / Custom Label 0", "Google Shopping / Custom Label 1", "Google Shopping / Custom Label 2", "Google Shopping / Custom Label 3", "Google Shopping / Custom Label 4", "Variant Image", "Variant Weight Unit", "Variant Tax Code", "Cost per item", "Status",
+        "Handle",   "Title",    "Body (HTML)",  "Vendor",   "Product Category", "Type", "Tags", "Published",    "Option1 Name", "Option1 Value",    "Option2 Name", "Option2 Value",    "Option3 Name", "Option3 Value",    "Variant SKU",  "Variant Grams",    "Variant Inventory Tracker",    "Variant Inventory Qty",    "Variant Inventory Policy", "Variant Fulfillment Service",  "Variant Price",    "Variant Compare At Price", "Variant Requires Shipping",    "Variant Taxable",  "Variant Barcode",  "Image Src",    "Image Position",   "Image Alt Text",   "Gift Card",    "SEO Title",    "SEO Description",  "Google Shopping / Google Product Category",    "Google Shopping / Gender", "Google Shopping / Age Group",  "Google Shopping / MPN",    "Google Shopping / AdWords Grouping",   "Google Shopping / AdWords Labels", "Google Shopping / Condition",  "Google Shopping / Custom Product", "Google Shopping / Custom Label 0", "Google Shopping / Custom Label 1", "Google Shopping / Custom Label 2", "Google Shopping / Custom Label 3", "Google Shopping / Custom Label 4", "Variant Image",    "Variant Weight Unit",  "Variant Tax Code", "Cost per item",    "Price / International",    "Compare At Price / International", "Price / Singapore",    "Compare At Price / Singapore", "Price / United States",    "Compare At Price / United States", "Status"
+
         };
 
         public sealed class ItemMap : CsvHelper.Configuration.ClassMap<ItemCsvViewModel>
@@ -77,26 +81,31 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         {
             List<AccuItemViewModel> item = new List<AccuItemViewModel>();
             List<string> tempNo = new List<string>();
-            foreach (var i in csv)
+            foreach (var i in csv )
             {
-                var barcode = i.variantBarcode.Replace("'", string.Empty).Trim();
-                AccuItemViewModel ii = new AccuItemViewModel
+               
+                    var barcode = i.variantBarcode.Replace("'", string.Empty).Trim();
+                    AccuItemViewModel ii = new AccuItemViewModel
+                    {
+                        itemType = "INVENTORY",
+                        name = string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value : i.title + " - " + i.option1Value,
+                        unit1Name = "PCS",
+                        unitPrice = string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice),
+                        upcNo = barcode,
+                        no = barcode,
+                        serialNumberType = "UNIQUE",
+                        usePPn = string.IsNullOrWhiteSpace(i.variantTaxable) ? false : (i.variantTaxable == "TRUE" ? true : false),
+                        preferedVendorName = string.IsNullOrWhiteSpace(i.vendor) ? csv.Find(x => x.handle == i.handle).vendor : i.vendor,
+                        vendorPrice = string.IsNullOrWhiteSpace(i.costPeritem) ? (string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice)) : Convert.ToDouble(i.costPeritem),
+                        vendorUnitName = "PCS",
+
+                    };
+                if (ii.no !="")
                 {
-                    itemType = "INVENTORY",
-                    name = string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value : i.title + " - " + i.option1Value,
-                    unit1Name = "PCS",
-                    unitPrice = string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice),
-                    upcNo = barcode,
-                    no = barcode,
-                    serialNumberType = "UNIQUE",
-                    usePPn = string.IsNullOrWhiteSpace(i.variantTaxable) ? false : (i.variantTaxable == "TRUE" ? true : false),
-                    preferedVendorName = string.IsNullOrWhiteSpace(i.vendor) ? csv.Find(x => x.handle == i.handle).vendor : i.vendor,
-                    vendorPrice = string.IsNullOrWhiteSpace(i.costPeritem) ? (string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice)) : Convert.ToDouble(i.costPeritem),
-                    vendorUnitName = "PCS",
 
-                };
-
-                item.Add(ii);
+                    item.Add(ii);
+                }
+               
             }
 
             return item;
@@ -137,7 +146,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             IQueryable<AccuItem> Query = this.dbSet;
 
-            foreach (ItemCsvViewModel item in data)
+            foreach (ItemCsvViewModel item in data.Where(s=>s.variantBarcode !=""))
             {
                 ErrorMessage = "";
 
@@ -297,8 +306,14 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             return created;
         }
-
-        private async Task<ItemSearchResultViewModel> SearchItemNo(int page, string date)
+        private class ResponseVM
+        {
+            public bool s { get; set; }
+            public List<string> d { get; set; }
+            public int  pageCount { get; set; }
+        }
+ 
+        private async Task<ResponseVM> SearchNo(int page, DateTime date)
         {
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = $"{AuthCredential.Host}/accurate/api/item/list.do";
@@ -332,18 +347,62 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
 
+           
+
             var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
             var response = await httpClient.SendAsync(HttpMethod.Get, url, content);
             var message = JsonConvert.DeserializeObject<ItemSearchResultViewModel>(await response.Content.ReadAsStringAsync());
+ 
+            JObject joResponse = JObject.Parse(message);
 
-            if (response.IsSuccessStatusCode && message.s)
+            var d = joResponse.GetValue("d").ToString();
+            var s = Convert.ToBoolean(joResponse.GetValue("s"));
+            var sp = joResponse.GetValue("sp").ToString();
+
+            List<Dictionary<string, string>> _d = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(d);
+            Dictionary<string, string> _sp = JsonConvert.DeserializeObject<Dictionary<string, string>>(sp);
+            List<string> dataD = new List<string>();
+            int pageCount = 0;
+            foreach (var item in _d)
             {
-                return message;
+                foreach(var detail in item)
+                {
+                    dataD.Add(detail.Value);
+                }
             }
-            else
+            foreach (var detail in _sp)
+            {
+                if(detail.Key == "pageCount")
+                {
+                    pageCount = Convert.ToInt32(detail.Value);
+                }
+ 
+            }
+            ResponseVM data = new ResponseVM
+            {
+                s = s,
+                d = dataD,
+                pageCount = pageCount
+
+            };
+            if(s)
+            {
+                return data;
+            }else
             {
                 return null;
             }
+            //var res = JsonConvert.DeserializeObject<AccurateResponseViewModel>(message);
+
+            //if (res.s)
+            //{
+            //    var data = JsonConvert.DeserializeObject<ItemSearchResultViewModel>(message);
+            //    return data;
+            //}
+            //else
+            //{
+            //    return null;
+            //}
         }
 
         public async Task<int> BulkIntoTemp(string username)
@@ -356,12 +415,14 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             if(st != null)
             {
-                for (var x = 1; x <= st.sp.pageCount; x++)
+                for(var x = 1; x <= st.pageCount; x++)
+ 
                 {
                     var data = await SearchItemNo(x, date);
                     foreach (var i in data.d)
                     {
-                        temp.Add(new AccuItemTemp { No = i.no });
+                        temp.Add(new AccuItemTemp { No = i});
+ 
                     }
                 }
 
