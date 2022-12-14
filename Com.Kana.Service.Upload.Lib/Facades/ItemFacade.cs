@@ -1,14 +1,12 @@
 ﻿using Com.DanLiris.Service.Purchasing.Lib.ViewModels.AccuItemViewModel;
 using Com.Kana.Service.Upload.Lib.Interfaces.ItemInterface;
 using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuItemModel;
-using Com.Kana.Service.Upload.Lib.ViewModels.AccuItemViewModel;
 using Com.Kana.Service.Upload.Lib.ViewModels.ItemViewModel;
 using Com.Moonlay.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
-using CsvHelper.TypeConversion;
 using System.Dynamic;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,11 +16,11 @@ using Newtonsoft.Json;
 using Com.Moonlay.NetCore.Lib;
 using Com.Kana.Service.Upload.Lib.Interfaces;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using Com.Kana.Service.Upload.Lib.ViewModels;
 using AutoMapper;
 using Com.Kana.Service.Upload.Lib.ViewModels.AccuItemViewModel.AccuItemUploadViewModel;
 using Newtonsoft.Json.Linq;
+
 
 namespace Com.Kana.Service.Upload.Lib.Facades
 {
@@ -119,22 +117,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             foreach (var i in data1)
             {
-                //List<AccuItemDetailOpenBalance> itemDetailOpenBalance = new List<AccuItemDetailOpenBalance>();
-
-                //foreach (var iii in i.detailOpenBalance)
-                //{
-                //    AccuItemDetailOpenBalance temp3 = new AccuItemDetailOpenBalance
-                //    {
-                //        AsOf = iii.asOf,
-                //        Quantity = iii.quantity,
-                //        ItemUnitName = iii.itemUnitName,
-                //        WarehouseName = iii.warehouseName,
-                //        UnitCost = iii.unitCost,
-                //    };
-
-                //    itemDetailOpenBalance.Add(temp3);
-                //}
-
                 AccuItem temp1 = new AccuItem
                 {
                     ItemType = i.itemType,
@@ -148,7 +130,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     VendorUnitName = i.vendorUnitName,
                     PreferedVendorName = i.preferedVendorName,
                     SerialNumberType = i.serialNumberType,
-                    //DetailOpenBalance = itemDetailOpenBalance,
                 };
 
                 item.Add(temp1);
@@ -237,12 +218,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             foreach (var i in data)
             {
                 EntityExtension.FlagForCreate(i, username, USER_AGENT);
-
-                //foreach (var iii in i.DetailOpenBalance)
-                //{
-                //    EntityExtension.FlagForCreate(iii, username, USER_AGENT);
-                //}
-
                 dbSet.Add(i);
             }
 
@@ -277,7 +252,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         {
             var token = await facade.RefreshToken();
             var session = await facade.OpenDb();
-            var temp = await BulkIntoTemp();
             var created = 0;
 
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
@@ -286,8 +260,6 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             foreach (var i in viewModel)
             {
                 var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).FirstOrDefault();
-                var dataToBeChecked = dbSetTemp.Where(x => x.No == dataToBeMapped.No).FirstOrDefault();
-
                 var dataToBeSerialize = new ItemUploadViewModel
                 {
                     itemType = dataToBeMapped.ItemType,
@@ -314,8 +286,16 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                     dataToBeMapped.IsAccurate = true;
                     EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
                 }
+            }
 
-                if(dataToBeChecked != null)
+            await BulkIntoTemp(username);
+
+            foreach(var i in viewModel)
+            {
+                var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).FirstOrDefault();
+                var dataToBeChecked = dbSetTemp.Where(x => x.No == dataToBeMapped.No).FirstOrDefault();
+
+                if(dataToBeChecked != null && !dataToBeMapped.IsAccurate)
                 {
                     dataToBeMapped.IsAccurate = true;
                     EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
@@ -332,24 +312,28 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             public List<string> d { get; set; }
             public int  pageCount { get; set; }
         }
-
+ 
         private async Task<ResponseVM> SearchNo(int page, DateTime date)
         {
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = $"{AuthCredential.Host}/accurate/api/item/list.do";
             var list = new List<string>();
-            var now = date.Date.ToShortDateString();
 
-            list.Add(now);
+            var latest = (from a in dbContext.AccuItemTemps orderby a.CreateDate descending select a.CreateDate.ToShortDateString()).FirstOrDefault();
+
+            var datefrom = latest == null ? Convert.ToDateTime(date).Date.AddDays(-1).ToShortDateString() : latest;
+            var dateto = date;
+            list.Add(datefrom);
+            list.Add(dateto);
 
             var dataToBeSerialize = new DetailSearchByDate
 			{
-                fields = "no",
+                fields = "no,createDate",
                 filter = new Filter
                 {
                     lastUpdate = new Val
                     {
-                        op = "LESS_THAN",
+                        op = "BETWEEN",
                         val = list
                     }
                 },
@@ -357,7 +341,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 {
                     page = page,
                     pageSize = 100,
-                    sort = "no|asc"
+                    sort = "createDate|desc"
                 }
             };
 
@@ -367,8 +351,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
             var response = await httpClient.SendAsync(HttpMethod.Get, url, content);
-            var message = await response.Content.ReadAsStringAsync();
-
+            var message = JsonConvert.DeserializeObject<ItemSearchResultViewModel>(await response.Content.ReadAsStringAsync());
+ 
             JObject joResponse = JObject.Parse(message);
 
             var d = joResponse.GetValue("d").ToString();
@@ -392,6 +376,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 {
                     pageCount = Convert.ToInt32(detail.Value);
                 }
+ 
             }
             ResponseVM data = new ResponseVM
             {
@@ -420,35 +405,49 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             //}
         }
 
-        private async Task<int> BulkIntoTemp()
+        public async Task<int> BulkIntoTemp(string username)
         {
-            var date = DateTime.Now;
+            var date = DateTime.Now.Date.ToShortDateString();
             var page = 1;
             var created = 0;
             List<AccuItemTemp> temp = new List<AccuItemTemp>();
-            var st = await SearchNo(page, date);
+            var st = await SearchItemNo(page, date);
 
             if(st != null)
             {
                 for(var x = 1; x <= st.pageCount; x++)
+ 
                 {
-                    var data = await SearchNo(x, date);
-                    foreach(var i in data.d)
+                    var data = await SearchItemNo(x, date);
+                    foreach (var i in data.d)
                     {
                         temp.Add(new AccuItemTemp { No = i});
+ 
                     }
                 }
 
-                foreach(var i in temp)
-                {
-                    EntityExtension.FlagForCreate(i, "YOKS", USER_AGENT);
-                    dbSetTemp.Add(i);
-                }
-
-                
+                await InsertTemp(temp, username);
             }
 
             return created += await dbContext.SaveChangesAsync();
+
+        }
+
+        public async Task InsertTemp(List<AccuItemTemp> data, string username)
+        {
+            foreach (var b in data)
+            {
+                AccuItemTemp accu = (from d in dbContext.AccuItemTemps
+                                      where d.No == b.No
+                                      select d).FirstOrDefault();
+                if (accu == null)
+                {
+                    EntityExtension.FlagForCreate(b, username, USER_AGENT);
+                    dbSetTemp.Add(b);
+                }
+            }
+
+            var result = await dbContext.SaveChangesAsync();
         }
     }
 }
