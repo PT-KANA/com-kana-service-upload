@@ -324,7 +324,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             var datefrom = latest == null ? Convert.ToDateTime(date).Date.AddDays(-1).ToShortDateString() : latest;
             var dateto = date;
             list.Add(datefrom);
-            list.Add(dateto);
+            list.Add(dateto.ToShortDateString());
 
             var dataToBeSerialize = new DetailSearchByDate
 			{
@@ -351,8 +351,9 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
             var response = await httpClient.SendAsync(HttpMethod.Get, url, content);
-            var message = JsonConvert.DeserializeObject<ItemSearchResultViewModel>(await response.Content.ReadAsStringAsync());
- 
+            var message = await response.Content.ReadAsStringAsync();
+           
+
             JObject joResponse = JObject.Parse(message);
 
             var d = joResponse.GetValue("d").ToString();
@@ -407,18 +408,18 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public async Task<int> BulkIntoTemp(string username)
         {
-            var date = DateTime.Now.Date.ToShortDateString();
+            var date = DateTime.Now.Date ;
             var page = 1;
             var created = 0;
             List<AccuItemTemp> temp = new List<AccuItemTemp>();
-            var st = await SearchItemNo(page, date);
+            var st = await SearchNo(page, date);
 
             if(st != null)
             {
                 for(var x = 1; x <= st.pageCount; x++)
  
                 {
-                    var data = await SearchItemNo(x, date);
+                    var data = await SearchNo(x, date);
                     foreach (var i in data.d)
                     {
                         temp.Add(new AccuItemTemp { No = i});
