@@ -9,10 +9,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Com.Kana.Service.Upload.Lib.Interfaces.ItemInterface;
 using CsvHelper;
-using Com.Kana.Service.Upload.WebApi.Helpers;
+using WebApiHelpers = Com.Kana.Service.Upload.WebApi.Helpers;
 using Com.Kana.Service.Upload.Lib.ViewModels.ItemViewModel;
 using Com.DanLiris.Service.Purchasing.Lib.ViewModels.AccuItemViewModel;
 using Com.Kana.Service.Upload.Lib.Models.AccurateIntegration.AccuItemModel;
+using LibHelpers = Com.Kana.Service.Upload.Lib.Helpers;
 
 namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
 {
@@ -79,7 +80,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                             await facade.UploadData(data, identityService.Username);
 
                             Dictionary<string, object> Result =
-                               new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
+                               new WebApiHelpers.ResultFormatter(ApiVersion, WebApiHelpers.General.CREATED_STATUS_CODE, WebApiHelpers.General.OK_MESSAGE)
                                .Ok();
                             return Created(HttpContext.Request.Path, Result);
                         }
@@ -103,7 +104,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                     else
                     {
                         Dictionary<string, object> Result =
-                          new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, General.CSV_ERROR_MESSAGE)
+                          new WebApiHelpers.ResultFormatter(ApiVersion, WebApiHelpers.General.INTERNAL_ERROR_STATUS_CODE, WebApiHelpers.General.CSV_ERROR_MESSAGE)
                           .Fail();
 
                         return NotFound(Result);
@@ -112,7 +113,7 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                 else
                 {
                     Dictionary<string, object> Result =
-                        new ResultFormatter(ApiVersion, General.BAD_REQUEST_STATUS_CODE, General.NO_FILE_ERROR_MESSAGE)
+                        new WebApiHelpers.ResultFormatter(ApiVersion, WebApiHelpers.General.BAD_REQUEST_STATUS_CODE, WebApiHelpers.General.NO_FILE_ERROR_MESSAGE)
                             .Fail();
                     return BadRequest(Result);
                 }
@@ -120,10 +121,10 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
             catch (Exception e)
             {
                 Dictionary<string, object> Result =
-                   new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                   new WebApiHelpers.ResultFormatter(ApiVersion, WebApiHelpers.General.INTERNAL_ERROR_STATUS_CODE, e.Message)
                    .Fail();
 
-                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+                return StatusCode(WebApiHelpers.General.INTERNAL_ERROR_STATUS_CODE, Result);
 
             }
         }
@@ -136,19 +137,32 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
                 identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
 
-                var res = await facade.Create(ViewModel, identityService.Username);
+                if (LibHelpers.AuthCredential.AccessToken == null)
+                {
+                    Dictionary<string, object> TokenNotFoundResult =
+                          new WebApiHelpers.ResultFormatter(ApiVersion, WebApiHelpers.General.NOT_FOUND_STATUS_CODE, WebApiHelpers.General.NO_ACCESS_TOKEN)
+                          .Fail();
 
-                Dictionary<string, object> Result =
-                    new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
-                    .Ok(res);
-                return Created(String.Concat(Request.Path, "/", 0), Result);
+                    return NotFound(TokenNotFoundResult);
+                }
+                else
+                {
+                    var res = await facade.Create(ViewModel, identityService.Username);
+
+                    Dictionary<string, object> Result =
+                        new WebApiHelpers.ResultFormatter(ApiVersion, WebApiHelpers.General.CREATED_STATUS_CODE, WebApiHelpers.General.OK_MESSAGE)
+                        .Ok(res);
+                    return Created(String.Concat(Request.Path, "/", 0), Result);
+                }
+
+                
             }
             catch (Exception e)
             {
                 Dictionary<string, object> Result =
-                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    new WebApiHelpers.ResultFormatter(ApiVersion, WebApiHelpers.General.INTERNAL_ERROR_STATUS_CODE, e.Message)
                     .Fail();
-                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+                return StatusCode(WebApiHelpers.General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
 
@@ -188,8 +202,8 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
                 return Ok(new
                 {
                     apiVersion = ApiVersion,
-                    statusCode = General.OK_STATUS_CODE,
-                    message = General.OK_MESSAGE,
+                    statusCode = WebApiHelpers.General.OK_STATUS_CODE,
+                    message = WebApiHelpers.General.OK_MESSAGE,
                     data = listData,
                     info = new Dictionary<string, object>
                     {
@@ -204,9 +218,9 @@ namespace Com.Kana.Service.Upload.WebApi.Controllers.v1.UploadController
             catch (Exception e)
             {
                 Dictionary<string, object> Result =
-                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    new WebApiHelpers.ResultFormatter(ApiVersion, WebApiHelpers.General.INTERNAL_ERROR_STATUS_CODE, e.Message)
                     .Fail();
-                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+                return StatusCode(WebApiHelpers.General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
 

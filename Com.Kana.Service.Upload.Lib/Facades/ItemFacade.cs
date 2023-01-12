@@ -20,7 +20,7 @@ using Com.Kana.Service.Upload.Lib.ViewModels;
 using AutoMapper;
 using Com.Kana.Service.Upload.Lib.ViewModels.AccuItemViewModel.AccuItemUploadViewModel;
 using Newtonsoft.Json.Linq;
-
+using System.Globalization;
 
 namespace Com.Kana.Service.Upload.Lib.Facades
 {
@@ -81,31 +81,31 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         {
             List<AccuItemViewModel> item = new List<AccuItemViewModel>();
             List<string> tempNo = new List<string>();
-            foreach (var i in csv )
+            foreach (var i in csv)
             {
-               
-                    var barcode = i.variantBarcode.Replace("'", string.Empty).Trim();
-                    AccuItemViewModel ii = new AccuItemViewModel
-                    {
-                        itemType = "INVENTORY",
-                        name = string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value : i.title + " - " + i.option1Value,
-                        unit1Name = "PCS",
-                        unitPrice = string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice),
-                        upcNo = barcode,
-                        no = barcode,
-                        serialNumberType = "UNIQUE",
-                        usePPn = string.IsNullOrWhiteSpace(i.variantTaxable) ? false : (i.variantTaxable == "TRUE" ? true : false),
-                        preferedVendorName = string.IsNullOrWhiteSpace(i.vendor) ? csv.Find(x => x.handle == i.handle).vendor : i.vendor,
-                        vendorPrice = string.IsNullOrWhiteSpace(i.costPeritem) ? (string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice)) : Convert.ToDouble(i.costPeritem),
-                        vendorUnitName = "PCS",
 
-                    };
-                if (ii.no !="")
+                var barcode = i.variantBarcode.Replace("'", string.Empty).Trim();
+                AccuItemViewModel ii = new AccuItemViewModel
+                {
+                    itemType = "INVENTORY",
+                    name = string.IsNullOrWhiteSpace(i.title) ? csv.Find(x => x.handle == i.handle).title + " - " + i.option1Value : i.title + " - " + i.option1Value,
+                    unit1Name = "PCS",
+                    unitPrice = string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice),
+                    upcNo = barcode,
+                    no = barcode,
+                    serialNumberType = "UNIQUE",
+                    usePPn = string.IsNullOrWhiteSpace(i.variantTaxable) ? false : (i.variantTaxable == "TRUE" ? true : false),
+                    preferedVendorName = string.IsNullOrWhiteSpace(i.vendor) ? csv.Find(x => x.handle == i.handle).vendor : i.vendor,
+                    vendorPrice = string.IsNullOrWhiteSpace(i.costPeritem) ? (string.IsNullOrWhiteSpace(i.variantPrice) ? 0 : Convert.ToDouble(i.variantPrice)) : Convert.ToDouble(i.costPeritem),
+                    vendorUnitName = "PCS",
+
+                };
+                if (ii.no != "")
                 {
 
                     item.Add(ii);
                 }
-               
+
             }
 
             return item;
@@ -146,7 +146,7 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             IQueryable<AccuItem> Query = this.dbSet;
 
-            foreach (ItemCsvViewModel item in data.Where(s=>s.variantBarcode !=""))
+            foreach (ItemCsvViewModel item in data.Where(s => s.variantBarcode != ""))
             {
                 ErrorMessage = "";
 
@@ -290,12 +290,12 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             await BulkIntoTemp(username);
 
-            foreach(var i in viewModel)
+            foreach (var i in viewModel)
             {
                 var dataToBeMapped = dbSet.Where(x => x.Id == i.Id).FirstOrDefault();
                 var dataToBeChecked = dbSetTemp.Where(x => x.No == dataToBeMapped.No).FirstOrDefault();
 
-                if(dataToBeChecked != null && !dataToBeMapped.IsAccurate)
+                if (dataToBeChecked != null && !dataToBeMapped.IsAccurate)
                 {
                     dataToBeMapped.IsAccurate = true;
                     EntityExtension.FlagForUpdate(dataToBeMapped, username, USER_AGENT);
@@ -310,24 +310,24 @@ namespace Com.Kana.Service.Upload.Lib.Facades
         {
             public bool s { get; set; }
             public List<string> d { get; set; }
-            public int  pageCount { get; set; }
+            public int pageCount { get; set; }
         }
- 
+
         private async Task<ResponseVM> SearchNo(int page, DateTime date)
         {
             IAccurateClientService httpClient = (IAccurateClientService)serviceProvider.GetService(typeof(IAccurateClientService));
             var url = $"{AuthCredential.Host}/accurate/api/item/list.do";
             var list = new List<string>();
 
-            var latest = (from a in dbContext.AccuItemTemps orderby a.CreateDate descending select a.CreateDate.ToShortDateString()).FirstOrDefault();
+            var latest = (from a in dbContext.AccuItemTemps orderby a.CreateDate descending select a.CreateDate.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture)).FirstOrDefault();
 
-            var datefrom = latest == null ? Convert.ToDateTime(date).Date.AddDays(-1).ToShortDateString() : latest;
-            var dateto = date;
+            var datefrom = latest == null ? date.AddDays(-1).ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) : latest;
+            var dateto = date.AddMinutes(1);
             list.Add(datefrom);
-            list.Add(dateto);
+            list.Add(dateto.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture));
 
             var dataToBeSerialize = new DetailSearchByDate
-			{
+            {
                 fields = "no,createDate",
                 filter = new Filter
                 {
@@ -347,12 +347,13 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
             var dataToBeSend = JsonConvert.SerializeObject(dataToBeSerialize);
 
-           
+
 
             var content = new StringContent(dataToBeSend, Encoding.UTF8, General.JsonMediaType);
             var response = await httpClient.SendAsync(HttpMethod.Get, url, content);
-            var message = JsonConvert.DeserializeObject<ItemSearchResultViewModel>(await response.Content.ReadAsStringAsync());
- 
+            var message = await response.Content.ReadAsStringAsync();
+
+
             JObject joResponse = JObject.Parse(message);
 
             var d = joResponse.GetValue("d").ToString();
@@ -365,18 +366,31 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             int pageCount = 0;
             foreach (var item in _d)
             {
-                foreach(var detail in item)
+                var noData = "";
+                var createDateData = "";
+                var mixedData = "";
+                foreach (var detail in item)
                 {
-                    dataD.Add(detail.Value);
+                    if (detail.Key == "no")
+                    {
+                        noData = detail.Value;
+                    }
+                    else if (detail.Key == "createDate")
+                    {
+                        createDateData = detail.Value;
+                    }
+
                 }
+                mixedData = String.Concat(noData, "createDate:", createDateData);
+                dataD.Add(mixedData);
             }
             foreach (var detail in _sp)
             {
-                if(detail.Key == "pageCount")
+                if (detail.Key == "pageCount")
                 {
                     pageCount = Convert.ToInt32(detail.Value);
                 }
- 
+
             }
             ResponseVM data = new ResponseVM
             {
@@ -385,10 +399,11 @@ namespace Com.Kana.Service.Upload.Lib.Facades
                 pageCount = pageCount
 
             };
-            if(s)
+            if (s)
             {
                 return data;
-            }else
+            }
+            else
             {
                 return null;
             }
@@ -407,22 +422,24 @@ namespace Com.Kana.Service.Upload.Lib.Facades
 
         public async Task<int> BulkIntoTemp(string username)
         {
-            var date = DateTime.Now.Date.ToShortDateString();
+            var date = DateTime.Now;
             var page = 1;
             var created = 0;
             List<AccuItemTemp> temp = new List<AccuItemTemp>();
-            var st = await SearchItemNo(page, date);
+            var st = await SearchNo(page, date);
 
-            if(st != null)
+            if (st != null)
             {
-                for(var x = 1; x <= st.pageCount; x++)
- 
+                for (var x = 1; x <= st.pageCount; x++)
+
                 {
-                    var data = await SearchItemNo(x, date);
+                    var data = await SearchNo(x, date);
                     foreach (var i in data.d)
                     {
-                        temp.Add(new AccuItemTemp { No = i});
- 
+                        var extractMixedData = i.Split("createDate:", StringSplitOptions.RemoveEmptyEntries);
+                        DateTime extractCreateDateData = DateTime.ParseExact(extractMixedData[1], "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                        temp.Add(new AccuItemTemp { No = extractMixedData[0], CreateDate = extractCreateDateData });
+
                     }
                 }
 
@@ -438,8 +455,8 @@ namespace Com.Kana.Service.Upload.Lib.Facades
             foreach (var b in data)
             {
                 AccuItemTemp accu = (from d in dbContext.AccuItemTemps
-                                      where d.No == b.No
-                                      select d).FirstOrDefault();
+                                     where d.No == b.No
+                                     select d).FirstOrDefault();
                 if (accu == null)
                 {
                     EntityExtension.FlagForCreate(b, username, USER_AGENT);
